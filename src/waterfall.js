@@ -3,17 +3,27 @@ import { JitterBuffer, createWaterfallDecoder } from './lib/wrappers.js'
 import Denque from 'denque'
 import 'core-js/actual/set-immediate'
 import 'core-js/actual/clear-immediate'
+import { eventBus } from './eventBus';
 
 export default class SpectrumWaterfall {
   constructor (endpoint, settings) {
+
+    this.isVHF = this.baseFreq >= 30e6; // VHF starts at 30 MHz
+
+
+    this.markers = [];
+    this.currentBand = null;
+
     this.endpoint = endpoint
+
+    this.zoomFactor = 1
 
     this.autoAdjust = false;
     this.adjustmentBuffer = []; // Buffer to accumulate data for adjustment
     this.bufferSize = 50; // Number of data points to accumulate before adjusting
     this.dampeningFactor = 0.1; // Factor to smooth adjustments (0 for instant, 1 for no change)
 
-    this.spectrum = true
+    this.spectrum = false
     this.waterfall = false
 
     this.waterfallQueue = new Denque(10)
@@ -39,41 +49,123 @@ export default class SpectrumWaterfall {
 
     this.wfheight = 200 * window.devicePixelRatio
 
+    const MODES = {
+      AM: 'AM',
+      FM: 'FM',
+      LSB: 'LSB',
+      USB: 'USB',
+      CW: 'CW-U',
+      DIGITAL: 'DIGITAL'
+    };
+    
     this.bands = [
-        { name: '2200M HAM', startFreq: 135700, endFreq: 137800, color: 'rgba(50, 168, 72, 0.6)' },
-        { name: '630M HAM', startFreq: 472000, endFreq: 479000, color: 'rgba(50, 168, 72, 0.6)' },
-        { name: '600M HAM', startFreq: 501000, endFreq: 504000, color: 'rgba(50, 168, 72, 0.6)' },
-        { name: '160M HAM', startFreq: 1810000, endFreq: 2000000, color: 'rgba(50, 168, 72, 0.6)' },
-        { name: '80M HAM', startFreq: 3500000, endFreq: 3900000, color: 'rgba(50, 168, 72, 0.6)' },
-        { name: '60M HAM', startFreq: 5351500, endFreq: 5366500, color: 'rgba(50, 168, 72, 0.6)' },
-        { name: '49M AM', startFreq: 5900000, endFreq: 6200000, color: 'rgba(199, 12, 193, 0.6)' },
-        { name: '40M HAM', startFreq: 7000000, endFreq: 7200000, color: 'rgba(50, 78, 168, 0.6)' }, 
-        { name: '41M AM', startFreq: 7200000, endFreq: 7450000, color: 'rgba(199, 12, 193, 0.6)' }, 
-        { name: '31M AM', startFreq: 9400000, endFreq: 9900000, color: 'rgba(199, 12, 193, 0.6)' }, 
-        { name: '30M HAM', startFreq: 10100000, endFreq: 10150000, color: 'rgba(199, 49, 12, 0.6)' }, 
-        { name: '25M AM', startFreq: 11600000, endFreq: 12100000, color: 'rgba(199, 12, 193, 0.6)' }, 
-        { name: '22M AM', startFreq: 13570000, endFreq: 13870000, color: 'rgba(199, 12, 193, 0.6)' }, 
-        { name: '20M HAM', startFreq: 14000000, endFreq: 14350000, color: 'rgba(255, 0, 0, 0.6)' }, 
-        { name: '19M AM', startFreq: 15100000, endFreq: 15800000, color: 'rgba(199, 12, 193, 0.6)' }, 
-        { name: '16M AM', startFreq: 17480000, endFreq: 17900000, color: 'rgba(199, 12, 193, 0.6)' }, 
-        { name: '17M AM', startFreq: 18068000, endFreq: 18168000, color: 'rgba(199, 12, 193, 0.6)' }, 
-        { name: '15M AM', startFreq: 18900000, endFreq: 19020000, color: 'rgba(199, 12, 193, 0.6)' }, 
-        { name: '15M HAM', startFreq: 21000000, endFreq: 21450000, color: 'rgba(6, 204, 214, 0.6)' }, 
-        { name: '13M AM', startFreq: 21450000, endFreq: 21850000, color: 'rgba(199, 12, 193, 0.6)' }, 
-        { name: '12M HAM', startFreq: 24890000, endFreq: 24990000, color: 'rgba(2, 155, 250, 0.6)' }, 
-        { name: '11M AM', startFreq: 25670000, endFreq: 26100000, color: 'rgba(199, 12, 193, 0.6)' },
-        { name: 'CB', startFreq: 26965000, endFreq: 27405000, color: 'rgba(3, 227, 252, 0.6)' },  
-        { name: '10M HAM', startFreq: 28000000, endFreq: 29700000, color: 'rgba(151, 2, 250, 0.6)' }, 
-        { name: '6M HAM', startFreq: 50000000, endFreq: 54000000, color: 'rgba(50, 168, 72, 0.6)' },
-        { name: '4M HAM', startFreq: 69950000, endFreq: 69950000, color: 'rgba(50, 168, 72, 0.6)' },
-        { name: '4M HAM', startFreq: 70112500, endFreq: 70412500, color: 'rgba(50, 168, 72, 0.6)' },
-        { name: '2M HAM', startFreq: 144000000, endFreq: 148000000, color: 'rgba(50, 168, 72, 0.6)' },
-        { name: '70CM HAM', startFreq: 430000000, endFreq: 440000000, color: 'rgba(50, 168, 72, 0.6)' },
-
-  ];
+        { name: '2200M HAM', startFreq: 135700, endFreq: 137800, color: 'rgba(50, 168, 72, 0.6)', 
+          modes: [{ mode: MODES.CW, startFreq: 135700, endFreq: 137800 }] },
+        { name: '630M HAM', startFreq: 472000, endFreq: 479000, color: 'rgba(50, 168, 72, 0.6)', 
+          modes: [
+            { mode: MODES.CW, startFreq: 472000, endFreq: 475000 },
+            { mode: MODES.LSB, startFreq: 475000, endFreq: 479000 }
+          ] },
+        { name: '600M HAM', startFreq: 501000, endFreq: 504000, color: 'rgba(50, 168, 72, 0.6)', 
+          modes: [{ mode: MODES.CW, startFreq: 501000, endFreq: 504000 }] },
+        { name: '160M HAM', startFreq: 1810000, endFreq: 2000000, color: 'rgba(50, 168, 72, 0.6)', 
+          modes: [
+            { mode: MODES.CW, startFreq: 1810000, endFreq: 1840000 },
+            { mode: MODES.LSB, startFreq: 1840000, endFreq: 2000000 }
+          ] },
+        { name: '80M HAM', startFreq: 3500000, endFreq: 3900000, color: 'rgba(50, 168, 72, 0.6)', 
+          modes: [
+            { mode: MODES.CW, startFreq: 3500000, endFreq: 3600000 },
+            { mode: MODES.LSB, startFreq: 3600000, endFreq: 3900000 }
+          ] },
+        { name: '60M HAM', startFreq: 5351500, endFreq: 5366500, color: 'rgba(50, 168, 72, 0.6)', 
+          modes: [{ mode: MODES.USB, startFreq: 5351500, endFreq: 5366500 }] },
+        { name: '49M AM', startFreq: 5900000, endFreq: 6200000, color: 'rgba(199, 12, 193, 0.6)', 
+          modes: [{ mode: MODES.AM, startFreq: 5900000, endFreq: 6200000 }] },
+        { name: '40M HAM', startFreq: 7000000, endFreq: 7200000, color: 'rgba(50, 168, 72, 0.6)', 
+          modes: [
+            { mode: MODES.CW, startFreq: 7000000, endFreq: 7050000 },
+            { mode: MODES.LSB, startFreq: 7050000, endFreq: 7200000 }
+          ] },
+        { name: '41M AM', startFreq: 7200000, endFreq: 7450000, color: 'rgba(199, 12, 193, 0.6)', 
+          modes: [{ mode: MODES.AM, startFreq: 7200000, endFreq: 7450000 }] },
+        { name: '31M AM', startFreq: 9400000, endFreq: 9900000, color: 'rgba(199, 12, 193, 0.6)', 
+          modes: [{ mode: MODES.AM, startFreq: 9400000, endFreq: 9900000 }] },
+        { name: '30M HAM', startFreq: 10100000, endFreq: 10150000, color: 'rgba(50, 168, 72, 0.6)', 
+          modes: [{ mode: MODES.CW, startFreq: 10100000, endFreq: 10150000 }] },
+        { name: '25M AM', startFreq: 11600000, endFreq: 12100000, color: 'rgba(199, 12, 193, 0.6)', 
+          modes: [{ mode: MODES.AM, startFreq: 11600000, endFreq: 12100000 }] },
+        { name: '22M AM', startFreq: 13570000, endFreq: 13870000, color: 'rgba(199, 12, 193, 0.6)', 
+          modes: [{ mode: MODES.AM, startFreq: 13570000, endFreq: 13870000 }] },
+        { name: '20M HAM', startFreq: 14000000, endFreq: 14350000, color: 'rgba(50, 168, 72, 0.6)', 
+          modes: [
+            { mode: MODES.CW, startFreq: 14000000, endFreq: 14070000 },
+            { mode: MODES.USB, startFreq: 14070000, endFreq: 14350000 }
+          ] },
+        { name: '19M AM', startFreq: 15100000, endFreq: 15800000, color: 'rgba(199, 12, 193, 0.6)', 
+          modes: [{ mode: MODES.AM, startFreq: 15100000, endFreq: 15800000 }] },
+        { name: '16M AM', startFreq: 17480000, endFreq: 17900000, color: 'rgba(199, 12, 193, 0.6)', 
+          modes: [{ mode: MODES.AM, startFreq: 17480000, endFreq: 17900000 }] },
+        { name: '17M HAM', startFreq: 18068000, endFreq: 18168000, color: 'rgba(50, 168, 72, 0.6)', 
+          modes: [
+            { mode: MODES.CW, startFreq: 18068000, endFreq: 18100000 },
+            { mode: MODES.USB, startFreq: 18100000, endFreq: 18168000 }
+          ] },
+        { name: '15M AM', startFreq: 18900000, endFreq: 19020000, color: 'rgba(199, 12, 193, 0.6)', 
+          modes: [{ mode: MODES.AM, startFreq: 18900000, endFreq: 19020000 }] },
+        { name: '15M HAM', startFreq: 21000000, endFreq: 21450000, color: 'rgba(50, 168, 72, 0.6)', 
+          modes: [
+            { mode: MODES.CW, startFreq: 21000000, endFreq: 21070000 },
+            { mode: MODES.USB, startFreq: 21070000, endFreq: 21450000 }
+          ] },
+        { name: '13M AM', startFreq: 21450000, endFreq: 21850000, color: 'rgba(199, 12, 193, 0.6)', 
+          modes: [{ mode: MODES.AM, startFreq: 21450000, endFreq: 21850000 }] },
+        { name: '12M HAM', startFreq: 24890000, endFreq: 24990000, color: 'rgba(50, 168, 72, 0.6)', 
+          modes: [
+            { mode: MODES.CW, startFreq: 24890000, endFreq: 24920000 },
+            { mode: MODES.USB, startFreq: 24920000, endFreq: 24990000 }
+          ] },
+        { name: '11M AM', startFreq: 25670000, endFreq: 26100000, color: 'rgba(199, 12, 193, 0.6)', 
+          modes: [{ mode: MODES.AM, startFreq: 25670000, endFreq: 26100000 }] },
+        { name: 'CB', startFreq: 26965000, endFreq: 27405000, color: 'rgba(3, 227, 252, 0.6)',  
+          modes: [{ mode: MODES.AM, startFreq: 26965000, endFreq: 27405000 }] },
+        { name: '10M HAM', startFreq: 28000000, endFreq: 29700000, color: 'rgba(50, 168, 72, 0.6)', 
+          modes: [
+            { mode: MODES.CW, startFreq: 28000000, endFreq: 28070000 },
+            { mode: MODES.USB, startFreq: 28070000, endFreq: 29700000 }
+          ] },
+        { name: '6M HAM', startFreq: 50000000, endFreq: 54000000, color: 'rgba(50, 168, 72, 0.6)', 
+          modes: [
+            { mode: MODES.CW, startFreq: 50000000, endFreq: 50100000 },
+            { mode: MODES.USB, startFreq: 50100000, endFreq: 54000000 }
+          ] },
+        { name: '4M HAM', startFreq: 69950000, endFreq: 69950000, color: 'rgba(50, 168, 72, 0.6)', 
+          modes: [{ mode: MODES.FM, startFreq: 69950000, endFreq: 69950000 }] },
+        { name: '4M HAM', startFreq: 70112500, endFreq: 70412500, color: 'rgba(50, 168, 72, 0.6)', 
+          modes: [{ mode: MODES.FM, startFreq: 70112500, endFreq: 70412500 }] },
+        { name: '2M HAM', startFreq: 144000000, endFreq: 148000000, color: 'rgba(50, 168, 72, 0.6)', 
+          modes: [
+            { mode: MODES.CW, startFreq: 144000000, endFreq: 144100000 },
+            { mode: MODES.USB, startFreq: 144100000, endFreq: 144300000 },
+            { mode: MODES.FM, startFreq: 144300000, endFreq: 148000000 }
+          ] },
+        { name: '70CM HAM', startFreq: 430000000, endFreq: 440000000, color: 'rgba(50, 168, 72, 0.6)', 
+          modes: [
+            { mode: MODES.CW, startFreq: 430000000, endFreq: 430100000 },
+            { mode: MODES.USB, startFreq: 430100000, endFreq: 432100000 },
+            { mode: MODES.FM, startFreq: 432100000, endFreq: 440000000 }
+          ] },
+    ];
+  
 
     
   }
+
+  addMarker(frequency, name, mode) {
+    this.markers.push({ frequency, name, mode });
+    this.markers.sort((a, b) => a.frequency - b.frequency);
+  }
+  
 
   initCanvas (settings) {
     this.canvasElem = settings.canvasElem
@@ -165,60 +257,33 @@ export default class SpectrumWaterfall {
   stop () {
     this.waterfallSocket.close()
   }
-  /*
-  setCanvasWidth() {
 
-    const dpr = window.devicePixelRatio || 1;
-
-    let canvasWidth = window.outerWidth * dpr
-
-    //this.canvasElem.width = canvasWidth
-
-    this.canvasScale = canvasWidth / 1024
-
-    // Aspect ratio is 1024 to 128px
-    this.spectrumCanvasElem.width = canvasWidth
-    this.spectrumCanvasElem.height = canvasWidth / 1024 * 128
-
-    // Aspect ratio is 1024 to 20px
-    this.graduationCanvasElem.width = canvasWidth
-    this.graduationCanvasElem.height = canvasWidth / 1024 * 20
-
-   
-    
-    this.canvasElem.width = window.outerWidth;
-    this.canvasElem.height = this.wfheight
-
-    this.canvasWidth = this.canvasElem.width * window.devicePixelRatio
-    this.canvasHeight = this.canvasElem.height
-  }*/
     setCanvasWidth() {
       const dpr = window.devicePixelRatio;
       const screenWidth = window.innerWidth;
     
-      let canvasWidth = screenWidth > 1300 ? 1300 : screenWidth;
+      let canvasWidth = screenWidth > 1372 ? 1372 : screenWidth;
       canvasWidth *= dpr;
-      console.log(canvasWidth);
-      if(canvasWidth != 1300)
+      if(canvasWidth != 1372)
       {
         this.mobile = true;
       }
 
     
       this.canvasElem.width = canvasWidth;
-      this.canvasScale = canvasWidth / 1300;
+      this.canvasScale = canvasWidth / 1372;
     
-      // Aspect ratio is 1300 to 128px
+      // Aspect ratio is 1372 to 128px
       this.spectrumCanvasElem.width = canvasWidth;
-      this.spectrumCanvasElem.height = (canvasWidth / 1300) * 128;
+      this.spectrumCanvasElem.height = (canvasWidth / 1372) * 128;
     
-      // Aspect ratio is 1300 to 20px
+      // Aspect ratio is 1372 to 20px
       this.graduationCanvasElem.width = canvasWidth;
-      this.graduationCanvasElem.height = (canvasWidth / 1300) * 20;
+      this.graduationCanvasElem.height = (canvasWidth / 1372) * 20;
 
-      // Aspect ratio is 1300 to 20px
+      // Aspect ratio is 1372 to 20px
       this.bandPlanCanvasElem.width = canvasWidth;
-      this.bandPlanCanvasElem.height = (canvasWidth / 1300) * 40;
+      this.bandPlanCanvasElem.height = (canvasWidth / 1372) * 40;
     
       this.canvasElem.height = this.wfheight;
       this.canvasWidth = canvasWidth;
@@ -230,6 +295,8 @@ export default class SpectrumWaterfall {
       this.bufferCanvas.height = this.canvasHeight;
       this.bufferContext = this.bufferCanvas.getContext('2d', { alpha: false });
 
+
+
     }
 
   socketMessageInitial (event) {
@@ -238,6 +305,22 @@ export default class SpectrumWaterfall {
       const settings = JSON.parse(event.data)
       if (!settings.fft_size) {
         return
+      }
+
+
+     // Handle markers
+      if (settings.markers) {
+        try {
+          const markersData = JSON.parse(settings.markers);
+          if (markersData.markers && Array.isArray(markersData.markers)) {
+            markersData.markers.forEach(marker => {
+
+              this.addMarker(marker.frequency, marker.name, marker.mode);
+            });
+          }
+        } catch (error) {
+          console.error("Error parsing markers:", error);
+        }
       }
       this.waterfallMaxSize = settings.fft_result_size
       this.fftSize = settings.fft_size
@@ -269,6 +352,10 @@ export default class SpectrumWaterfall {
       this.updateGraduation()
       this.updateBandPlan()
       this.resolvePromise(settings)
+
+  
+
+      //eventBus.publish('frequencyChange', { detail: 1e6 });
     }
   }
 
@@ -323,9 +410,6 @@ export default class SpectrumWaterfall {
     this.maxWaterfall += (maxValue - this.maxWaterfall) * this.dampeningFactor;
   }
 
-  //transformValue (x) {
-  //  return Math.min(Math.max(x + this.waterfallColourShift, 0), 255)
-  //}
   transformValue(value) {
       // Clamp value between minValue and maxValue
       let clampedValue = Math.max(this.minWaterfall, Math.min(this.maxWaterfall, value));
@@ -474,7 +558,6 @@ export default class SpectrumWaterfall {
   }
   
 
-  
   drawSpectrum(arr, pxL, pxR, curL, curR) {
     if (curL !== this.spectrumFiltered[0][0] || curR !== this.spectrumFiltered[0][1]) {
       this.spectrumFiltered[1] = arr;
@@ -564,6 +647,41 @@ export default class SpectrumWaterfall {
       this.spectrumCtx.setLineDash([]);
     }
   }
+  checkBandAndSetMode(frequency) {
+    let newBand = null;
+    let newMode = null;
+  
+    for (const band of this.bands) {
+      if (frequency >= band.startFreq && frequency <= band.endFreq) {
+        newBand = band;
+        for (const modeRange of band.modes) {
+          if (frequency >= modeRange.startFreq && frequency <= modeRange.endFreq) {
+            newMode = modeRange.mode;
+            break;
+          }
+        }
+        break;
+      }
+    }
+  
+    if (newBand !== this.currentBand || (newBand && newMode !== this.currentMode)) {
+      this.currentBand = newBand;
+      this.currentMode = newMode;
+      
+      if (newBand) {
+        eventBus.publish('setMode', newMode);
+        return newMode;
+      } else {
+        // We've moved out of all defined bands
+        eventBus.publish('outOfBand');
+        return null;
+      }
+    }
+  
+    return null; // No change in band or mode
+  }
+  
+
 
   updateGraduation() {
     const freqL = this.idxToFreq(this.waterfallL)
@@ -640,62 +758,188 @@ export default class SpectrumWaterfall {
     const freqL = this.idxToFreq(this.waterfallL);
     const freqR = this.idxToFreq(this.waterfallR);
     const scale = this.canvasScale;
-  
+
     // Clear the bandplan canvas
     this.bandPlanCtx.clearRect(0, 0, this.bandPlanCanvasElem.width, this.bandPlanCanvasElem.height);
-  
+
     // Define the height of the band marker
     const bandHeight = 10 * scale;
     const bandOffset = 25 * scale;
-  
+
     // Loop through each band and draw it
     this.bands.forEach(band => {
-      const startIdx = this.freqToIdx(band.startFreq);
-      const endIdx = this.freqToIdx(band.endFreq);
-      const startX = this.idxToCanvasX(startIdx);
-      const endX = this.idxToCanvasX(endIdx);
-      const bandWidth = endX - startX;
-  
-      // Calculate the y-position for the band
-      const bandY = this.bandPlanCanvasElem.height - bandHeight - bandOffset;
-  
-      // Draw the band line
-      this.bandPlanCtx.strokeStyle = band.color;
-      this.bandPlanCtx.lineWidth = 2 * scale;
-      this.bandPlanCtx.beginPath();
-      this.bandPlanCtx.moveTo(startX, bandY);
-      this.bandPlanCtx.lineTo(endX, bandY);
-      this.bandPlanCtx.stroke();
-      let fontSize;
-      // Set the font for the band label
-      if(this.mobile) {
-        fontSize = Math.max(Math.min(bandWidth / band.name.length, 14), 8) * scale;
-      } else {
-        fontSize = Math.max(Math.min(bandWidth / band.name.length, 10), 8) * scale;
-      }
+        const startIdx = this.freqToIdx(band.startFreq);
+        const endIdx = this.freqToIdx(band.endFreq);
+        const startX = this.idxToCanvasX(startIdx);
+        const endX = this.idxToCanvasX(endIdx);
+        const bandWidth = endX - startX;
 
-      
-      this.bandPlanCtx.fillStyle = 'white';
-      this.bandPlanCtx.font = `${fontSize}px Inter`;
-      this.bandPlanCtx.textAlign = 'center';
-  
-      // Calculate the y-position for the text
-      const textY = bandY + bandHeight + fontSize - 8;
-  
-      // Draw the text
-      if (this.bandPlanCtx.measureText(band.name).width < bandWidth) {
-        this.bandPlanCtx.fillText(band.name, (startX + endX) / 2, textY);
-      } else {
-        while (this.bandPlanCtx.measureText(band.name).width >= bandWidth && fontSize > 6 * scale) {
-          fontSize--;
-          this.bandPlanCtx.font = `${fontSize}px Inter`;
+        // Calculate the y-position for the band
+        const bandY = this.bandPlanCanvasElem.height - bandHeight - bandOffset;
+
+        // Draw the band line with improved styling
+        this.bandPlanCtx.strokeStyle = band.color;
+        this.bandPlanCtx.lineWidth = 2 * scale;
+        this.bandPlanCtx.lineCap = 'round';
+        this.bandPlanCtx.beginPath();
+        this.bandPlanCtx.moveTo(startX, bandY);
+        this.bandPlanCtx.lineTo(endX, bandY);
+        
+        // Add a subtle glow effect
+        this.bandPlanCtx.shadowColor = band.color;
+        this.bandPlanCtx.shadowBlur = 3 * scale;
+        this.bandPlanCtx.stroke();
+
+        // Reset shadow for text
+        this.bandPlanCtx.shadowColor = 'transparent';
+        this.bandPlanCtx.shadowBlur = 0;
+
+        // Set the font for the band label
+        let fontSize = this.mobile ? 12 * scale : 10 * scale;
+        this.bandPlanCtx.font = `${fontSize}px Inter`;
+        this.bandPlanCtx.fillStyle = 'white';
+        this.bandPlanCtx.textAlign = 'center';
+        this.bandPlanCtx.textBaseline = 'top';
+
+        // Only draw text if it fits fully within the band width
+        if (this.bandPlanCtx.measureText(band.name).width <= bandWidth - 4 * scale) {
+            const textY = bandY + bandHeight + 2 * scale;
+
+            // Draw the text with a subtle shadow for better visibility
+            this.bandPlanCtx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            this.bandPlanCtx.shadowBlur = 2 * scale;
+            this.bandPlanCtx.shadowOffsetY = 1 * scale;
+
+            this.bandPlanCtx.fillText(band.name, (startX + endX) / 2, textY);
+
+            // Reset shadow
+            this.bandPlanCtx.shadowColor = 'transparent';
+            this.bandPlanCtx.shadowBlur = 0;
+            this.bandPlanCtx.shadowOffsetY = 0;
         }
-        if (fontSize > 6 * scale) {
-          this.bandPlanCtx.fillText(band.name, (startX + endX) / 2, textY);
-        }
-      }
     });
+
+    // Draw markers with improved styling
+  // Draw markers with improved styling
+this.markers.forEach(marker => {
+  const x = this.freqToCanvasX(marker.frequency);
+  
+  // Adjust marker width and height based on zoom factor, but with a minimum size
+  const markerWidth = Math.max(2, 4 / Math.sqrt(this.zoomFactor));
+  const markerHeight = 23 * this.canvasScale;
+  
+  // Adjust colors for better visibility
+  const markerColor = 'rgba(255, 255, 0, 0.8)';
+  
+  // Draw marker line
+  this.bandPlanCtx.strokeStyle = markerColor;
+  this.bandPlanCtx.lineWidth = markerWidth;
+  this.bandPlanCtx.beginPath();
+  this.bandPlanCtx.moveTo(x, this.bandPlanCanvasElem.height - 10);
+  this.bandPlanCtx.lineTo(x, this.bandPlanCanvasElem.height - markerHeight);
+  this.bandPlanCtx.stroke();
+
+  // Add a glow effect
+  this.bandPlanCtx.shadowColor = markerColor;
+  this.bandPlanCtx.shadowBlur = 3 * this.canvasScale;
+  this.bandPlanCtx.stroke();
+
+  // Reset shadow for next operations
+  this.bandPlanCtx.shadowColor = 'transparent';
+  this.bandPlanCtx.shadowBlur = 0;
+
+  // Draw marker label
+  const fontSize = Math.max(10, 10 * this.canvasScale);
+  this.bandPlanCtx.font = `${fontSize}px Inter`;
+  this.bandPlanCtx.fillStyle = 'white';
+  this.bandPlanCtx.textAlign = 'center';
+  this.bandPlanCtx.textBaseline = 'bottom';
+  this.bandPlanCtx.fillText(marker.name, x, this.bandPlanCanvasElem.height - markerHeight - 5);
+});
+}
+
+handleMarkerHover(x, y) {
+  const hoverFreq = this.canvasXtoFreq(x);
+  const hoverThreshold = this.calculateThreshold();
+
+  const hoverMarker = this.markers.find(marker =>
+    Math.abs(marker.frequency - hoverFreq) < hoverThreshold
+  );
+
+  if (hoverMarker) {
+    // Implement hover effect here if needed
+    return true;
   }
+  return false;
+}
+
+handleMarkerClick(x) {
+  const clickedFreq = this.canvasXtoFreq(x);
+  const clickThreshold = this.calculateThreshold();
+
+  const clickedMarker = this.markers.find(marker =>
+    Math.abs(marker.frequency - clickedFreq) < clickThreshold
+  );
+
+  if (clickedMarker) {
+    eventBus.publish('frequencyClick', {
+      frequency: clickedMarker.frequency,
+      mode: clickedMarker.mode
+    });
+    return true;
+  }
+  return false;
+}
+
+calculateThreshold() {
+  const pixelWidth = this.totalBandwidth / this.canvasWidth;
+  let baseThreshold;
+
+  if (this.isVHF) {
+    // For VHF and above
+    baseThreshold = 75e3; // 25 kHz
+  } else {
+    // For HF
+    baseThreshold = 1;
+  }
+
+  // Adjust threshold basefactor
+  const zoomAdjustedThreshold = baseThreshold / this.zoomFactor;
+
+
+  if(this.totalBandwidth > 10000000)
+  {
+    return Math.min(Math.max(zoomAdjustedThreshold, pixelWidth / (this.zoomFactor * 1.25)), pixelWidth * 10);
+  }else
+  {
+    return Math.min(Math.max(zoomAdjustedThreshold, pixelWidth ), pixelWidth * 10);
+  }
+
+}
+
+  freqToCanvasX(freq) {
+    const idx = this.freqToIdx(freq);
+    return this.idxToCanvasX(idx);
+  }
+
+  
+  
+  // Helper function to abbreviate band names
+  abbreviateBandName(name, width, fontSize) {
+    this.bandPlanCtx.font = `${fontSize}px Inter`;
+    if (this.bandPlanCtx.measureText(name).width <= width - 4 * this.canvasScale) {
+      return name;
+    }
+    
+    const words = name.split(' ');
+    if (words.length === 1) {
+      return name.substring(0, Math.floor(width / (fontSize * 0.6)));
+    }
+    
+    return words.map(word => word[0]).join('');
+  }
+  
+  
 
   setClients (clients) {
     this.clients = clients
@@ -909,6 +1153,17 @@ export default class SpectrumWaterfall {
     if (r - l <= 128 && zoomAmount < 0) {
       return false
     }
+    if(zoomAmount > 0) {
+      if(this.zoomFactor != 1) {
+        this.zoomFactor = this.zoomFactor - 1
+      }
+    } else if (zoomAmount < 0) {
+      
+      this.zoomFactor = this.zoomFactor + 1
+    }
+
+   
+
     const centerfreq = (r - l) * x / this.canvasWidth + l
     let widthL = centerfreq - l
     let widthR = r - centerfreq

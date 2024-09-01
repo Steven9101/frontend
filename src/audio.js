@@ -176,7 +176,7 @@ export default class SpectrumAudio {
     switch (this.demodulation) {
       case 'USB':
       case 'LSB':
-        this.bassBoost.gain.value = 4
+        this.bassBoost.gain.value = 12
         this.bandpass.frequency.value = 1800
         this.bandpass.Q.value = 1.2
         this.bandpass.gain.value = 3
@@ -195,7 +195,7 @@ export default class SpectrumAudio {
         this.setLowpass(1000)
         break
       case 'AM':
-        this.bassBoost.gain.value = 5
+        this.bassBoost.gain.value = 20
         this.bandpass.frequency.value = 1500
         this.bandpass.Q.value = 1
         this.bandpass.gain.value = 2
@@ -204,7 +204,7 @@ export default class SpectrumAudio {
         this.setLowpass(4500)
         break
       case 'FM':
-        this.bassBoost.gain.value = 6
+        this.bassBoost.gain.value = 30
         this.bandpass.frequency.value = 1500
         this.bandpass.Q.value = 0.8
         this.bandpass.gain.value = 2
@@ -540,10 +540,8 @@ export default class SpectrumAudio {
     const waitSeconds = 15 - (seconds % 15);
     
     if (waitSeconds === 15 && !this.isCollecting) {
-      console.log("Start");
       this.startCollection();
     } else if (waitSeconds === 1 && this.isCollecting) {
-      console.log("Stop");
       this.stopCollection();
     }
   }
@@ -641,11 +639,9 @@ export default class SpectrumAudio {
     if (this.playTime - currentTime <= bufferThreshold) {
       // Underrun: increase buffer
       this.playTime = currentTime + bufferThreshold + curPlayTime;
-      console.log('Adjusting for underrun');
     } else if (this.playTime - currentTime > 0.5) {
       // Overrun: decrease buffer
       this.playTime = currentTime + bufferThreshold;
-      console.log('Adjusting for overrun');
     } else {
       // Normal operation: advance play time
       this.playTime += curPlayTime;
