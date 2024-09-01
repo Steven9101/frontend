@@ -1,6 +1,6 @@
 <script>
 
-  const VERSION = "1.5.2";
+  const VERSION = "1.5.3";
 
   import { onDestroy, onMount, tick } from "svelte";
   import { fade, fly, scale } from "svelte/transition";
@@ -1258,6 +1258,14 @@
         class="w-full xl:rounded-lg   peer overflow-hidden"
         id="waterfall"
       >
+      <canvas
+      class="w-full bg-black peer {spectrumDisplay ? 'max-h-40' : 'max-h-0'}"
+      bind:this={spectrumCanvas}
+      on:wheel={handleWaterfallWheel}
+      on:click={passbandTunerComponent.handlePassbandClick}
+      width="1024"
+      height="128"
+    ></canvas>
         <canvas
           class="w-full  bg-black {waterfallDisplay ? 'block' : 'hidden'}"
           bind:this={waterfallCanvas}
@@ -1276,14 +1284,7 @@
       bind:this={frequencyInputComponent}
       on:change={handleFrequencyChange}
     ></FrequencyInput>
-    <canvas
-      class="w-full bg-black peer {spectrumDisplay ? 'max-h-40' : 'max-h-0'}"
-      bind:this={spectrumCanvas}
-      on:wheel={handleWaterfallWheel}
-      on:click={passbandTunerComponent.handlePassbandClick}
-      width="1024"
-      height="128"
-    ></canvas>
+
     <FrequencyMarkers
     bind:this={frequencyMarkerComponent}
     on:click={passbandTunerComponent.handlePassbandClick}

@@ -832,17 +832,51 @@ for (let i = 0; i < 256; i++) {
   twenteData[i] = twenteData[i].map(x => x / 255);
 }
 
+// SpectraVU Colormap
+const spectraVUData = [];
+
+for (let i = 0; i < 256; i++) {
+  if (i < 64) {
+    // Dark blue to blue
+    const r = 0;
+    const g = 0;
+    const b = 128 + (i * 2);
+    spectraVUData.push([r, g, b]);
+  } else if (i < 128) {
+    // Blue to green
+    const r = 0;
+    const g = (i - 64) * 4;
+    const b = 255 - ((i - 64) * 4);
+    spectraVUData.push([r, g, b]);
+  } else if (i < 192) {
+    // Green to yellow
+    const r = (i - 128) * 4;
+    const g = 255;
+    const b = 0;
+    spectraVUData.push([r, g, b]);
+  } else {
+    // Yellow to red
+    const r = 255;
+    const g = 255 - ((i - 192) * 4);
+    const b = 0;
+    spectraVUData.push([r, g, b]);
+  }
+  // Normalize RGB values to the range 0-1
+  spectraVUData[i] = spectraVUData[i].map(x => Math.min(x, 255) / 255);
+}
+
+
 
 const definedColormaps = {
   turbo: turboColormap,
   gqrx: gqrxData,
   twente: twenteData,
   twentev2: twenteColorMapFull,
-  PhantomPlus: PhantomPlus,
+  SpectraVU: spectraVUData,
 }
 
 export const availableColormaps = [
-  'turbo', 'gqrx', 'twente', 'twentev2','PhantomPlus'
+  'turbo', 'gqrx', 'twente', 'twentev2','SpectraVU'
 ]
 
 

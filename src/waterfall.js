@@ -8,9 +8,6 @@ import { eventBus } from './eventBus';
 export default class SpectrumWaterfall {
   constructor (endpoint, settings) {
 
-    this.isVHF = this.baseFreq >= 30e6; // VHF starts at 30 MHz
-
-
     this.markers = [];
     this.currentBand = null;
 
@@ -489,7 +486,7 @@ export default class SpectrumWaterfall {
         this.accumulateAdjustmentData(arr);
       }
   
-      if (this.waterfall && !this.spectrum) {
+      if (this.waterfall) {
         this.drawWaterfall(arr, pxL, pxR, curL, curR);
       }
       if (this.spectrum) {
