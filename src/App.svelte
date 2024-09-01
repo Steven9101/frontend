@@ -200,12 +200,11 @@
   }
 
   // Audio demodulation selection
-  let demodulators = ["USB", "LSB", "CW-U", "CW-L", "AM", "FM"];
+  let demodulators = ["USB", "LSB", "CW", "CW-L", "AM", "FM"];
   const demodulationDefaults = {
     USB: { type: "USB", offsets: [-100, 2800] },
     LSB: { type: "LSB", offsets: [2800, -100] },
-    "CW-U": { type: "USB", offsets: [-500, 1000], bfo: -700 },
-    "CW-L": { type: "LSB", offsets: [1000, -500], bfo: 700 },
+    "CW": { type: "USB", offsets: [-500, 1000], bfo: -700 },
     AM: { type: "AM", offsets: [5000, 5000] },
     FM: { type: "FM", offsets: [5000, 5000] },
     WBFM: { type: "FM", offsets: [95000, 95000] },
@@ -216,6 +215,10 @@
     return [Math.floor(l), m, Math.floor(r)];
   }
   function SetMode(mode) {
+    if(mode == "CW-U" || mode == "CW-L")
+      {
+        mode = "CW"
+      }
     console.log("Setting mode to", mode);
     demodulation = mode;
 
@@ -596,6 +599,17 @@
   let frequencyMarkerComponent;
   function handleFrequencyMarkerClick(event) {
     handleFrequencyChange({ detail: event.detail.frequency });
+
+          
+      // Convert back to kHz and ensure 2 decimal places
+      frequency = (event.detail.frequency / 1e3).toFixed(2);
+      
+      // Ensure frequency is not negative
+      frequency = Math.max(0, parseFloat(frequency));
+      
+      frequencyInputComponent.setFrequency(event.detail.frequency);
+
+
     demodulation = event.detail.modulation;
     handleDemodulationChange();
   }
@@ -1541,9 +1555,9 @@
               <div id="frequencyContainer" class="w-full mt-4">
                 <div class="space-y-3">
                   <!-- Demodulation -->
-                  <div>
-                    <div id="demodulationModes" class="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                      {#each ['USB', 'LSB', 'CW-U', 'CW-L', 'AM', 'FM'] as mode}
+                  <div class="flex justify-center">
+                    <div id="demodulationModes" class="grid grid-cols-3 sm:grid-cols-5 gap-2 w-full max-w-md">
+                      {#each ['USB', 'LSB', 'CW', 'AM', 'FM'] as mode}
                         <button
                           on:click={() => SetMode(mode)}
                           class="retro-button text-white font-bold h-10 text-sm rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {demodulation === mode ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
@@ -1553,6 +1567,7 @@
                       {/each}
                     </div>
                   </div>
+                  
             
                   <hr class="border-gray-600 my-2">
             
