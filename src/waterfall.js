@@ -26,6 +26,9 @@ export default class SpectrumWaterfall {
     this.spectrum = false
     this.waterfall = false
 
+    this.frequencyMarkerComponent = null; // Reference to the Svelte component
+    this.pendingMarkers = []; // Store markers temporarily
+
     this.waterfallQueue = new Denque(10)
     this.drawnWaterfallQueue = new Denque(4096)
     this.lagTime = 0
@@ -299,6 +302,19 @@ export default class SpectrumWaterfall {
 
     }
 
+    setFrequencyMarkerComponent(component) {
+      this.frequencyMarkerComponent = component;
+      this.addMarkersToComponent();
+    }
+  
+    addMarkersToComponent() {
+      if (this.frequencyMarkerComponent && this.pendingMarkers.length > 0) {
+        this.frequencyMarkerComponent.insertAll(this.pendingMarkers);
+        this.frequencyMarkerComponent.finalizeList();
+        this.pendingMarkers = []; // Clear pending markers
+      }
+    }
+
   socketMessageInitial (event) {
     // First message gives the parameters in json
     if (!(event.data instanceof ArrayBuffer)) {
@@ -307,16 +323,17 @@ export default class SpectrumWaterfall {
         return
       }
 
-
-     // Handle markers
+      // Handle markers
       if (settings.markers) {
         try {
           const markersData = JSON.parse(settings.markers);
           if (markersData.markers && Array.isArray(markersData.markers)) {
-            markersData.markers.forEach(marker => {
-
-              this.addMarker(marker.frequency, marker.name, marker.mode);
-            });
+            this.pendingMarkers = markersData.markers.map(marker => ({
+              f: marker.frequency,
+              d: marker.name,
+              m: marker.mode
+            }));
+            this.addMarkersToComponent();
           }
         } catch (error) {
           console.error("Error parsing markers:", error);
@@ -819,180 +836,9 @@ export default class SpectrumWaterfall {
         }
     });
 
-  this.drawMarkersWithDensityCheck();
-}
-
-drawMarkersWithDensityCheck() {
-  const visibleMarkers = this.getVisibleMarkers();
-  const clusters = this.clusterMarkers(visibleMarkers);
-
-  clusters.forEach(cluster => {
-    const representativeMarker = this.getRepresentativeMarker(cluster);
-    const x = this.freqToCanvasX(representativeMarker.frequency);
-    const markerWidth = Math.max(2, 4 / Math.sqrt(this.zoomFactor));
-    const markerHeight = 23 * this.canvasScale;
-    const markerColor = 'rgba(255, 255, 0, 0.8)';
-
-    // Draw marker line
-    this.bandPlanCtx.strokeStyle = markerColor;
-    this.bandPlanCtx.lineWidth = markerWidth;
-    this.bandPlanCtx.beginPath();
-    this.bandPlanCtx.moveTo(x, this.bandPlanCanvasElem.height - 10);
-    this.bandPlanCtx.lineTo(x, this.bandPlanCanvasElem.height - markerHeight);
-    this.bandPlanCtx.stroke();
-
-    // Add glow effect
-    this.bandPlanCtx.shadowColor = markerColor;
-    this.bandPlanCtx.shadowBlur = 3 * this.canvasScale;
-    this.bandPlanCtx.stroke();
-
-    // Reset shadow
-    this.bandPlanCtx.shadowColor = 'transparent';
-    this.bandPlanCtx.shadowBlur = 0;
-
-    // Draw marker label if there's enough space
-    const availableWidth = this.calculateAvailableWidth(cluster);
-    const fontSize = this.calculateFontSize(availableWidth, representativeMarker.name);
-    
-    if (fontSize > 0) {
-      this.bandPlanCtx.font = `${fontSize}px Inter`;
-      this.bandPlanCtx.fillStyle = 'white';
-      this.bandPlanCtx.textAlign = 'center';
-      this.bandPlanCtx.textBaseline = 'bottom';
-      this.bandPlanCtx.fillText(representativeMarker.name, x, this.bandPlanCanvasElem.height - markerHeight - 5);
-    }
-  });
-}
-
-clusterMarkers(markers) {
-  const minDistance = 50 * this.canvasScale; // Minimum distance in pixels between clusters
-  let clusters = [];
-  
-  markers.forEach(marker => {
-    const markerX = this.freqToCanvasX(marker.frequency);
-    let addedToCluster = false;
-    
-    for (let cluster of clusters) {
-      const clusterX = this.freqToCanvasX(cluster[0].frequency);
-      if (Math.abs(markerX - clusterX) < minDistance) {
-        cluster.push(marker);
-        addedToCluster = true;
-        break;
-      }
-    }
-    
-    if (!addedToCluster) {
-      clusters.push([marker]);
-    }
-  });
-  
-  return clusters;
-}
-
-getRepresentativeMarker(cluster) {
-  // For now, we'll just return the first marker in the cluster
-  return cluster[0];
-}
-
-calculateAvailableWidth(cluster) {
-  if (cluster.length === 1) {
-    return this.canvasWidth; // Full width available for single markers
-  }
-  
-  const clusterStart = this.freqToCanvasX(Math.min(...cluster.map(m => m.frequency)));
-  const clusterEnd = this.freqToCanvasX(Math.max(...cluster.map(m => m.frequency)));
-  return clusterEnd - clusterStart;
-}
-
-calculateFontSize(availableWidth, text) {
-  const maxFontSize = 10 * this.canvasScale;
-  const minFontSize = 8 * this.canvasScale;
-  
-  for (let fontSize = maxFontSize; fontSize >= minFontSize; fontSize--) {
-    this.bandPlanCtx.font = `${fontSize}px Inter`;
-    if (this.bandPlanCtx.measureText(text).width <= availableWidth) {
-      return fontSize;
-    }
-  }
-  
-  return 0; // Return 0 if text doesn't fit even at minimum font size
 }
 
 
-getVisibleMarkers() {
-  const freqL = this.idxToFreq(this.waterfallL);
-  const freqR = this.idxToFreq(this.waterfallR);
-  return this.markers.filter(marker => marker.frequency >= freqL && marker.frequency <= freqR);
-}
-
-calculateAppropriateZoomLevel(visibleMarkers) {
-  const minSpaceBetweenMarkers = 50; // Minimum space in pixels between markers to show text
-  const totalWidth = this.canvasWidth;
-  const markerCount = visibleMarkers.length;
-
-  if (markerCount === 0) return 1;
-
-  const averageSpace = totalWidth / markerCount;
-  return Math.ceil(minSpaceBetweenMarkers / averageSpace);
-}
-
-handleMarkerHover(x, y) {
-  const hoverFreq = this.canvasXtoFreq(x);
-  const hoverThreshold = this.calculateThreshold();
-
-  const hoverMarker = this.markers.find(marker =>
-    Math.abs(marker.frequency - hoverFreq) < hoverThreshold
-  );
-
-  if (hoverMarker) {
-    return true;
-  }
-  return false;
-}
-
-handleMarkerClick(x) {
-  const clickedFreq = this.canvasXtoFreq(x);
-  const clickThreshold = this.calculateThreshold();
-
-  const clickedMarker = this.markers.find(marker =>
-    Math.abs(marker.frequency - clickedFreq) < clickThreshold
-  );
-
-  if (clickedMarker) {
-    eventBus.publish('frequencyClick', {
-      frequency: clickedMarker.frequency,
-      mode: clickedMarker.mode
-    });
-    return true;
-  }
-  return false;
-}
-
-calculateThreshold() {
-  const pixelWidth = this.totalBandwidth / this.canvasWidth;
-  let baseThreshold;
-
-  if (this.isVHF) {
-    // For VHF and above
-    baseThreshold = 75e3; // 25 kHz
-  } else {
-    // For HF
-    baseThreshold = 1;
-  }
-
-  // Adjust threshold basefactor
-  const zoomAdjustedThreshold = baseThreshold / this.zoomFactor;
-
-
-  if(this.totalBandwidth > 10000000)
-  {
-    return Math.min(Math.max(zoomAdjustedThreshold, pixelWidth / (this.zoomFactor * 1.25)), pixelWidth * 10);
-  }else
-  {
-    return Math.min(Math.max(zoomAdjustedThreshold, pixelWidth ), pixelWidth * 10);
-  }
-
-}
 
   freqToCanvasX(freq) {
     const idx = this.freqToIdx(freq);

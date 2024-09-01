@@ -4,37 +4,36 @@
 
   import { frequencyToWaterfallOffset, getFrequencyView } from '../lib/backend'
 
-  import builtinShortwave from '../assets/shortwavestations.json'
-  import builtinAmateur from '../assets/amateurfrequencies.json'
   const dispatch = createEventDispatcher()
   let markerDiv;
-  const frequencyList = []
-  function insertAll (frequencies) {
+  var frequencyList = []
+  export function insertAll (frequencies) {
     for (const frequency of frequencies) {
       frequencyList.push([
         frequency.f || frequency.frequency,
         frequency.d || frequency.description,
         frequency.m || frequency.modulation
       ])
+
     }
+
+    frequencyList = [...frequencyList];
   }
   function frequencyListComparator (a, b) {
     return a[0] - b[0]
   }
-  function finalizeList () {
+  export function finalizeList () {
     frequencyList.sort(frequencyListComparator)
     if (frequencyList.length === 0) {
       markerDiv.style.display = 'none'
     }
   }
-  
-  //insertAll(builtinShortwave)
-  //insertAll(builtinAmateur)
 
   function getFrequencyBoundsInRange (lo, hi) {
     return [bounds.ge(frequencyList, [lo], frequencyListComparator), bounds.ge(frequencyList, [hi], frequencyListComparator)]
   }
   function getFrequencyInRange (from, to) {
+
     return frequencyList.slice(from, to).map(x => ({
       frequency: x[0],
       description: x[1],
@@ -46,24 +45,35 @@
   let frequencyMarkers = []
   let frequencyBoundsLo = -1
   let frequencyBoundsHi = -1
-  export function updateFrequencyMarkerPositions () {
-    const [frequencyFrom, frequencyTo] = getFrequencyView()
-    const [from, to] = getFrequencyBoundsInRange(frequencyFrom, frequencyTo)
+  export function updateFrequencyMarkerPositions() {
+    const [frequencyFrom, frequencyTo] = getFrequencyView();
+    const [from, to] = getFrequencyBoundsInRange(frequencyFrom, frequencyTo);
+    
     if (frequencyTo - frequencyFrom <= 200000) {
       if (from !== frequencyBoundsLo || to !== frequencyBoundsHi) {
-        frequencyBoundsLo = from
-        frequencyBoundsHi = to
-        frequencyMarkers = getFrequencyInRange(frequencyBoundsLo, frequencyBoundsHi)
+        frequencyBoundsLo = from;
+        frequencyBoundsHi = to;
+        frequencyMarkers = getFrequencyInRange(frequencyBoundsLo, frequencyBoundsHi);
       }
     } else {
-      frequencyMarkers = []
+      frequencyMarkers = [];
+      frequencyBoundsHi = -1;
+      frequencyBoundsLo = -1;
     }
-    for (let i = 0; i < frequencyMarkers.length; i++) {
-      frequencyMarkers[i].left = frequencyToWaterfallOffset(frequencyMarkers[i].frequency)
-    }
+
+    // Always update the left position, even if the array didn't change
+    frequencyMarkers = frequencyMarkers.map(marker => ({
+      ...marker,
+      left: frequencyToWaterfallOffset(marker.frequency)
+    }));
+
+    // Force Svelte to update the component
+    frequencyMarkers = [...frequencyMarkers];
   }
+
+
   onMount(() => {
-    finalizeList()
+    //finalizeList()
   })
 </script>
 <div on:click|self on:wheel|self class="w-full h-4 bg-black relative" bind:this={markerDiv} role="button">

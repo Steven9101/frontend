@@ -1,6 +1,6 @@
 <script>
 
-  const VERSION = "1.5.0";
+  const VERSION = "1.5.2";
 
   import { onDestroy, onMount, tick } from "svelte";
   import { fade, fly, scale } from "svelte/transition";
@@ -14,17 +14,7 @@
 
   import { eventBus } from './eventBus';
 
-
-
-
-
-
-
-
   import { quintOut } from 'svelte/easing';
-
-
-
 
   import { pinch, pan } from "./lib/hammeractions.js";
   import { availableColormaps } from "./lib/colormaps";
@@ -331,7 +321,6 @@
     audio.setAudioRange(...audioParameters);
     updatePassband();
     updateLink();
-    console.log(frequency)
     waterfall.checkBandAndSetMode(frequency);
   }
 
@@ -904,10 +893,14 @@
       tempCanvasElem: tempCanvas,
     });
 
+    
+
+
     backendPromise = init();
+
     await backendPromise;
 
-    
+    waterfall.setFrequencyMarkerComponent(frequencyMarkerComponent);
 
     // Enable after connection established
     [
@@ -966,6 +959,8 @@
     updateParameters(storageParameters) */
     const linkParameters = parseLink(location.search.slice(1));
     updateParameters(linkParameters);
+
+
 
     // Refresh all the controls to the initial value
     updatePassband();
@@ -1316,15 +1311,15 @@
       class="w-full bg-black peer"
       bind:this={bandPlanCanvas}
       on:wheel={handleWaterfallWheel}
-      on:click={handleBandPlanClick}
+      on:click={passbandTunerComponent.handlePassbandClick}
       on:mousedown={(e) => passbandTunerComponent.handleMoveStart(e, 1)}
       on:touchstart={passbandTunerComponent.handleTouchStart}
       on:touchmove={passbandTunerComponent.handleTouchMove}
       on:touchend={passbandTunerComponent.handleTouchEnd}
-      on:mousemove={handleBandPlanMouseMove}
       width="1024"
       height="20"
     >
+
 
 
       </div>
