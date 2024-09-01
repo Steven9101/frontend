@@ -223,6 +223,7 @@
     demodulation = mode;
 
     handleDemodulationChange(null, true);
+    updateLink();
   }
 
   // Demodulation controls
@@ -324,7 +325,11 @@
     audio.setAudioRange(...audioParameters);
     updatePassband();
     updateLink();
-    waterfall.checkBandAndSetMode(frequency);
+    if(!event.markerclick)
+    {
+      waterfall.checkBandAndSetMode(frequency);
+    }
+    
   }
 
   // Waterfall magnification controls
@@ -598,7 +603,7 @@
   // Tune to the frequency when clicked
   let frequencyMarkerComponent;
   function handleFrequencyMarkerClick(event) {
-    handleFrequencyChange({ detail: event.detail.frequency });
+    handleFrequencyChange({ detail: event.detail.frequency,  markerclick: true });
 
           
       // Convert back to kHz and ensure 2 decimal places

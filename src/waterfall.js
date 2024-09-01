@@ -671,13 +671,14 @@ export default class SpectrumWaterfall {
         for (const modeRange of band.modes) {
           if (frequency >= modeRange.startFreq && frequency <= modeRange.endFreq) {
             newMode = modeRange.mode;
+            
             break;
           }
         }
         break;
       }
     }
-  
+
     if (newBand !== this.currentBand || (newBand && newMode !== this.currentMode)) {
       this.currentBand = newBand;
       this.currentMode = newMode;
