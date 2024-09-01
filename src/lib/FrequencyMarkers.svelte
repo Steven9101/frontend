@@ -49,7 +49,7 @@
     const [frequencyFrom, frequencyTo] = getFrequencyView();
     const [from, to] = getFrequencyBoundsInRange(frequencyFrom, frequencyTo);
     
-    if (frequencyTo - frequencyFrom <= 1500000) {
+    if (frequencyTo - frequencyFrom <= 3500000) {
       if (from !== frequencyBoundsLo || to !== frequencyBoundsHi) {
         frequencyBoundsLo = from;
         frequencyBoundsHi = to;
