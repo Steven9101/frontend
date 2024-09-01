@@ -20,6 +20,7 @@
 
 
 
+
   import { quintOut } from 'svelte/easing';
 
 
@@ -373,8 +374,8 @@
   let squelch = -50;
   let power = 0;
   let powerPeak = 0;
-  const numberOfDots = 35; // Number of dots to represent the range from -100 to 0 dB
-  const s9Index = 17; // Index of S9 (This may change based on your scale)
+  const numberOfDots = 35;
+  const s9Index = 17;
   const accumulator = RollingMax(10);
 
   // Function to draw the S-meter
@@ -455,11 +456,37 @@
     function onWheel(event) {
       event.preventDefault();
       const delta = event.deltaY > 0 ? -1 : 1;
-      const step = event.shiftKey ? 1 : 0.1;
-      frequency = Math.max(0, Number((parseFloat(frequency) + delta * step).toFixed(3)));
-      frequencyInputComponent.setFrequency(frequency * 1e3);
-      handleFrequencyChange({ detail: frequency * 1e3 });
-
+      const isShiftPressed = event.shiftKey;
+      
+      // Convert frequency to Hz for calculations
+      let frequencyHz = Math.round(parseFloat(frequency) * 1e3);
+      
+      function adjustFrequency(freq, direction, shiftPressed) {
+        const step = shiftPressed ? 100 : 50;
+        const lastDigits = freq % step;
+        
+        if (lastDigits === 0) {
+          // For .00, .05, .10, .15, .20 etc. (or .00, .10, .20 etc. when Shift is pressed)
+          return freq + direction * step;
+        } else if (direction > 0) {
+          // Scrolling up: round up to next step
+          return Math.ceil(freq / step) * step;
+        } else {
+          // Scrolling down: round down to previous step
+          return Math.floor(freq / step) * step;
+        }
+      }
+      
+      frequencyHz = adjustFrequency(frequencyHz, delta, isShiftPressed);
+      
+      // Convert back to kHz and ensure 2 decimal places
+      frequency = (frequencyHz / 1e3).toFixed(2);
+      
+      // Ensure frequency is not negative
+      frequency = Math.max(0, parseFloat(frequency));
+      
+      frequencyInputComponent.setFrequency(frequencyHz);
+      handleFrequencyChange({ detail: frequencyHz });
     }
 
     node.addEventListener('wheel', onWheel);
