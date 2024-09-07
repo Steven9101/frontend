@@ -279,7 +279,7 @@ export default class SpectrumWaterfall {
     
       // Aspect ratio is 1372 to 20px
       this.graduationCanvasElem.width = canvasWidth;
-      this.graduationCanvasElem.height = (canvasWidth / 1372) * 20;
+      this.graduationCanvasElem.height = (canvasWidth / 1372) * 30;
 
       // Aspect ratio is 1372 to 20px
       this.bandPlanCanvasElem.width = canvasWidth;
@@ -753,7 +753,7 @@ export default class SpectrumWaterfall {
       if (printFreq) {
         this.graduationCtx.textAlign = 'center'
         // Convert Hz to kHz by dividing by 1000, then round to remove decimal places
-        const freqInKHz = Math.round(freqLStart / 1000)
+        const freqInKHz = (freqLStart / 1000)
         this.graduationCtx.fillText(freqInKHz.toString(), middlePixel, 20 * scale)
       }
       // draw a line in the middle of it

@@ -1,6 +1,6 @@
 <script>
 
-  const VERSION = "1.5.3";
+  const VERSION = "1.5.4";
 
   import { onDestroy, onMount, tick } from "svelte";
   import { fade, fly, scale } from "svelte/transition";
@@ -36,6 +36,10 @@
   } from "./lib/storage.js";
 
 
+
+  let isRecording = false;
+  let canDownload = false;
+
   let waterfallCanvas;
   let spectrumCanvas;
   let graduationCanvas;
@@ -50,6 +54,24 @@
 
   let link;
   var chatContentDiv;
+
+
+  
+  function toggleRecording() {
+    if (!isRecording) {
+      audio.startRecording();
+      isRecording = true;
+      canDownload = false;
+    } else {
+      audio.stopRecording();
+      isRecording = false;
+      canDownload = true;
+    }
+  }
+
+  function downloadRecording() {
+    audio.downloadRecording();
+  }
 
 
   function generateUniqueId() {
@@ -204,7 +226,8 @@
   const demodulationDefaults = {
     USB: { type: "USB", offsets: [-100, 2800] },
     LSB: { type: "LSB", offsets: [2800, -100] },
-    "CW": { type: "USB", offsets: [-500, 1000], bfo: -700 },
+    "CW": { type: "USB", offsets: [250, 250] },
+    //CW: { type: "CW", offsets: [2800, -100] },
     AM: { type: "AM", offsets: [5000, 5000] },
     FM: { type: "FM", offsets: [5000, 5000] },
     WBFM: { type: "FM", offsets: [95000, 95000] },
@@ -237,7 +260,14 @@
       } else {
         audio.setFmDeemph(0);
       }
-      audio.setAudioDemodulation(demodulationDefault.type);
+      if(demodulationDefault.type == "USB" && demodulationDefault.offsets[0] == 250)
+      {
+        audio.setAudioDemodulation("CW");
+      }else
+      {
+        audio.setAudioDemodulation(demodulationDefault.type);
+      }
+      
     }
     let prevBFO = frequencyInputComponent.getBFO();
     let newBFO = demodulationDefault.bfo || 0;
@@ -251,8 +281,18 @@
 
     frequency = (frequencyInputComponent.getFrequency() / 1e3).toFixed(2);
 
+    // CW
+    const lOffset = l - 200;
+    const mOffset = m - 750;
+    const rOffset = r - 200;
+    const audioParametersOffset = [lOffset, mOffset, rOffset].map(frequencyToFFTOffset);
     const audioParameters = [l, m, r].map(frequencyToFFTOffset);
-    audio.setAudioRange(...audioParameters);
+
+
+
+    // Set audio range with both normal and offset values
+    audio.setAudioRange(...audioParameters, ...audioParametersOffset);
+    
     updatePassband();
     updateLink();
   }
@@ -269,32 +309,47 @@
     return ((dbValue - minDb) / (maxDb - minDb)) * 100;
   }
 
-  // When user drags or changes the passband
   function handlePassbandChange(passband) {
     let [l, m, r] = passband.detail.map(waterfallOffsetToFrequency);
+
     let bfo = frequencyInputComponent.getBFO();
     bfo = 0;
+
     l += bfo;
     m += bfo;
     r += bfo;
+
+    // CW
+    const lOffset = l - 200;
+    const mOffset = m - 750;
+    const rOffset = r - 200;
+
     bandwidth = ((r - l) / 1000).toFixed(2);
     frequencyInputComponent.setFrequency(m);
     frequency = (frequencyInputComponent.getFrequency() / 1e3).toFixed(2);
+
     const audioParameters = [l, m, r].map(frequencyToFFTOffset);
-    audio.setAudioRange(...audioParameters);
+    const audioParametersOffset = [lOffset, mOffset, rOffset].map(frequencyToFFTOffset);
+
+    // Set audio range with both normal and offset values
+    audio.setAudioRange(...audioParameters, ...audioParametersOffset);
+
     updateLink();
     updatePassband();
     waterfall.checkBandAndSetMode(frequency * 1e3);
-    
   }
 
   // Entering new frequency into the textbox
   function handleFrequencyChange(event) {
     
+
+ 
+
     const frequency = event.detail;
     const audioRange = audio.getAudioRange();
+    
     const [l, m, r] = audioRange.map(FFTOffsetToFrequency);
-
+    
     // Preserve current bandwidth settings
     let audioParameters = [
       frequency - (m - l),
@@ -302,6 +357,13 @@
       frequency + (r - m),
     ].map(frequencyToFFTOffset);
     const newm = audioParameters[1];
+
+
+    const lOffset = frequency - (m - l) - 200;
+    const mOffset = frequency - 750;
+    const rOffset = frequency + (r - m) - 200;
+
+    const audioParametersOffset = [lOffset, mOffset, rOffset].map(frequencyToFFTOffset);
 
     // If the ranges are not within limit, shift it back
     let [waterfallL, waterfallR] = waterfall.getWaterfallRange();
@@ -322,13 +384,14 @@
       waterfallR = Math.floor(newMid + limits);
       waterfall.setWaterfallRange(waterfallL, waterfallR);
     }
-    audio.setAudioRange(...audioParameters);
+    audio.setAudioRange(...audioParameters, ...audioParametersOffset);
     updatePassband();
     updateLink();
     if(!event.markerclick)
     {
       waterfall.checkBandAndSetMode(frequency);
     }
+    frequencyMarkerComponent.updateFrequencyMarkerPositions();
     
   }
 
@@ -349,12 +412,14 @@
         e.scale = -1;
         waterfall.canvasWheel(e);
         updatePassband();
+        frequencyMarkerComponent.updateFrequencyMarkerPositions();
         return;
       case "-":
         e.coords = { x: offset };
         e.scale = 1;
         waterfall.canvasWheel(e);
         updatePassband();
+        frequencyMarkerComponent.updateFrequencyMarkerPositions();
         return;
       case "min":
         l = 0;
@@ -362,6 +427,8 @@
         break;
     }
     waterfall.setWaterfallRange(l, r);
+    frequencyMarkerComponent.updateFrequencyMarkerPositions();
+    
     updatePassband();
   }
 
@@ -517,7 +584,12 @@
       );
     }
     let audioParameters = [l, m, r].map(frequencyToFFTOffset);
-    audio.setAudioRange(...audioParameters);
+    const lOffset = l - 200;
+    const mOffset = m - 750;
+    const rOffset = r - 200;
+    const audioParametersOffset = [lOffset, mOffset, rOffset].map(frequencyToFFTOffset);
+
+    audio.setAudioRange(...audioParameters, ...audioParametersOffset);
     updatePassband();
   }
 
@@ -615,8 +687,9 @@
       frequencyInputComponent.setFrequency(event.detail.frequency);
 
 
-    demodulation = event.detail.modulation;
-    handleDemodulationChange();
+    SetMode(event.detail.modulation);
+    //demodulation = event.detail.modulation;
+    //handleDemodulationChange();
   }
 
   // Permalink handling
@@ -1501,6 +1574,43 @@
                 </div>
               </div>
             {/if}
+
+             <!-- Recording Options -->
+            <div class="mt-6 w-full">
+              <label class="block text-sm font-medium text-gray-300 mb-3">Recording Options</label>
+              <div class="flex justify-center gap-4">
+                <button
+                  class="bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors {isRecording ? 'ring-2 ring-red-500' : ''}"
+                  on:click={toggleRecording}
+                >
+                  {#if isRecording}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" />
+                    </svg>
+                    Stop
+                  {:else}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                    </svg>
+                    Record
+                  {/if}
+                </button>
+                
+                {#if canDownload}
+                  <button
+                    class="bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors"
+                    on:click={downloadRecording}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                    Download
+                  </button>
+                {/if}
+              </div>
+            </div>
+
+
             </div>
 
             <div class="flex flex-col items-center bg-gray-800 p-6 border-l-0 border-r-0 border border-gray-700">

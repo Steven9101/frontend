@@ -4,12 +4,18 @@ import createWindow from 'live-moving-average'
 import { decode as cbor_decode } from 'cbor-x';
 import { encode, decode } from "./modules/ft8.js";
 
-import { AudioContext, ConvolverNode, IIRFilterNode, GainNode, AudioBuffer, AudioBufferSourceNode, DynamicsCompressorNode } from 'standardized-audio-context'
+import { AudioContext, ConvolverNode, IIRFilterNode, GainNode, AudioBuffer, AudioBufferSourceNode, DynamicsCompressorNode, MediaStreamAudioDestinationNode } from 'standardized-audio-context'
 import { BiquadFilterNode } from 'standardized-audio-context';
 export default class SpectrumAudio {
   constructor(endpoint) {
 
     
+    // For Recording
+    this.isRecording = false;
+    this.recordedAudio = [];
+
+
+
     this.endpoint = endpoint
 
     this.playAmount = 0
@@ -154,6 +160,9 @@ export default class SpectrumAudio {
     this.setGain(5)
   
 
+
+    // Add MediaStreamDestination node
+    this.destinationNode = new MediaStreamAudioDestinationNode(this.audioCtx);
   
     // Connect nodes in the correct order
     this.convolverNode.connect(this.highPass)
@@ -162,6 +171,7 @@ export default class SpectrumAudio {
     this.bassBoost.connect(this.presenceBoost)
     this.presenceBoost.connect(this.compressor)
     this.compressor.connect(this.gainNode)
+    this.gainNode.connect(this.destinationNode);
     this.gainNode.connect(this.audioCtx.destination)
   
     this.audioInputNode = this.convolverNode
@@ -176,6 +186,7 @@ export default class SpectrumAudio {
     switch (this.demodulation) {
       case 'USB':
       case 'LSB':
+      case 'CW':
         this.bassBoost.gain.value = 12
         this.bandpass.frequency.value = 1800
         this.bandpass.Q.value = 1.2
@@ -184,14 +195,13 @@ export default class SpectrumAudio {
         this.presenceBoost.gain.value = 4
         this.setLowpass(3000)
         break
-      case 'CW-U':
-      case 'CW-L':
+      case 'CW':
         this.bassBoost.gain.value = 0
         this.bandpass.frequency.value = 700
-        this.bandpass.Q.value = 4
-        this.bandpass.gain.value = 6
+        this.bandpass.Q.value = 1.2
+        this.bandpass.gain.value = 2
         this.highPass.frequency.value = 400
-        this.presenceBoost.gain.value = 2
+        this.presenceBoost.gain.value = 1
         this.setLowpass(1000)
         break
       case 'AM':
@@ -237,6 +247,8 @@ export default class SpectrumAudio {
   {
     this.decodeFT8 = value;
   }
+
+  
 
   setFmDeemph(tau) {
     if (tau === 0) {
@@ -376,17 +388,33 @@ export default class SpectrumAudio {
   }
 
   updateAudioParams() {
-    this.audioSocket.send(JSON.stringify({
-      cmd: 'window',
-      l: this.audioL,
-      m: this.audioM,
-      r: this.audioR
-    }))
+    if(this.demodulation == "CW")
+    {
+      this.audioSocket.send(JSON.stringify({
+        cmd: 'window',
+        l: this.audioLOffset,
+        m: this.audioMOffset,
+        r: this.audioROffset
+      }))
+    }else
+    {
+      this.audioSocket.send(JSON.stringify({
+        cmd: 'window',
+        l: this.audioL,
+        m: this.audioM,
+        r: this.audioR
+      }))
+    }
+    
   }
 
   setAudioDemodulation(demodulation) {
 
     this.demodulation = demodulation
+    if(demodulation == "CW")
+    {
+      demodulation = "USB"
+    }
     this.updateFilters()
     this.audioSocket.send(JSON.stringify({
       cmd: 'demodulation',
@@ -394,13 +422,21 @@ export default class SpectrumAudio {
     }))
   }
 
-  setAudioRange(audioL, audioM, audioR) {
-    this.audioL = Math.floor(audioL)
-    this.audioM = audioM
-    this.audioR = Math.ceil(audioR)
-    this.actualL = audioL
-    this.actualR = audioR
-    this.updateAudioParams()
+  setAudioRange(audioL, audioM, audioR, audioLOffset, audioMOffset, audioROffset) {
+    this.audioL = Math.floor(audioL);
+    this.audioM = audioM;
+    this.audioR = Math.ceil(audioR);
+    this.actualL = audioL;
+    this.actualR = audioR;
+  
+    this.audioLOffset = Math.floor(audioLOffset);
+    this.audioMOffset = audioMOffset;
+    this.audioROffset = Math.ceil(audioROffset);
+    this.actualLOffset = audioLOffset;
+    this.actualROffset = audioROffset;
+
+  
+    this.updateAudioParams();
   }
 
   getAudioRange() {
@@ -618,6 +654,8 @@ export default class SpectrumAudio {
   // FT8 END
 
 
+  
+
   playAudio(pcmArray) {
     if (this.mute || (this.squelchMute && this.squelch)) {
       return
@@ -646,6 +684,10 @@ export default class SpectrumAudio {
       // Normal operation: advance play time
       this.playTime += curPlayTime;
     }
+
+    if (this.isRecording) {
+      this.recordedAudio.push(...pcmArray);
+    }
   }
   
   playPCM(buffer, playTime, sampleRate, scale) {
@@ -653,7 +695,6 @@ export default class SpectrumAudio {
       console.warn('Audio not initialized');
       return 0;
     }
-  
     const source = new AudioBufferSourceNode(this.audioCtx);
     const audioBuffer = new AudioBuffer({ 
       length: buffer.length, 
@@ -672,8 +713,109 @@ export default class SpectrumAudio {
     source.onended = () => {
       source.disconnect();
     };
+
+
   
     return audioBuffer.duration;
+  }
+
+  startRecording() {
+    if (this.isRecording) return;
+
+    this.isRecording = true;
+    this.recordedChunks = [];
+
+    this.mediaRecorder = new MediaRecorder(this.destinationNode.stream);
+    
+    this.mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        this.recordedChunks.push(event.data);
+      }
+    };
+
+    this.mediaRecorder.start();
+  }
+
+  stopRecording() {
+    if (!this.isRecording) return;
+
+    this.isRecording = false;
+    this.mediaRecorder.stop();
+  }
+
+  downloadRecording() {
+    if (this.recordedChunks.length === 0) {
+      console.warn('No recorded audio to download');
+      return;
+    }
+
+    const blob = new Blob(this.recordedChunks, { type: 'audio/webm' });
+    
+    // Convert blob to ArrayBuffer
+    blob.arrayBuffer().then(arrayBuffer => {
+      // Decode the audio data
+      this.audioCtx.decodeAudioData(arrayBuffer).then(audioBuffer => {
+        // Create WAV file
+        const wavFile = this.createWavFile(audioBuffer);
+        
+        // Create download link
+        const url = URL.createObjectURL(new Blob([wavFile], { type: 'audio/wav' }));
+        const a = document.createElement('a');
+        document.body.appendChild(a);
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'recorded_audio.wav';
+        a.click();
+        window.URL.revokeObjectURL(url);
+      });
+    });
+  }
+
+  createWavFile(audioBuffer) {
+    const numChannels = audioBuffer.numberOfChannels;
+    const sampleRate = audioBuffer.sampleRate;
+    const format = 1; // PCM
+    const bitsPerSample = 16;
+    const bytesPerSample = bitsPerSample / 8;
+    const blockAlign = numChannels * bytesPerSample;
+    const byteRate = sampleRate * blockAlign;
+    const dataSize = audioBuffer.length * blockAlign;
+    const bufferSize = 44 + dataSize;
+    const arrayBuffer = new ArrayBuffer(bufferSize);
+    const view = new DataView(arrayBuffer);
+
+    const writeString = (view, offset, string) => {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    };
+
+    // Write WAV header
+    writeString(view, 0, 'RIFF');
+    view.setUint32(4, bufferSize - 8, true);
+    writeString(view, 8, 'WAVE');
+    writeString(view, 12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, format, true);
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, byteRate, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, bitsPerSample, true);
+    writeString(view, 36, 'data');
+    view.setUint32(40, dataSize, true);
+
+    // Write audio data
+    const offset = 44;
+    for (let i = 0; i < audioBuffer.numberOfChannels; i++) {
+      const channel = audioBuffer.getChannelData(i);
+      for (let j = 0; j < channel.length; j++) {
+        const sample = Math.max(-1, Math.min(1, channel[j]));
+        view.setInt16(offset + (j * numChannels + i) * bytesPerSample, sample * 0x7FFF, true);
+      }
+    }
+
+    return arrayBuffer;
   }
   
 }

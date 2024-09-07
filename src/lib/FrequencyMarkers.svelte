@@ -32,9 +32,12 @@
   function getFrequencyBoundsInRange (lo, hi) {
     return [bounds.ge(frequencyList, [lo], frequencyListComparator), bounds.ge(frequencyList, [hi], frequencyListComparator)]
   }
-  function getFrequencyInRange (from, to) {
 
+  let markerIdCounter = 0;
+
+  function getFrequencyInRange(from, to) {
     return frequencyList.slice(from, to).map(x => ({
+      id: markerIdCounter++,
       frequency: x[0],
       description: x[1],
       modulation: x[2],
@@ -61,7 +64,7 @@
       frequencyBoundsLo = -1;
     }
 
-    // Always update the left position, even if the array didn't change
+    // Update the left position, preserving the id
     frequencyMarkers = frequencyMarkers.map(marker => ({
       ...marker,
       left: frequencyToWaterfallOffset(marker.frequency)
@@ -77,7 +80,7 @@
   })
 </script>
 <div on:click|self on:wheel|self class="w-full h-4 bg-black relative" bind:this={markerDiv} role="button">
-  {#each frequencyMarkers as frequencyMarker (frequencyMarker.frequency)}
+  {#each frequencyMarkers as frequencyMarker (frequencyMarker.id)}
   <div class="h-4 absolute p-0 group" style="left: {frequencyMarker.left * 100}%"
       on:click={() => dispatch('markerclick', frequencyMarker)}>
       <div class="top-0 w-px h-8 z-0 peer bg-yellow-600 absolute">
