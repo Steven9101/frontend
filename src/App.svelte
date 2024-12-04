@@ -514,7 +514,7 @@
     drawSMeter(activeSegments);
   }
 
-  let defaultStep = 50; // Default step value
+  let defaultStep = 10; // Default step value was 50, Bas ON5HB, 10 is better S-meter response.
   let currentTuneStep = 0; // Track the current step
 
   function setStep(step) {
