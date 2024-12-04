@@ -1,6 +1,6 @@
 <script>
 
-  const VERSION = "1.5.4";
+  const VERSION = "1.5.4 | Modified by Bas Heijermans - ON5HB";
 
   import { onDestroy, onMount, tick } from "svelte";
   import { fade, fly, scale } from "svelte/transition";
@@ -55,8 +55,6 @@
   let link;
   var chatContentDiv;
 
-
-  
   function toggleRecording() {
     if (!isRecording) {
       audio.startRecording();
@@ -228,7 +226,7 @@
     LSB: { type: "LSB", offsets: [2800, -100] },
     "CW": { type: "USB", offsets: [250, 250] },
     //CW: { type: "CW", offsets: [2800, -100] },
-    AM: { type: "AM", offsets: [5000, 5000] },
+    AM: { type: "AM", offsets: [4900, 4900] },
     FM: { type: "FM", offsets: [5000, 5000] },
     WBFM: { type: "FM", offsets: [95000, 95000] },
   };
@@ -433,7 +431,7 @@
   }
 
   let mute;
-  let volume = 65;
+  let volume = 75;
   let squelchEnable;
   let squelch = -50;
   let power = 0;
@@ -516,30 +514,133 @@
     drawSMeter(activeSegments);
   }
 
+  let defaultStep = 10; // Default step value was 50, Bas ON5HB, 10 is better S-meter response.
+  let currentTuneStep = 0; // Track the current step
+
+  function setStep(step) {
+    currentTuneStep = step;
+  }
+
+ let band;
+ let newFrequency = 0;
+ let newMode;
+ let currentBand = band;
+
+ function setBand(band,newFrequency,newMode) {
+   currentBand = band;
+   frequencyInputComponent.setFrequency(newFrequency * 1e3);
+   handleFrequencyChange({ detail: newFrequency * 1e3 });
+   SetMode(newMode);
+
+   let [l, m, r] = audio.getAudioRange();
+   const [waterfallL, waterfallR] = waterfall.getWaterfallRange();
+   const offset = ((m - waterfallL) / (waterfallR - waterfallL)) * waterfall.canvasWidth;
+   m = Math.min(waterfall.waterfallMaxSize - 512, Math.max(512, m));
+   l = Math.floor(m - 512);
+   r = Math.ceil(m + 512);
+   switch (band) {
+     case 2200:
+       l -= 100;
+       r += 100;
+       break;
+     case 630:
+       l -= 200;
+       r += 200;
+       break;
+     case 160:
+       l -= 15000;
+       r += 15000;
+       break;
+     case 80:
+       l -= 35000;
+       r += 35000;
+       break;
+     case 60:
+       l -= 750;
+       r += 750;
+       break;
+     case 42:
+       l -= 1000;
+       r += 1000;
+       break;
+     case 40:
+       l -= 20000;
+       r += 20000;
+       break;
+     case 31:
+       l -= 1000;
+       r += 1000;
+       break;
+     case 30:
+      l -= 3300;
+      r += 3300;
+      break;
+     case 20:
+      l -= 30000;
+      r += 30000;
+      break;
+     case 17:
+       l -= 7500;
+       r += 7500;
+       break;
+     case 15:
+       l -= 35000;
+       r += 35000;
+       break;
+     case 12:
+       l -= 8000;
+       r += 8000;
+       break;
+     case 11:
+       l -= 35000;
+       r += 35000;
+       break;
+     case 10:
+       l -= 140000;
+       r += 140000;
+       break;
+    case 49:
+       l -= 5000;
+       r += 5000;
+       break;
+    case 49.1:
+       l -= 5000;
+       r += 5000;
+       break;
+    case 642:
+       l -= 5000;
+       r += 5000;
+       break;
+
+    }
+   waterfall.setWaterfallRange(l, r);
+   frequencyMarkerComponent.updateFrequencyMarkerPositions();
+   updatePassband();
+}
+
   function handleWheel(node) {
     function onWheel(event) {
       event.preventDefault();
       const delta = event.deltaY > 0 ? -1 : 1;
       const isShiftPressed = event.shiftKey;
-      
+      const isAltPressed = event.altKey;
+
       // Convert frequency to Hz for calculations
       let frequencyHz = Math.round(parseFloat(frequency) * 1e3);
-      
-      function adjustFrequency(freq, direction, shiftPressed) {
-        const step = shiftPressed ? 100 : 50;
+
+      function adjustFrequency(freq, direction, shiftPressed, altPressed) {
+        const step = currentTuneStep || (altPressed ? 10000 : shiftPressed ? 1000 : defaultStep);
         const lastDigits = freq % step;
-        
+
         if (lastDigits === 0) {
-          // For .00, .05, .10, .15, .20 etc. (or .00, .10, .20 etc. when Shift is pressed)
           return freq + direction * step;
         } else if (direction > 0) {
-          // Scrolling up: round up to next step
           return Math.ceil(freq / step) * step;
         } else {
-          // Scrolling down: round down to previous step
           return Math.floor(freq / step) * step;
         }
       }
+
       
       frequencyHz = adjustFrequency(frequencyHz, delta, isShiftPressed);
       
@@ -840,6 +941,14 @@
       content: "Use these buttons to zoom in and out of the waterfall display.",
     },
     {
+    	selector: "#frequency-step-selection",
+	content: "Use these buttons to change the frequency steps.",
+    },
+    {
+    	selector: "#band-selection",
+	content: "Use these buttons to change bands.",
+    },
+    {
       selector: "#moreoptions",
       content:
         "These options allow you to enable things like CTCSS Supression, Noise Reduction and more.",
@@ -973,10 +1082,6 @@
       }
     }
 
-
-
-
-
     waterfall.initCanvas({
       canvasElem: waterfallCanvas,
       spectrumCanvasElem: spectrumCanvas,
@@ -984,9 +1089,6 @@
       bandPlanCanvasElem: bandPlanCanvas,
       tempCanvasElem: tempCanvas,
     });
-
-    
-
 
     backendPromise = init();
 
@@ -1002,7 +1104,6 @@
       element.disabled = false;
     });
 
-    
 
     // Enable WBFM option if bandwidth is wide enough
     if (audio.trueAudioSps > 170000) {
@@ -1251,7 +1352,6 @@
   }
 
 
-
   function formatLinks(text) {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     const parts = [];
@@ -1321,9 +1421,7 @@
   }
 </script>
 
-<svelte:window
-  on:mousemove={handleWindowMouseMove}
-  on:mouseup={handleWindowMouseUp}
+<svelte:window on:mousemove={handleWindowMouseMove} on:mouseup={handleWindowMouseUp}
 />
 
 <main class="custom-scrollbar">
@@ -1343,7 +1441,91 @@
           
      
       <div class="xl:pt-20"></div>
-      <div class="flex justify-center w-full" >
+
+          <!--Titel Box with Admin Infos, to be personalized-->
+          <div class="flex flex-col rounded p-2 justify-center" id="chat-column">
+            <div class="p-3 sm:p-5 flex flex-col bg-gray-800 border border-gray-700 rounded-lg w-full mb-8" id="chat-box" style="opacity: 0.85;">
+              <!-- Header -->
+              <h2 class="text-xl sm:text-2xl font-semibold text-gray-100 mb-2 sm:mb-4">
+                <span>
+                  Heppen Wideband Websdr @ JO21oc:
+                  <a href="https://k7fry.com/grid/?qth=JO21oc" class="text-blue-500 hover:underline" target="_blank">click on JO21oc</a>
+                </span>
+              </h2>
+
+              <!-- Details -->
+              <span class="text-white text-xs sm:text-sm mr-4 mb-2 sm:mb-0">
+                Operated by Bas ON5HB and Marian ON3MS, e-mail:
+                <a href="mailto:on5hb@heppen.be?subject=WebSDR" class="font-bold text-blue-500 hover:underline">on5hb@heppen.be</a>&nbsp; Other PhantomSDR+ WebSDR servers at
+                <a href="https://sdr-list.xyz/" class="font-bold text-blue-500 hover:underline" target="_blank">sdr-list.xyz</a>
+              </span>
+
+              <form style="margin-top: 15px;" method="get" target="_blank" action="https://www.qrz.com/lookup">
+                <span class="text-white text-xs sm:text-sm mr-4 mb-2 sm:mb-0"><b>QRZ Callsign lookup: &nbsp;&nbsp;</b></span>
+                <input class="glass-username text-white text-xs sm:text-sm px-3 py-1 rounded-lg mr-2 mb-2 sm:mb-0" type="text" name="callsign" value="" size="6" onClick="this.form.q.select();this.form.q.focus()" />&nbsp;&nbsp;&nbsp;
+                <input type="hidden" name="action" value="search" />
+                <input class="glass-button text-white py-1 px-3 mb-2 lg:mb-0 rounded-lg text-xs sm:text-sm" type="submit" name="page" value="Search" />
+              </form>
+
+              <!-- Collapsible Menu -->
+              <div>
+                <!-- Toggle Button -->
+                <center>
+                  <button class="bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg flex items-center transition-colors ring-2 ring-blue-500 s-XsEmFtvddWTw" onclick="toggleMenu()" style="margin-top: 15px;">
+                    <span id="menu-toggle-label">Open Additional Info</span>
+                  </button>
+                </center>
+
+                <!-- Collapsible Content -->
+                <div id="collapsible-menu" class="hidden mt-3 bg-gray-700 p-3 rounded">
+                  <ul style="font-size: 0.91rem; text-align: left;">
+                    <b>Setup &amp; Configuration:</b>
+                    <br />
+                    <span style="/*text-decoration: line-through*/">Hardware: Intel i5-7500 16GBram, RX888MKII Receiver and a Long-wire 54m long as an inverted-V max height about 20m above ground</span>
+                    <br />
+                    <span style="/*text-decoration: line-through*/">Software: Ubuntu 22 Server, PhantomSDR+ v1.5.4, compiled with OpenCL Support</span>
+                    <br />
+                    <br />
+                    <br />
+                    <div style="font-weight: bold;">Current band propagation</div>
+                    <div style="display: flex; align-items: center; margin-top: 10px;">
+                      <a href="https://www.hamqsl.com/solar.html" title="Click for more information">
+                        <img alt="Solar propagation" src="https://www.hamqsl.com/solar101vhf.php" />
+                      </a>
+                      <br />
+                    </div>
+                    <br />
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <script>
+            // JavaScript function to toggle the menu
+            function toggleMenu() {
+              const menu = document.getElementById("collapsible-menu");
+              const label = document.getElementById("menu-toggle-label");
+
+              if (menu.classList.contains("hidden")) {
+                menu.classList.remove("hidden");
+                label.innerText = "Close Additional Info";
+              } else {
+                menu.classList.add("hidden");
+                label.innerText = "Open Additional Info";
+              }
+            }
+          </script>
+
+          <style>
+            .hidden {
+              display: none;
+            }
+          </style>
+          <!--End of Titel Box -->
+
+
+<div class="flex justify-center w-full" >
         <div class="w-full" id="outer-waterfall-container"> 
       <div
         style="image-rendering:pixelated;"
@@ -1412,9 +1594,6 @@
       width="1024"
       height="20"
     >
-
-
-
       </div>
     </div>
   </div>
@@ -1434,13 +1613,8 @@
             </div>
           </div>
 
-
-
-      
-
           {#if showTutorial}
-          <div
-            class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+          <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
             on:click|self={nextStep}
             transition:fade={{ duration: 300 }}
           >
@@ -1482,8 +1656,6 @@
             </div>
           </div>
         {/if}
-        
-
 
           <!-- alles neu  -->
 
@@ -1609,9 +1781,7 @@
                 {/if}
               </div>
             </div>
-
-
-            </div>
+           </div>
 
             <div class="flex flex-col items-center bg-gray-800 p-6 border-l-0 border-r-0 border border-gray-700">
               <div class="bg-black rounded-lg p-8 min-w-80 lg:min-w-0 lg:p-4 mb-4 w-full" id="smeter-tut">
@@ -1658,17 +1828,74 @@
                   </div>
                 </div>
               </div>
-       
-            
-           
-       
-            
-           
- 
-              
-            
+
+<!--START-->
+<!-- Band Selection -->
+                  <div>
+                    <h3 class="text-white text-lg font-semibold mb-2">Band Selection</h3>
+
+                    <div id="band-selection" class="grid grid-cols-2 sm:grid-cols-8 gap-3">
+
+                      <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 2200 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
+                      on:click={() => setBand(2200,136,"USB")} title="2200 meters" > 2200m </button>
+
+                      <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 630 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
+                      on:click={() => setBand(630,474.2,"USB")} title="630 meters" > 630m </button>
+
+		      <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 160 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
+                      on:click={() => setBand(160,1900,"LSB")} title="160 meters" > 160m </button>
+		      
+		      <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 80 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
+                      on:click={() => setBand(80,3700,"LSB")} title="80 meters" > 80m </button>
+		      
+		      <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 60 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
+                      on:click={() => setBand(60,5358,"USB")} title="60 meters" > 60m </button>
+
+		      <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 40 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
+                      on:click={() => setBand(40,7100,"LSB")} title="40 meters" > 40m </button>
+
+                      <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 30 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
+                      on:click={() => setBand(30,10125,"CW")} title="30 meters" > 30m </button>
+
+                      <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 20 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
+                      on:click={() => setBand(20,14175,"USB")} title="20 meters" > 20m </button>
+
+
+</div><br>
+<div>
+	              <div id="band-selection" class="grid grid-cols-2 sm:grid-cols-8 gap-3">
+                                            
+		      <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 17 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
+                      on:click={() => setBand(17,18120,"USB")} title="17 meters" > 17m </button>
+                                         
+		      <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 15 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
+                      on:click={() => setBand(15,21225,"USB")} title="15 meters" > 15m </button>
+
+                      <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 12 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
+                      on:click={() => setBand(12,24940,"USB")} title="12 meters" > 12m </button>
+
+                      <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 11 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
+                      on:click={() => setBand(11,27200,"LSB")} title="11 meters" > 11m </button>
+
+                      <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 10 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}" 
+                      on:click={() => setBand(10,28900,"USB")} title="10 meters" > 10m </button>
+
+                      <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 642 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}" 
+                      on:click={() => setBand(642,648,"AM")} title="Caroline" > Caro </button>
+		      
+                      <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 49 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
+                      on:click={() => setBand(49,5955,"AM")} title="Veronica" > Vero </button>
+		      
+		      <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 49.1 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
+                      on:click={() => setBand(49.1,6085,"AM")} title="MiAmigo" > MiAm </button>
+</div>
+</div>
+</div>
+
+ <hr class="border-gray-600 my-2">              
               <div id="frequencyContainer" class="w-full mt-4">
                 <div class="space-y-3">
+		<h3 class="text-white text-lg font-semibold mb-2">Mode Selection</h3>
                   <!-- Demodulation -->
                   <div class="flex justify-center">
                     <div id="demodulationModes" class="grid grid-cols-3 sm:grid-cols-5 gap-2 w-full max-w-md">
@@ -1683,9 +1910,55 @@
                     </div>
                   </div>
                   
-            
+           
                   <hr class="border-gray-600 my-2">
-            
+
+<!--START-->
+<!-- Tuning Setep -->
+                  <div>
+                    <h3 class="text-white text-lg font-semibold mb-2">Frequency Step Selection</h3>
+                    <div id="frequency-step-selection" class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+		      <button
+		      class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentTuneStep === 500 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
+		      on:click={() => setStep(500)}
+		      title="Off"
+		      >
+		      Default
+		      </button>
+
+                      <button
+		      class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentTuneStep === 1000 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
+		      on:click={() => setStep(1000)}
+		      title="1 kHz"
+		      >
+		      1 kHz
+		      </button>
+
+                      <button
+		      class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentTuneStep === 10000 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
+		      on:click={() => setStep(10000)}
+		      title="10 kHz"
+		      >
+		      10 kHz
+		      </button>
+                      <button
+		      class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentTuneStep === 100000 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
+		      on:click={() => setStep(100000)}
+		      title="100 kHz"
+		      >
+		      100 kHz
+		      </button>
+                      <button
+		      class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentTuneStep === 1000000 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
+		      on:click={() => setStep(1000000)}
+		      title="1 MHz"
+		      >
+		      1 MHz
+		      </button>
+		</div>
+		</div>
+<!--END-->		    
+           <hr class="border-gray-600 my-2"> 
                   <!-- Zoom Controls and Misc in a single row -->
                   <div class="grid sm:grid-cols-2 gap-4">
                     <!-- Zoom Controls -->
@@ -2035,8 +2308,10 @@
           
           <div class="flex flex-col rounded p-2 justify-center " id="chat-column">
             <div class="p-3 sm:p-5 flex flex-col bg-gray-800 border border-gray-700 rounded-lg w-full mb-8" id="chat-box">
-              <h2 class="text-xl sm:text-2xl font-semibold text-gray-100 mb-2 sm:mb-4">Chat</h2>
-          
+              <h2 class="text-xl sm:text-2xl font-semibold text-gray-100 mb-2 sm:mb-4">WebSDR Chatbox</h2>
+         <p class="text-white text-xs sm:text-sm mr-2 mb-2 sm:mb-0">
+                This chatbox is intended to discuss the operation of the WebSDR, so please keep the discussion civil and polite.<br /><br />
+		</p>
               <!-- Username Display/Input -->
               <div class="mb-2 sm:mb-4 flex flex-wrap items-center">
                 <span class="text-white text-xs sm:text-sm mr-2 mb-2 sm:mb-0">Chatting as:</span>
@@ -2301,10 +2576,12 @@
     box-sizing: content-box;
   }
 
+ /* Here you can Change the Background of WebSDR, Picture must be in assets folder*/
   .bg-custom-dark {
-    background-color: #1c1c1c; /* A very dark gray with a tiny hint of warmth */
+    /* background-color: #1c1c1c; /* Original: A very dark gray with a tiny hint of warmth */
+    background: url("./assets/IMG_3689.jpg") no-repeat center center fixed;
+    background-size: cover;
   }
-
 
 
   .glass-username {
