@@ -524,7 +524,7 @@
  let band;
  let newFrequency = 0;
  let newMode;
- let currentBand = 40;
+ let currentBand = band;
 
  function setBand(band,newFrequency,newMode) {
    currentBand = band;
