@@ -339,9 +339,6 @@
 
   // Entering new frequency into the textbox
   function handleFrequencyChange(event) {
-    
-
- 
 
     const frequency = event.detail;
     const audioRange = audio.getAudioRange();
@@ -514,7 +511,7 @@
     drawSMeter(activeSegments);
   }
 
-  let defaultStep = 10; // Default step value was 50, Bas ON5HB, 10 is better S-meter response.
+  let defaultStep = 50; // Default step value
   let currentTuneStep = 0; // Track the current step
 
   function setStep(step) {
@@ -524,7 +521,7 @@
  let band;
  let newFrequency = 0;
  let newMode;
- let currentBand = band;
+ let currentBand = 40;
 
  function setBand(band,newFrequency,newMode) {
    currentBand = band;
@@ -556,16 +553,16 @@
        r += 35000;
        break;
      case 60:
-       l -= 750;
-       r += 750;
+       l -= 6500;
+       r += 6500;
        break;
      case 42:
        l -= 1000;
        r += 1000;
        break;
      case 40:
-       l -= 20000;
-       r += 20000;
+       l -= 35000;
+       r += 35000;
        break;
      case 31:
        l -= 1000;
@@ -588,16 +585,16 @@
        r += 35000;
        break;
      case 12:
-       l -= 8000;
-       r += 8000;
+       l -= 9000;
+       r += 9000;
        break;
      case 11:
        l -= 35000;
        r += 35000;
        break;
      case 10:
-       l -= 140000;
-       r += 140000;
+       l -= 20000;
+       r += 20000;
        break;
     case 49:
        l -= 5000;
@@ -793,6 +790,15 @@
     //handleDemodulationChange();
   }
 
+    // Fine Tuning Section
+
+    let fineTuneAmount = 0;
+    function fineTune(fineTuneAmount) {
+       if(fineTuneAmount == 0) { frequency = Math.round(frequency)}
+       frequencyInputComponent.setFrequency((frequency * 1e3)+ fineTuneAmount);
+       handleFrequencyChange({ detail: ((frequency * 1e3) + fineTuneAmount) });
+   }
+
   // Permalink handling
   function updateLink() {
     const linkObj = {
@@ -941,11 +947,11 @@
       content: "Use these buttons to zoom in and out of the waterfall display.",
     },
     {
-    	selector: "#frequency-step-selection",
+	selector: "#frequency-step-selection",
 	content: "Use these buttons to change the frequency steps.",
     },
     {
-    	selector: "#band-selection",
+	selector: "#band-selection",
 	content: "Use these buttons to change bands.",
     },
     {
@@ -1597,7 +1603,7 @@
       </div>
     </div>
   </div>
-
+</div>
             <div
             class="absolute inset-0 z-20 bg-black bg-opacity-40 backdrop-filter backdrop-blur-sm transition-opacity duration-300 ease-in-out cursor-pointer flex justify-center items-center"
             id="startaudio"
@@ -1830,9 +1836,41 @@
               </div>
 
 <!--START-->
+
+<!--Tuning Buttons-->
+
+                 <div>  
+                    <h3 class="text-white text-lg font-semibold mb-2"> Tuning Selection</h3>
+
+                       <div id="tuning-selection" class="grid grid-cols-2 sm:grid-cols-7 gap-3">
+
+                       <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out bg-gray-700 hover:bg-gray-600" 
+                       on:click={() => fineTune(-5000)} title="-5 KHz"> -5 KHz </button>
+                  
+                       <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out bg-gray-700 hover:bg-gray-600"
+                       on:click={() => fineTune(-1000)} title="-1 kHz"> -1 KHz </button>
+                     
+                       <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out bg-gray-700 hover:bg-gray-600"
+                       on:click={() => fineTune(-10)} title="-10 Hz"> -10 Hz </button>
+
+                       <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out bg-gray-700 hover:bg-gray-600"
+                       on:click={() => fineTune(0)} title="center"> .00 Hz </button>
+                                       
+                       <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out bg-gray-700 hover:bg-gray-600"
+                       on:click={() => fineTune(10)} title="+10 Hz"> +10 Hz </button>
+
+                       <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out bg-gray-700 hover:bg-gray-600"
+                       on:click={() => fineTune(1000)} title="+1 kHz"> +1 KHz </button>
+                     
+                       <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out bg-gray-700 hover:bg-gray-600"
+                       on:click={() => fineTune(5000)} title="+5 kHz"> +5 KHz </button>
+                   </div><br>
+	       </div>
+
+
 <!-- Band Selection -->
                   <div>
-                    <h3 class="text-white text-lg font-semibold mb-2">Band Selection</h3>
+		    <h3 class="text-white text-lg font-semibold mb-2">Band Selection</h3>
 
                     <div id="band-selection" class="grid grid-cols-2 sm:grid-cols-8 gap-3">
 
@@ -1849,7 +1887,7 @@
                       on:click={() => setBand(80,3700,"LSB")} title="80 meters" > 80m </button>
 		      
 		      <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 60 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
-                      on:click={() => setBand(60,5358,"USB")} title="60 meters" > 60m </button>
+                      on:click={() => setBand(60,5357,"USB")} title="60 meters" > 60m </button>
 
 		      <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 40 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
                       on:click={() => setBand(40,7100,"LSB")} title="40 meters" > 40m </button>
@@ -1875,10 +1913,10 @@
                       on:click={() => setBand(12,24940,"USB")} title="12 meters" > 12m </button>
 
                       <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 11 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}"
-                      on:click={() => setBand(11,27200,"LSB")} title="11 meters" > 11m </button>
+                      on:click={() => setBand(11,27000,"LSB")} title="11 meters" > 11m </button>
 
                       <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 10 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}" 
-                      on:click={() => setBand(10,28900,"USB")} title="10 meters" > 10m </button>
+                      on:click={() => setBand(10,28400,"USB")} title="10 meters" > 10m </button>
 
                       <button class="retro-button text-white font-bold h-10 text-base rounded-md flex items-center justify-center border border-gray-600 shadow-inner transition-all duration-200 ease-in-out {currentBand === 642 ? 'bg-blue-600 pressed scale-95' : 'bg-gray-700 hover:bg-gray-600'}" 
                       on:click={() => setBand(642,648,"AM")} title="Caroline" > Caro </button>
@@ -2400,9 +2438,9 @@
                     Paste Freq
                   </button>
                 </div>
-  
 
-
+                </div>
+              </div>
           </div>
       </div>
         </div>
@@ -2579,7 +2617,7 @@
  /* Here you can Change the Background of WebSDR, Picture must be in assets folder*/
   .bg-custom-dark {
     /* background-color: #1c1c1c; /* Original: A very dark gray with a tiny hint of warmth */
-    background: url("./assets/IMG_3689.jpg") no-repeat center center fixed;
+    background: url("./assets/background.jpg") no-repeat center center fixed;
     background-size: cover;
   }
 
