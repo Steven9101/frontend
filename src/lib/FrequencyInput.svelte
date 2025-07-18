@@ -232,6 +232,11 @@
       class="text-3xl font-mono text-white outline-none bg-transparent text-center appearance-none p-0 m-0 inline-block"
       bind:value={frequencyDisplay}
       on:change={handleFrequencyChange}
+      on:keydown={(e) => {
+        if (e.key === "Enter") {
+          handleFrequencyChange(e);
+        }
+      }}
     />
     <span class="text-white font-mono p-1 m-1 text-3xl">{frequencyUnit}</span>
   </div>

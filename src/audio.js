@@ -14,7 +14,9 @@ export default class SpectrumAudio {
     this.isRecording = false;
     this.recordedAudio = [];
 
-
+    // Audio delay tracking
+    this.delayHistory = [];
+    this.maxDelayHistorySize = 10;
 
     this.endpoint = endpoint
 
@@ -473,6 +475,129 @@ export default class SpectrumAudio {
     this.ctcss = ctcss;
     this.updateFilters();
   }
+  
+  setAGCSpeed(speed, customAttack, customRelease) {
+    if (!this.compressor) return;
+    
+    let attack_ms, release_ms;
+    
+    switch(speed) {
+      case 'off':
+        // Disable compression by setting ratio to 1:1
+        this.compressor.ratio.value = 1;
+        this.compressor.threshold.value = 0;
+        attack_ms = null;
+        release_ms = null;
+        break;
+      case 'custom':
+        if (customAttack !== undefined && customRelease !== undefined) {
+          this.compressor.ratio.value = 12;
+          this.compressor.threshold.value = -24;
+          this.compressor.attack.value = customAttack / 1000.0;  // Convert ms to seconds
+          this.compressor.release.value = customRelease / 1000.0;  // Convert ms to seconds
+          attack_ms = customAttack;
+          release_ms = customRelease;
+        } else {
+          // Fallback to default if custom values not provided
+          this.compressor.ratio.value = 12;
+          this.compressor.threshold.value = -24;
+          this.compressor.attack.value = 0.003;
+          this.compressor.release.value = 0.25;
+          attack_ms = 3.0;
+          release_ms = 250.0;
+        }
+        break;
+      case 'fast':
+        this.compressor.ratio.value = 12;
+        this.compressor.threshold.value = -24;
+        this.compressor.attack.value = 0.001;
+        this.compressor.release.value = 0.05;
+        attack_ms = null;
+        release_ms = null;
+        break;
+      case 'medium':
+        this.compressor.ratio.value = 12;
+        this.compressor.threshold.value = -24;
+        this.compressor.attack.value = 0.01;
+        this.compressor.release.value = 0.15;
+        attack_ms = null;
+        release_ms = null;
+        break;
+      case 'slow':
+        this.compressor.ratio.value = 12;
+        this.compressor.threshold.value = -24;
+        this.compressor.attack.value = 0.05;
+        this.compressor.release.value = 0.5;
+        attack_ms = null;
+        release_ms = null;
+        break;
+      case 'default':
+      default:
+        this.compressor.ratio.value = 12;
+        this.compressor.threshold.value = -24;
+        this.compressor.attack.value = 0.003;
+        this.compressor.release.value = 0.25;
+        attack_ms = null;
+        release_ms = null;
+        break;
+    }
+    
+    // Send AGC speed to backend
+    const message = {
+      cmd: 'agc',
+      speed: speed
+    };
+    
+    if (attack_ms !== null && release_ms !== null) {
+      message.attack = attack_ms;
+      message.release = release_ms;
+    }
+    
+    this.audioSocket.send(JSON.stringify(message));
+  }
+  
+  setBufferSize(size) {
+    // Adjust the play time buffer threshold based on buffer size
+    switch(size) {
+      case 'small':
+        this.bufferThreshold = 0.05; // 50ms buffer
+        break;
+      case 'large':
+        this.bufferThreshold = 0.2; // 200ms buffer
+        break;
+      case 'medium':
+      default:
+        this.bufferThreshold = 0.1; // 100ms buffer (default)
+        break;
+    }
+    
+    // Reset play time to clear audio queue
+    const currentTime = this.audioCtx.currentTime;
+    this.playTime = currentTime + this.bufferThreshold;
+    
+    // Send buffer size to backend
+    this.audioSocket.send(JSON.stringify({
+      cmd: 'buffer',
+      size: size
+    }));
+  }
+  
+  getAudioDelay() {
+    if (!this.audioCtx) return 0;
+    // Calculate actual delay between play time and current time
+    const currentDelay = this.playTime - this.audioCtx.currentTime;
+    const delayMs = Math.max(0, currentDelay * 1000); // Convert to milliseconds
+    
+    // Add to history for smoothing
+    this.delayHistory.push(delayMs);
+    if (this.delayHistory.length > this.maxDelayHistorySize) {
+      this.delayHistory.shift();
+    }
+    
+    // Return average of recent delays for smoother display
+    const avgDelay = this.delayHistory.reduce((a, b) => a + b, 0) / this.delayHistory.length;
+    return avgDelay;
+  }
 
   setSquelch(squelch) {
     this.squelch = squelch
@@ -672,7 +797,7 @@ export default class SpectrumAudio {
   
     // Dynamic adjustment of play time
     const currentTime = this.audioCtx.currentTime;
-    const bufferThreshold = 0.1; // 100ms buffer
+    const bufferThreshold = this.bufferThreshold || 0.1; // Use dynamic buffer threshold
   
     if (this.playTime - currentTime <= bufferThreshold) {
       // Underrun: increase buffer

@@ -26,8 +26,8 @@ export default class SpectrumWaterfall {
     this.frequencyMarkerComponent = null; // Reference to the Svelte component
     this.pendingMarkers = []; // Store markers temporarily
 
-    this.waterfallQueue = new Denque(10)
-    this.drawnWaterfallQueue = new Denque(4096)
+    this.waterfallQueue = new Denque()
+    this.drawnWaterfallQueue = new Denque()
     this.lagTime = 0
     this.spectrumAlpha = 0.5
     this.spectrumFiltered = [[-1, -1], [0]]
@@ -159,6 +159,23 @@ export default class SpectrumWaterfall {
   
 
     
+    // Pre-allocate reusable arrays for performance
+    this.reusableUint8Array = null;
+    this.reusableImageData = null;
+    
+    // Performance optimizations
+    this.isDrawing = false;
+    this.pendingFrame = null;
+    
+    // Cache for frequently used calculations
+    this.cachedCanvasXtoFreq = new Map();
+    this.cachedFreqToCanvasX = new Map();
+    this.cacheSize = 1000;
+    
+    // Batch processing for markers
+    this.markerBatchSize = 100;
+    this.markerProcessingIndex = 0;
+    
   }
 
   addMarker(frequency, name, mode) {
@@ -170,11 +187,13 @@ export default class SpectrumWaterfall {
   initCanvas (settings) {
     this.canvasElem = settings.canvasElem
     this.ctx = this.canvasElem.getContext('2d')
-    this.ctx.imagesmoothingEnabled = false
+    this.ctx.imageSmoothingEnabled = false
     //this.ctx.imageSmoothingQuality = "high"
     this.canvasWidth = this.canvasElem.width
     this.canvasHeight = this.canvasElem.height
     this.backgroundColor = window.getComputedStyle(document.body, null).getPropertyValue('background-color')
+    
+    
 
     this.curLine = this.canvasHeight / 2
 
@@ -192,10 +211,6 @@ export default class SpectrumWaterfall {
     this.spectrumCanvasElem.addEventListener('mousemove', this.spectrumMouseMove.bind(this))
     this.spectrumCanvasElem.addEventListener('mouseleave', this.spectrumMouseLeave.bind(this))
 
-    
-
-
-
     this.tempCanvasElem = settings.tempCanvasElem
     this.tempCtx = this.tempCanvasElem.getContext('2d')
     this.tempCanvasElem.height = this.wfheight
@@ -205,35 +220,60 @@ export default class SpectrumWaterfall {
     this.mobile = false
 
     let resizeTimeout;
-     this.resizeCallback = () => {
-
-      this.setCanvasWidth()
-
-      // Create a new canvas and copy over new canvas
-      let resizeCanvas = document.createElement('canvas')
-      resizeCanvas.width = this.canvasElem.width
-      resizeCanvas.height = this.canvasElem.height
-      let resizeCtx = resizeCanvas.getContext('2d')
-      resizeCtx.imagesmoothingEnabled = false;
-      resizeCtx.drawImage(this.canvasElem, 0, 0)
-
+    this.resizeCallback = () => {
+      const oldCanvasWidth = this.canvasWidth;
+      const oldCanvasHeight = this.canvasHeight;
       
-      this.curLine = Math.ceil(this.curLine * this.canvasElem.height / resizeCanvas.height)
-      // Copy resizeCanvas to new canvas with scaling
-      this.ctx.imagesmoothingEnabled = false;
-      this.ctx.drawImage(resizeCanvas, 0, 0, resizeCanvas.width, resizeCanvas.height, 0, 0, this.canvasElem.width, this.canvasElem.height)
-      this.updateGraduation()
-      this.updateBandPlan()
-      //this.redrawWaterfall()
-      resizeTimeout = undefined
-    }
-    window.addEventListener('resize', () => {
-      if (resizeTimeout) {
-        clearTimeout(resizeTimeout)
+      // Update canvas dimensions
+      this.setCanvasWidth();
+      
+      // If dimensions haven't changed, no need to resize
+      if (oldCanvasWidth === this.canvasWidth && oldCanvasHeight === this.canvasHeight) {
+        return;
       }
-      //this.resizeCallback()
-      //resizeTimeout = setTimeout(this.resizeCallback, 250)
-    })
+      
+      // Clear the canvas instead of trying to scale old content
+      this.ctx.fillStyle = this.backgroundColor;
+      this.ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+      
+      // Reset the current line position proportionally
+      this.curLine = Math.ceil(this.curLine * this.canvasHeight / oldCanvasHeight);
+      
+      // Clear the waterfall queues to start fresh
+      this.waterfallQueue.clear();
+      this.drawnWaterfallQueue.clear();
+      
+      // Clear caches
+      this.clearFrequencyCache();
+      
+      // Update graduation and band plan
+      this.updateGraduation();
+      this.updateBandPlan();
+      
+      // Reset line resets counter
+      this.lineResets = 0;
+      
+      // Request fresh data from server with new dimensions
+      if (this.waterfallSocket && this.waterfallSocket.readyState === WebSocket.OPEN) {
+        this.waterfallSocket.send(JSON.stringify({
+          cmd: 'window',
+          l: this.waterfallL,
+          r: this.waterfallR
+        }));
+      }
+    };
+    
+    window.addEventListener('resize', () => {
+      // Update labels immediately for responsive UI
+      this.updateGraduation();
+      this.updateBandPlan();
+      
+      // Debounce the expensive resize operations
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+      }
+      resizeTimeout = setTimeout(this.resizeCallback, 100);
+    });
   }
 
   async init () {
@@ -241,76 +281,98 @@ export default class SpectrumWaterfall {
       return this.promise
     }
 
-    this.waterfallSocket = new WebSocket(this.endpoint)
-    this.waterfallSocket.binaryType = 'arraybuffer'
-    this.firstWaterfallMessage = true
-    this.waterfallSocket.onmessage = this.socketMessageInitial.bind(this)
-
     this.promise = new Promise((resolve, reject) => {
       this.resolvePromise = resolve
       this.rejectPromise = reject
     })
 
+    this.connectWebSocket()
     return this.promise
+  }
+
+  connectWebSocket() {
+    this.waterfallSocket = new WebSocket(this.endpoint)
+    this.waterfallSocket.binaryType = 'arraybuffer'
+    this.firstWaterfallMessage = true
+    this.waterfallSocket.onmessage = this.socketMessageInitial.bind(this)
+    
+    this.waterfallSocket.onerror = (error) => {
+      console.error('WebSocket error:', error)
+      if (this.rejectPromise) {
+        this.rejectPromise(error)
+      }
+    }
+    
+    this.waterfallSocket.onclose = () => {
+      console.log('WebSocket closed, attempting to reconnect...')
+      // Attempt to reconnect after 3 seconds
+      setTimeout(() => {
+        if (this.waterfallSocket.readyState === WebSocket.CLOSED) {
+          this.connectWebSocket()
+        }
+      }, 3000)
+    }
   }
 
   stop () {
     this.waterfallSocket.close()
   }
 
-    setCanvasWidth() {
-      const dpr = window.devicePixelRatio;
-      const screenWidth = window.innerWidth;
-    
-      let canvasWidth = screenWidth > 1372 ? 1372 : screenWidth;
-      canvasWidth *= dpr;
-      if(canvasWidth != 1372)
-      {
-        this.mobile = true;
-      }
-
-    
-      this.canvasElem.width = canvasWidth;
-      this.canvasScale = canvasWidth / 1372;
-    
-      // Aspect ratio is 1372 to 128px
-      this.spectrumCanvasElem.width = canvasWidth;
-      this.spectrumCanvasElem.height = (canvasWidth / 1372) * 128;
-    
-      // Aspect ratio is 1372 to 20px
-      this.graduationCanvasElem.width = canvasWidth;
-      this.graduationCanvasElem.height = (canvasWidth / 1372) * 30;
-
-      // Aspect ratio is 1372 to 20px
-      this.bandPlanCanvasElem.width = canvasWidth;
-      this.bandPlanCanvasElem.height = (canvasWidth / 1372) * 40;
-    
-      this.canvasElem.height = this.wfheight;
-      this.canvasWidth = canvasWidth;
-      this.canvasHeight = this.canvasElem.height;
-
-      // Create a new canvas that will be used as a buffer
-      this.bufferCanvas = document.createElement('canvas');
-      this.bufferCanvas.width = this.canvasWidth;
-      this.bufferCanvas.height = this.canvasHeight;
-      this.bufferContext = this.bufferCanvas.getContext('2d', { alpha: false });
-
-
-
-    }
-
-    setFrequencyMarkerComponent(component) {
-      this.frequencyMarkerComponent = component;
-      this.addMarkersToComponent();
-    }
+  setCanvasWidth() {
+    const dpr = window.devicePixelRatio || 1;
+    const screenWidth = window.innerWidth;
   
-    addMarkersToComponent() {
-      if (this.frequencyMarkerComponent && this.pendingMarkers.length > 0) {
-        this.frequencyMarkerComponent.insertAll(this.pendingMarkers);
-        this.frequencyMarkerComponent.finalizeList();
-        this.pendingMarkers = []; // Clear pending markers
-      }
+    let canvasWidth = screenWidth > 1372 ? 1372 : screenWidth;
+    canvasWidth *= dpr;
+    
+    // Better mobile detection based on screen width and touch capability
+    this.mobile = screenWidth < 768 || ('ontouchstart' in window);
+  
+    this.canvasElem.width = canvasWidth;
+    this.canvasScale = canvasWidth / 1372;
+  
+    // Aspect ratio is 1372 to 128px
+    this.spectrumCanvasElem.width = canvasWidth;
+    this.spectrumCanvasElem.height = (canvasWidth / 1372) * 128;
+  
+    // Aspect ratio is 1372 to 30px
+    this.graduationCanvasElem.width = canvasWidth;
+    this.graduationCanvasElem.height = (canvasWidth / 1372) * 30;
+
+    // Aspect ratio is 1372 to 40px
+    this.bandPlanCanvasElem.width = canvasWidth;
+    this.bandPlanCanvasElem.height = (canvasWidth / 1372) * 40;
+  
+    this.canvasElem.height = this.wfheight;
+    this.canvasWidth = canvasWidth;
+    this.canvasHeight = this.canvasElem.height;
+
+    // Recreate buffer canvas with new dimensions
+    this.bufferCanvas = document.createElement('canvas');
+    this.bufferCanvas.width = this.canvasWidth;
+    this.bufferCanvas.height = this.canvasHeight;
+    this.bufferContext = this.bufferCanvas.getContext('2d', { alpha: false });
+    
+    // Ensure all contexts have proper image smoothing settings
+    this.ctx.imageSmoothingEnabled = false;
+    this.bufferContext.imageSmoothingEnabled = false;
+    this.spectrumCtx.imageSmoothingEnabled = false;
+    this.graduationCtx.imageSmoothingEnabled = false;
+    this.bandPlanCtx.imageSmoothingEnabled = false;
+  }
+
+  setFrequencyMarkerComponent(component) {
+    this.frequencyMarkerComponent = component;
+    this.addMarkersToComponent();
+  }
+
+  addMarkersToComponent() {
+    if (this.frequencyMarkerComponent && this.pendingMarkers.length > 0) {
+      this.frequencyMarkerComponent.insertAll(this.pendingMarkers);
+      this.frequencyMarkerComponent.finalizeList();
+      this.pendingMarkers = []; // Clear pending markers
     }
+  }
 
   socketMessageInitial (event) {
     // First message gives the parameters in json
@@ -346,12 +408,10 @@ export default class SpectrumWaterfall {
       this.setCanvasWidth()
       this.tempCanvasElem.width = settings.waterfall_size 
 
-
       this.ctx.fillRect(0, 0, this.canvasElem.width, this.canvasElem.height)
 
       const skipNum = Math.max(1, Math.floor((this.sps / this.fftSize) / 5.0) * 2)
       const waterfallFPS = (this.sps / this.fftSize) / (skipNum / 2)
-      //this.waterfallQueue = new JitterBuffer(1000 / waterfallFPS)
       
       console.log('Waterfall FPS: ' + waterfallFPS)
 
@@ -366,10 +426,6 @@ export default class SpectrumWaterfall {
       this.updateGraduation()
       this.updateBandPlan()
       this.resolvePromise(settings)
-
-  
-
-      //eventBus.publish('frequencyChange', { detail: 1e6 });
     }
   }
 
@@ -387,7 +443,6 @@ export default class SpectrumWaterfall {
   }
   
   enqueueSpectrogram (array) {
-    
     // Decode and extract header
     this.waterfallDecoder.decode(array).forEach((waterfallArray) => {
       this.waterfallQueue.unshift(waterfallArray)
@@ -399,7 +454,8 @@ export default class SpectrumWaterfall {
       return
     }
 
-    while (this.waterfallQueue.length > 2) {
+    // Keep optimal buffer for smooth performance without overwhelming the draw loop
+    while (this.waterfallQueue.length > 5) {
       this.waterfallQueue.pop()
     }
   }
@@ -438,8 +494,11 @@ export default class SpectrumWaterfall {
       return Math.max(0, Math.min(255, colormapIndex));
   }
 
-
-  // Helper functions
+  // Helper functions with caching
+  clearFrequencyCache() {
+    this.cachedCanvasXtoFreq.clear();
+    this.cachedFreqToCanvasX.clear();
+  }
 
   idxToFreq (idx) {
     return idx / this.waterfallMaxSize * this.totalBandwidth + this.baseFreq
@@ -450,12 +509,41 @@ export default class SpectrumWaterfall {
   }
 
   canvasXtoFreq (x) {
+    // Use caching for frequently called function
+    if (this.cachedCanvasXtoFreq.has(x)) {
+      return this.cachedCanvasXtoFreq.get(x);
+    }
+    
     const idx = x / this.canvasWidth * (this.waterfallR - this.waterfallL) + this.waterfallL
-    return this.idxToFreq(idx)
+    const freq = this.idxToFreq(idx);
+    
+    // Cache the result
+    if (this.cachedCanvasXtoFreq.size < this.cacheSize) {
+      this.cachedCanvasXtoFreq.set(x, freq);
+    }
+    
+    return freq;
   }
 
   freqToIdx (freq) {
     return (freq - this.baseFreq) / (this.totalBandwidth) * this.waterfallMaxSize
+  }
+
+  freqToCanvasX(freq) {
+    // Use caching for frequently called function
+    if (this.cachedFreqToCanvasX.has(freq)) {
+      return this.cachedFreqToCanvasX.get(freq);
+    }
+    
+    const idx = this.freqToIdx(freq);
+    const x = this.idxToCanvasX(idx);
+    
+    // Cache the result
+    if (this.cachedFreqToCanvasX.size < this.cacheSize) {
+      this.cachedFreqToCanvasX.set(freq, x);
+    }
+    
+    return x;
   }
 
   // Drawing functions
@@ -471,6 +559,7 @@ export default class SpectrumWaterfall {
     }
     return [arr, pxL, pxR]
   }
+
 
   drawSpectrogram() {
     const draw = () => {
@@ -499,9 +588,7 @@ export default class SpectrumWaterfall {
     requestAnimationFrame(draw);
   }
 
-
   async redrawWaterfall () {
-    
     const toDraw = this.drawnWaterfallQueue.toArray()
     const curLineReset = this.lineResets
     const curLine = this.curLine
@@ -530,8 +617,6 @@ export default class SpectrumWaterfall {
   
     // Calculate the width of the waterfall line
     const width = pxR - pxL;
-  
-
   
     // Copy the current canvas content to the buffer canvas
     this.bufferContext.drawImage(this.ctx.canvas, 0, 1, this.canvasWidth, this.canvasHeight - 1, 0, 0, this.canvasWidth, this.canvasHeight - 1);
@@ -570,7 +655,6 @@ export default class SpectrumWaterfall {
     // Draw directly to the buffer canvas
     ctx.putImageData(colorarr, pxL, ctx.canvas.height - 1 - line);
   }
-  
 
   drawSpectrum(arr, pxL, pxR, curL, curR) {
     if (curL !== this.spectrumFiltered[0][0] || curR !== this.spectrumFiltered[0][1]) {
@@ -598,8 +682,8 @@ export default class SpectrumWaterfall {
   
     // Create gradient
     const gradient = this.spectrumCtx.createLinearGradient(0, 0, 0, height);
-    gradient.addColorStop(0, 'rgba(3, 157, 252, 0.8)');  // Yellow at top
-    gradient.addColorStop(1, 'rgba(3, 157, 252, 0.2)');  // Orange at bottom
+    gradient.addColorStop(0, 'rgba(3, 157, 252, 0.8)');  // Blue at top
+    gradient.addColorStop(1, 'rgba(3, 157, 252, 0.2)');  // Lighter blue at bottom
   
     // Set up the drawing styles
     this.spectrumCtx.lineWidth = 2;
@@ -637,8 +721,6 @@ export default class SpectrumWaterfall {
     this.spectrumCtx.fill();
     this.spectrumCtx.stroke();
   
-
-  
     // Reset shadow for text and frequency line
     this.spectrumCtx.shadowBlur = 0;
   
@@ -661,6 +743,7 @@ export default class SpectrumWaterfall {
       this.spectrumCtx.setLineDash([]);
     }
   }
+
   checkBandAndSetMode(frequency) {
     let newBand = null;
     let newMode = null;
@@ -671,7 +754,6 @@ export default class SpectrumWaterfall {
         for (const modeRange of band.modes) {
           if (frequency >= modeRange.startFreq && frequency <= modeRange.endFreq) {
             newMode = modeRange.mode;
-            
             break;
           }
         }
@@ -695,8 +777,6 @@ export default class SpectrumWaterfall {
   
     return null; // No change in band or mode
   }
-  
-
 
   updateGraduation() {
     const freqL = this.idxToFreq(this.waterfallL)
@@ -763,8 +843,6 @@ export default class SpectrumWaterfall {
       this.graduationCtx.lineTo(middlePixel, (10) * scale)
       this.graduationCtx.stroke()
     }
-
-    
 
     this.drawClients()
   }
@@ -833,18 +911,8 @@ export default class SpectrumWaterfall {
             this.bandPlanCtx.shadowOffsetY = 0;
         }
     });
-
-}
-
-
-
-  freqToCanvasX(freq) {
-    const idx = this.freqToIdx(freq);
-    return this.idxToCanvasX(idx);
   }
 
-  
-  
   // Helper function to abbreviate band names
   abbreviateBandName(name, width, fontSize) {
     this.bandPlanCtx.font = `${fontSize}px Inter`;
@@ -859,8 +927,6 @@ export default class SpectrumWaterfall {
     
     return words.map(word => word[0]).join('');
   }
-  
-  
 
   setClients (clients) {
     this.clients = clients
@@ -942,6 +1008,9 @@ export default class SpectrumWaterfall {
     this.waterfallL = waterfallL;
     this.waterfallR = waterfallR;
     
+    // Clear frequency cache when range changes
+    this.clearFrequencyCache();
+    
     this.waterfallSocket.send(JSON.stringify({
       cmd: 'window',
       l: this.waterfallL,
@@ -953,7 +1022,6 @@ export default class SpectrumWaterfall {
     const newCanvasWidth = newCanvasX2 - newCanvasX1
 
     this.ctx.drawImage(this.canvasElem, 0, 0, this.canvasWidth, this.canvasHeight, newCanvasX1, 0, newCanvasWidth, this.canvasHeight)
-
   
     // Special case for zoom out or panning, blank the borders
     if ((prevR - prevL) <= (waterfallR - waterfallL) + 1) {
@@ -963,7 +1031,11 @@ export default class SpectrumWaterfall {
   
     this.updateGraduation();
     this.updateBandPlan();
-    this.drawSpectrogram();
+    
+    // Publish event to notify other components of waterfall range change
+    if (typeof eventBus !== 'undefined') {
+      eventBus.publish('waterfallRangeChanged');
+    }
   }
 
   getWaterfallRange () {
@@ -995,6 +1067,7 @@ export default class SpectrumWaterfall {
   setColormap (name) {
     this.setColormapArray(getColormap(name))
   }
+  
 
   setUserID (userID) {
     this.waterfallSocket.send(JSON.stringify({
@@ -1005,40 +1078,30 @@ export default class SpectrumWaterfall {
 
   setSpectrum (spectrum) {
     this.spectrum = spectrum
-    if(spectrum == true)
-    {
+    if(spectrum == true) {
       this.wfheight = 200 * window.devicePixelRatio;
-      if(typeof this.resizeCallback == 'function')
-      {
+      if(typeof this.resizeCallback == 'function') {
         this.resizeCallback();
       }
-      
-    }else  if(spectrum == false)
-    {
+    } else if(spectrum == false) {
       this.wfheight = 200 * window.devicePixelRatio;
-      if(typeof this.resizeCallback == 'function')
-        {
-          this.resizeCallback();
-        }
+      if(typeof this.resizeCallback == 'function') {
+        this.resizeCallback();
+      }
     }
   }
 
   setWaterfallBig (big) {
-    if(big == true)
-    {
+    if(big == true) {
       this.wfheight = 300 * window.devicePixelRatio;
-      if(typeof this.resizeCallback == 'function')
-      {
+      if(typeof this.resizeCallback == 'function') {
         this.resizeCallback();
       }
-      
-    }else  if(big == false)
-    {
+    } else if(big == false) {
       this.wfheight = 200 * window.devicePixelRatio;
-      if(typeof this.resizeCallback == 'function')
-        {
-          this.resizeCallback();
-        }
+      if(typeof this.resizeCallback == 'function') {
+        this.resizeCallback();
+      }
     }
   }
 
@@ -1071,7 +1134,7 @@ export default class SpectrumWaterfall {
     const scale = e.scaleAmount || 0.85
 
     // Prevent zooming beyond a certain point
-    if (r - l <= 128 && zoomAmount < 0) {
+    if (r - l <= 64 && zoomAmount < 0) {
       return false
     }
     if(zoomAmount > 0) {
@@ -1079,11 +1142,8 @@ export default class SpectrumWaterfall {
         this.zoomFactor = this.zoomFactor - 1
       }
     } else if (zoomAmount < 0) {
-      
       this.zoomFactor = this.zoomFactor + 1
     }
-
-   
 
     const centerfreq = (r - l) * x / this.canvasWidth + l
     let widthL = centerfreq - l
@@ -1109,7 +1169,6 @@ export default class SpectrumWaterfall {
     const mouseMovement = e.movementX
     const frequencyMovement = Math.round(mouseMovement / this.canvasElem.getBoundingClientRect().width * (this.waterfallR - this.waterfallL))
 
-
     const newL = this.waterfallL - frequencyMovement
     const newR = this.waterfallR - frequencyMovement
     this.setWaterfallRange(newL, newR)
@@ -1126,4 +1185,17 @@ export default class SpectrumWaterfall {
     this.spectrumFreq = undefined
     this.spectrumX = undefined
   }
-} 
+
+  // Clean up method
+  destroy() {
+    if (this.waterfallSocket) {
+      this.waterfallSocket.close();
+    }
+    if (this.updateImmediate) {
+      clearImmediate(this.updateImmediate);
+    }
+    this.clearFrequencyCache();
+    this.waterfallQueue.clear();
+    this.drawnWaterfallQueue.clear();
+  }
+}

@@ -15,7 +15,9 @@ export function pinch (node) {
 
   return {
     destroy () {
-
+      hammer.off('pinchmove')
+      hammer.off('pinchstart')
+      hammer.destroy()
     }
   }
 }
@@ -39,7 +41,10 @@ export function pan (node) {
   
   return {
     destroy () {
-
+      hammer.off('panstart')
+      hammer.off('panmove')
+      hammer.off('panend')
+      hammer.destroy()
     }
   }
 }

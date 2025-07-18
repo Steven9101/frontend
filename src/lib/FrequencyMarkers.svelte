@@ -83,14 +83,17 @@
   {#each frequencyMarkers as frequencyMarker (frequencyMarker.id)}
   <div class="h-4 absolute p-0 group" style="left: {frequencyMarker.left * 100}%"
       on:click={() => dispatch('markerclick', frequencyMarker)}>
-      <div class="top-0 w-px h-8 z-0 peer bg-yellow-600 absolute">
+      <div class="top-0 w-px h-8 z-0 peer bg-yellow-500 absolute
+                  shadow-[0_0_3px_rgba(250,204,21,0.6)] group-hover:shadow-[0_0_6px_rgba(250,204,21,0.8)]
+                  transition-shadow duration-300">
       </div>
       <div class="outline-1 outline-black outline-offset-0 outline p-px
-          bg-yellow-400 absolute bottom-0 z-10 group-hover:z-20 hover:z-20 peer-hover:z-20
-          text-left whitespace-pre whitespace-nowrap text-black text-xs align-middle
-          border border-yellow-600 transform origin-bottom-left overflow-hidden
+          bg-gray-900/90 backdrop-blur-sm absolute bottom-0 z-10 group-hover:z-20 hover:z-20 peer-hover:z-20
+          text-left whitespace-pre whitespace-nowrap text-yellow-300 text-xs align-middle
+          border border-yellow-600/50 transform origin-bottom-left overflow-hidden
           h-auto max-h-full hover:max-h-screen peer-hover:max-h-screen
-          transition-all ease-linear duration-1000">
+          transition-all ease-linear duration-1000
+          shadow-lg hover:shadow-xl hover:shadow-yellow-500/20">
       {frequencyMarker.description}</div>
   </div>
   {/each}

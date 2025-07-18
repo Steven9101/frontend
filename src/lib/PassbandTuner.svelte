@@ -1,7 +1,8 @@
 <script>
     import { createEventDispatcher, onMount } from 'svelte'
-    import { bandwidthToWaterfallOffset, getMaximumBandwidth } from './backend'
-    import { pan } from './hammeractions';
+    import { bandwidthToWaterfallOffset, getMaximumBandwidth, waterfallOffsetToFrequency, frequencyToWaterfallOffset } from './backend'
+    import { pan } from './hammeractions'
+    import { frequencySteps } from '../stores/frequencySteps.js';
 
     const dispatch = createEventDispatcher()
     const NoDrag = 0
@@ -56,17 +57,23 @@
     function handleWheel(e) {
       e.preventDefault(); 
       
-      const direction = e.deltaY < 0 ? 1 : -1; 
-      const basePixelStep = 0.1; 
-      const speedFactor = Math.min(Math.abs(e.deltaY) / 100, 10); 
+      const delta = e.deltaY > 0 ? -1 : 1;
+      const isShiftPressed = e.shiftKey;
       
-      const pixelStep = basePixelStep * speedFactor; 
-      const frequencyPerPixel = getFrequencyPerPixel();
-      const frequencyStep = pixelStep * frequencyPerPixel;
+      // Use same step logic as frequency input: configurable steps
+      const stepHz = isShiftPressed ? $frequencySteps.mouseWheelStep * 2 : $frequencySteps.mouseWheelStep;
       
-      const newOffset = passbandOffset + direction * (frequencyStep / passbandWidth);
-
-      passbandOffset = Math.min(Math.max(-passbandLeftOffset, newOffset), 1 - passbandRightOffset);
+      // Convert current passband offset to frequency
+      const currentFrequency = waterfallOffsetToFrequency(passbandOffset);
+      
+      // Apply the frequency step
+      const newFrequency = currentFrequency + (stepHz * delta);
+      
+      // Convert back to offset
+      const newOffset = frequencyToWaterfallOffset(newFrequency);
+      
+      // Constrain to valid bounds (ensure offset stays within valid range)
+      passbandOffset = Math.max(0, Math.min(1, newOffset));
       
       dispatchPassbandChange();
     }
