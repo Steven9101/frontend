@@ -250,16 +250,26 @@ export function WaterfallCard({
   }, [gridLocator]);
 
   const bandGroups = useMemo(() => {
+    const inReceiverRange = (b: BandOverlay) => {
+      const s = settings;
+      if (!s) return true;
+      const minHz = s.basefreq;
+      const maxHz = s.basefreq + s.total_bandwidth;
+      if (!Number.isFinite(minHz) || !Number.isFinite(maxHz)) return true;
+      return b.endHz >= minHz && b.startHz <= maxHz;
+    };
+
     const ham = hamBandsForItuRegion(ituRegion);
     const broadcast: BandOverlay[] = [];
     const other: BandOverlay[] = [];
     for (const b of bands) {
+      if (!inReceiverRange(b)) continue;
       if (/\bHAM\b/i.test(b.name)) continue;
       if (/\bAM\b/i.test(b.name)) broadcast.push(b);
       else other.push(b);
     }
-    return { ham, broadcast, other };
-  }, [bands, ituRegion]);
+    return { ham: ham.filter(inReceiverRange), broadcast, other };
+  }, [bands, ituRegion, settings]);
 
   const jumpToBand = useCallback(
     (b: BandOverlay) => {

@@ -132,6 +132,9 @@ export function WebSdrUi({
     if (!Number.isFinite(hz)) return;
     const rounded = Math.round(hz);
     if (rounded <= 0) return;
+    // Keep the "live" snapshot in sync immediately so auto-band logic doesn't
+    // repeatedly apply changes while React state updates are still pending.
+    liveRef.current.centerHz = rounded;
     frequencySetNonceRef.current += 1;
     setFrequencySet({ nonce: frequencySetNonceRef.current, centerHz: rounded });
   }, []);
@@ -207,6 +210,10 @@ export function WebSdrUi({
   const setModeForActiveVfo = useCallback(
     (nextMode: typeof mode) => {
       const sanitized = nextMode === 'WBFM' && !canWbfm ? 'FM' : nextMode;
+      // Avoid creating an update loop by re-applying the same mode and
+      // emitting new passbandSet nonces while React state is catching up.
+      if (liveRef.current.mode === sanitized) return;
+      liveRef.current.mode = sanitized;
       setMode(sanitized);
       writeActiveVfo((v) => {
         v.mode = sanitized;
