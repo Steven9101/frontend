@@ -288,11 +288,6 @@ export function WaterfallCard({
       } else if (/\bHAM\b/i.test(b.name)) {
         recommendedMode = centerHz < 10_000_000 ? 'LSB' : 'USB';
       }
-      if (recommendedMode && onSetMode) {
-        if (!(mode === 'SAM' && recommendedMode === 'AM')) {
-          onSetMode(recommendedMode);
-        }
-      }
 
       const s = settings;
       if (s && onViewportSet) {
@@ -305,7 +300,16 @@ export function WaterfallCard({
         const r = hzToIdx(endHz);
         if (r > l) onViewportSet({ l, r });
       }
+
+      // Set frequency first so the mode switch computes passband/window for the *new* center,
+      // avoiding a brief snap-back/glitch to the previous frequency during React state updates.
       onSetFrequencyHz?.(centerHz);
+
+      if (recommendedMode && onSetMode) {
+        if (!(mode === 'SAM' && recommendedMode === 'AM')) {
+          onSetMode(recommendedMode);
+        }
+      }
     },
     [mode, onSetFrequencyHz, onSetMode, onViewportSet, settings],
   );

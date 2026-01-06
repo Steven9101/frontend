@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useState } from 'react';
-
 import { useReconnectingWebSocket } from './useReconnectingWebSocket';
 
 export type ServerEventsInfo = {

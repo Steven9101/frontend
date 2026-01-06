@@ -6,10 +6,11 @@ import decodeFT8Module from './emscripten/decode_ft8.js';
 
 import decodeFt8WasmUrl from './emscripten/decode_ft8.wasm?url';
 
-type InitMsg = { type: 'init'; inputSampleRate: number };
+type InitMsg = { type: 'init'; inputSampleRate: number; timeOffsetMs?: number };
 type PcmMsg = { type: 'pcm'; pcm: Float32Array };
+type TimeOffsetMsg = { type: 'timeOffset'; offsetMs: number };
 type StopMsg = { type: 'stop' };
-type Msg = InitMsg | PcmMsg | StopMsg;
+type Msg = InitMsg | PcmMsg | TimeOffsetMsg | StopMsg;
 
 type WorkerOut =
   | { type: 'ready' }
@@ -30,6 +31,7 @@ let writePos = 0;
 
 let stopped = false;
 let scheduled = false;
+let timeOffsetMs = 0;
 
 // Streaming resampler state (linear interpolation)
 let prevSample = 0;
@@ -66,21 +68,22 @@ function scheduleDecodeLoop() {
       writePos = Math.min(writePos, FRAME_SAMPLES);
     }
 
-    const now = Date.now();
+    const now = Date.now() + timeOffsetMs;
     const delay = FRAME_SEC * 1000 - (now % (FRAME_SEC * 1000));
     setTimeout(tick, delay);
   };
 
-  const now = Date.now();
+  const now = Date.now() + timeOffsetMs;
   const delay = FRAME_SEC * 1000 - (now % (FRAME_SEC * 1000));
   setTimeout(tick, delay);
 }
 
-async function init(inputSampleRate: number) {
+async function init(inputSampleRate: number, offset: number) {
   stopped = false;
   scheduled = false;
   writePos = 0;
   inputFs = inputSampleRate;
+  timeOffsetMs = Number.isFinite(offset) ? Math.round(offset) : 0;
   prevSample = 0;
   posIn = 0;
   stepIn = inputFs / TARGET_FS;
@@ -139,8 +142,12 @@ self.onmessage = (ev: MessageEvent<Msg>) => {
     stopped = true;
     return;
   }
+  if (msg.type === 'timeOffset') {
+    timeOffsetMs = Number.isFinite(msg.offsetMs) ? Math.round(msg.offsetMs) : 0;
+    return;
+  }
   if (msg.type === 'init') {
-    init(msg.inputSampleRate).catch((e: any) => {
+    init(msg.inputSampleRate, msg.timeOffsetMs ?? 0).catch((e: any) => {
       post({ type: 'error', message: e?.message ?? String(e) });
     });
     return;

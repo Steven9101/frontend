@@ -1,6 +1,7 @@
 export type BasicInfo = {
   receiver_id?: string;
   receiver_name?: string;
+  audio_unique_id?: string;
   sps: number;
   audio_max_sps: number;
   audio_max_fft: number;

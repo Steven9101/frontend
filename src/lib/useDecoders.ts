@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { readTimeOffsetMs } from './timeSync';
+
 export type DecoderId = 'ft8';
 
 export type DecodeLine = {
@@ -10,8 +12,9 @@ export type DecodeLine = {
 };
 
 type WorkerIn =
-  | { type: 'init'; inputSampleRate: number }
+  | { type: 'init'; inputSampleRate: number; timeOffsetMs?: number }
   | { type: 'pcm'; pcm: Float32Array }
+  | { type: 'timeOffset'; offsetMs: number }
   | { type: 'stop' };
 
 type WorkerOut =
@@ -34,6 +37,7 @@ export function useDecoders() {
   const workerRef = useRef<Worker | null>(null);
   const readyRef = useRef<boolean>(false);
   const inputRateRef = useRef<number | null>(null);
+  const timeOffsetRef = useRef<number>(0);
 
   const pcmAccRef = useRef<Float32Array>(new Float32Array(0));
   const pcmAccLenRef = useRef<number>(0);
@@ -66,6 +70,7 @@ export function useDecoders() {
     stopWorker();
 
     inputRateRef.current = inputSampleRate;
+    timeOffsetRef.current = readTimeOffsetMs();
     const w = new Worker(new URL('../decoders/ft8/ft8Worker.ts', import.meta.url), { type: 'module' });
     workerRef.current = w;
 
@@ -86,12 +91,12 @@ export function useDecoders() {
         if (!GRID_RE.test(text)) return;
         // Filter a little noise.
         if (/^ft8_lib\b/i.test(text)) return;
-        setLines((prev) => [{ id: makeId(), ts: Date.now(), decoder: 'ft8' as const, text }, ...prev].slice(0, 500));
+        setLines((prev) => [{ id: makeId(), ts: Date.now() + timeOffsetRef.current, decoder: 'ft8' as const, text }, ...prev].slice(0, 500));
         setUnread((prev) => ({ ...prev, ft8: prev.ft8 + 1 }));
       }
     };
 
-    w.postMessage({ type: 'init', inputSampleRate } satisfies WorkerIn);
+    w.postMessage({ type: 'init', inputSampleRate, timeOffsetMs: timeOffsetRef.current } satisfies WorkerIn);
 
     // Flush PCM to the worker in batches (keeps the UI thread light).
     pcmAccRef.current = new Float32Array(48_000); // ~1s at 48kHz (will grow if needed)
@@ -99,6 +104,17 @@ export function useDecoders() {
     pcmFlushTimerRef.current = window.setInterval(() => {
       const ww = workerRef.current;
       if (!ww || !readyRef.current) return;
+
+      const nextOffset = readTimeOffsetMs();
+      if (nextOffset !== timeOffsetRef.current) {
+        timeOffsetRef.current = nextOffset;
+        try {
+          ww.postMessage({ type: 'timeOffset', offsetMs: nextOffset } satisfies WorkerIn);
+        } catch {
+          // ignore
+        }
+      }
+
       const n = pcmAccLenRef.current;
       if (n <= 0) return;
       const chunk = pcmAccRef.current.subarray(0, n);

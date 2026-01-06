@@ -490,8 +490,8 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
 
       const hzPerBin = info.total_bandwidth / info.fft_result_size;
       if (Number.isFinite(hzPerBin) && hzPerBin > 0 && (demod === 'USB' || demod === 'LSB')) {
-        const ssbLowCutHzRaw = info.defaults?.ssb_lowcut_hz ?? 300;
-        const ssbHighCutHzRaw = info.defaults?.ssb_highcut_hz ?? 3000;
+        const ssbLowCutHzRaw = info.defaults?.ssb_lowcut_hz ?? 100;
+        const ssbHighCutHzRaw = info.defaults?.ssb_highcut_hz ?? 2800;
 
         const ssbLowCutHz = Math.max(0, Math.floor(Number(ssbLowCutHzRaw) || 0));
         const ssbHighCutHz = Math.max(ssbLowCutHz + 1, Math.floor(Number(ssbHighCutHzRaw) || 0));
@@ -538,6 +538,13 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
           const desiredReceiverId = receiverIdRef.current;
           if (desiredReceiverId && raw.receiver_id && raw.receiver_id !== desiredReceiverId) {
             return;
+          }
+          try {
+            if (raw.audio_unique_id) {
+              window.sessionStorage.setItem('novasdr.audio_unique_id', raw.audio_unique_id);
+            }
+          } catch {
+            // ignore
           }
           setBasicInfo(raw);
           smeterOffsetDbRef.current = typeof raw.smeter_offset === 'number' ? raw.smeter_offset : 0;

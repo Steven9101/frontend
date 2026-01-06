@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { WebSdrHeader } from './components/app/WebSdrHeader';
 import { BackendReconnectOverlay } from './components/app/BackendReconnectOverlay';
+import { TimeSyncOverlay } from './components/app/TimeSyncOverlay';
 import { BackgroundImage } from './components/app/BackgroundImage';
 import { WebSdrUi } from './components/receiver/WebSdrUi';
 import type { AudioDebugStats, AudioUiSettings } from './components/audio/types';
@@ -225,6 +226,7 @@ export default function App() {
       <BackgroundImage />
       <div className="relative z-20 flex min-h-dvh flex-col">
         <BackendReconnectOverlay />
+        <TimeSyncOverlay />
         <WebSdrHeader 
           receivers={receivers.kind === 'ready' ? receivers.value.receivers : null}
           receiverId={receiverId}

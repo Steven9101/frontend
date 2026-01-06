@@ -166,11 +166,13 @@ export function WebSdrUi({
 
       const maxIdx = Math.max(0, Math.floor(fft) - 1);
 
-      const centerIdx = ((hz - base) / bw) * fft;
+      const cwBfoHz = 750;
+      const carrierHz = nextMode === 'CW' ? hz - cwBfoHz : hz;
+      const centerIdx = ((carrierHz - base) / bw) * fft;
       if (!Number.isFinite(centerIdx)) return null;
 
-      const ssbLowCutHzRaw = settings.defaults?.ssb_lowcut_hz ?? 300;
-      const ssbHighCutHzRaw = settings.defaults?.ssb_highcut_hz ?? 3000;
+      const ssbLowCutHzRaw = settings.defaults?.ssb_lowcut_hz ?? 100;
+      const ssbHighCutHzRaw = settings.defaults?.ssb_highcut_hz ?? 2800;
       const ssbLowCutHz = Math.max(0, Math.floor(Number(ssbLowCutHzRaw) || 0));
       const ssbHighCutHz = Math.max(ssbLowCutHz + 1, Math.floor(Number(ssbHighCutHzRaw) || 0));
 
@@ -184,11 +186,13 @@ export function WebSdrUi({
               : nextMode === 'FM' || nextMode === 'FMC'
                 ? 12_000
               : nextMode === 'CW'
-                ? 800
+                ? 400
                 : 2_700;
       const spanIdx = (spanHz / bw) * fft;
+      const cwBfoIdx = (cwBfoHz / bw) * fft;
 
       const clampIdx = (v: number) => Math.max(0, Math.min(maxIdx, Math.round(v)));
+      const clampM = (v: number) => Math.max(0, Math.min(maxIdx, v));
       const ssbLowCutIdx = (ssbLowCutHz / bw) * fft;
       const ssbHighCutIdx = (ssbHighCutHz / bw) * fft;
 
@@ -200,9 +204,23 @@ export function WebSdrUi({
       } else if (nextMode === 'LSB') {
         l = clampIdx(centerIdx - ssbHighCutIdx);
         r = clampIdx(centerIdx - ssbLowCutIdx);
+      } else if (nextMode === 'CW') {
+        // CW uses a narrow, BFO-offset window:
+        // - `hz` is the tone center (what the user types/clicks)
+        // - `m` is the carrier (toneCenter - BFO)
+        const toneCenter = centerIdx + cwBfoIdx;
+        l = clampIdx(toneCenter - spanIdx / 2);
+        r = clampIdx(toneCenter + spanIdx / 2);
+        // Keep CW on the USB side of the carrier by default.
+        if (l < centerIdx) {
+          const shift = centerIdx - l;
+          l = centerIdx;
+          r = clampIdx(r + shift);
+        }
       }
       if (r < l) [l, r] = [r, l];
-      return { l, m: clampIdx(centerIdx), r };
+      // Keep `m` as a float so switching modes doesn't quantize the displayed frequency.
+      return { l, m: clampM(centerIdx), r };
     },
     [],
   );
@@ -570,6 +588,11 @@ export function WebSdrUi({
             }
           }}
           onTuningChange={(t) => {
+            // Keep live snapshot in sync *before* auto-band logic runs.
+            // Otherwise `maybeApplyAutoBandMode` -> `setModeForActiveVfo` can read a stale centerHz
+            // and briefly snap the UI back to the previous frequency.
+            liveRef.current.centerHz = t.centerHz;
+            liveRef.current.bandwidthHz = t.bandwidthHz;
             setCenterHz(t.centerHz);
             setBandwidthHz(t.bandwidthHz);
             writeActiveVfo((v) => {

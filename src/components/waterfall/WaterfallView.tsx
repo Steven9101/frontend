@@ -7,6 +7,7 @@ import { createPalette } from './colormaps';
 import type { WaterfallSettings } from './protocol';
 import type { WaterfallDisplaySettings } from './viewSettings';
 import { useReconnectingWebSocket } from '../../lib/useReconnectingWebSocket';
+import { useServerEvents } from '../../lib/useServerEvents';
 import type { ReceiverMode } from '../../lib/receiverMode';
 
 export type BandModeOverlay = { mode: ReceiverMode; startHz: number; endHz: number };
@@ -74,6 +75,8 @@ export function WaterfallView({
   tuningStepHz,
   onTuningChange,
 }: Props) {
+  const serverEvents = useServerEvents();
+  const serverEventsValue = serverEvents.kind === 'ready' ? serverEvents.value : null;
   const containerRef = useRef<HTMLDivElement | null>(null);
   const scaleCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -158,6 +161,48 @@ export function WaterfallView({
     return { freqL, span, visibleMarkers };
   }, [markers, settingsState, viewportState]);
 
+  const otherUsersLayout = useMemo(() => {
+    const changes = serverEventsValue?.signal_changes;
+    if (!changes) return null;
+
+    const settings = settingsRef.current;
+    const viewport = viewportRef.current;
+    if (!settings || !viewport) return null;
+
+    const idxToHz = (idx: number) => settings.basefreq + (idx / settings.fft_result_size) * settings.total_bandwidth;
+    const freqL = idxToHz(viewport.l);
+    const freqR = idxToHz(viewport.r);
+    const span = freqR - freqL;
+    if (!Number.isFinite(span) || span <= 0) return null;
+
+    const prefix = `${receiverId}:`;
+    let selfKey: string | null = null;
+    try {
+      const selfUniqueId = window.sessionStorage.getItem('novasdr.audio_unique_id');
+      if (selfUniqueId) selfKey = `${receiverId}:${selfUniqueId}`;
+    } catch {
+      selfKey = null;
+    }
+    const pts: Array<{ key: string; hz: number }> = [];
+    for (const [k, v] of Object.entries(changes)) {
+      if (!k.startsWith(prefix)) continue;
+      if (selfKey && k === selfKey) continue;
+      const m = Array.isArray(v) ? Number(v[1]) : NaN;
+      if (!Number.isFinite(m)) continue;
+      const hz = idxToHz(m);
+      if (!Number.isFinite(hz)) continue;
+      if (hz < freqL || hz > freqR) continue;
+      pts.push({ key: k, hz });
+    }
+    if (pts.length === 0) return null;
+
+    // Keep it subtle: cap the number of indicators rendered.
+    const MAX = 40;
+    const display = pts.length > MAX ? pts.slice(0, MAX) : pts;
+
+    return { freqL, span, display, remaining: Math.max(0, pts.length - display.length) };
+  }, [receiverId, serverEventsValue, settingsState, viewportState]);
+
   const palette = useMemo(() => createPalette(display.colormap), [display.colormap]);
   const paletteRef = useRef<Uint32Array>(palette);
   const displayRef = useRef<WaterfallDisplaySettings>(display);
@@ -173,6 +218,8 @@ export function WaterfallView({
   useEffect(() => {
     modeRef.current = mode;
   }, [mode]);
+
+  const lastModeForPassbandRef = useRef<Props['mode']>('USB');
 
   useEffect(() => {
     viewportCallbackRef.current = onViewportChange;
@@ -219,11 +266,14 @@ export function WaterfallView({
     const cb = tuningCallbackRef.current;
     const settings = settingsRef.current;
     if (!cb || !settings || !passband) return;
-    const center = idxToFreqHz(settings, passband.m);
+    const center =
+      mode === 'CW'
+        ? idxToFreqHz(settings, passband.m + cwBfoIdx(settings))
+        : idxToFreqHz(settings, passband.m);
     const left = idxToFreqHz(settings, passband.l);
     const right = idxToFreqHz(settings, passband.r);
     cb({ centerHz: center, bandwidthHz: Math.max(0, right - left) });
-  }, [passband]);
+  }, [mode, passband]);
 
   useEffect(() => {
     const settings = settingsRef.current;
@@ -260,12 +310,14 @@ export function WaterfallView({
     const span = viewportRef.current.r - viewportRef.current.l;
     setPassband((prev) => {
       if (!prev) return prev;
-      const center = idxToFreqHz(settings, prev.m) + frequencyAdjust.deltaHz;
+      const mode = modeRef.current ?? 'USB';
+      const prevCenterIdx = mode === 'CW' ? prev.m + cwBfoIdx(settings) : prev.m;
+      const center = idxToFreqHz(settings, prevCenterIdx) + frequencyAdjust.deltaHz;
       const centerIdx = freqHzToIdx(settings, center);
       if (span > 0) {
         setWaterfallRangeRef.current(centerIdx - span / 2, centerIdx + span / 2);
       }
-      return movePassbandToCenterIdx(settings, prev, centerIdx);
+      return movePassbandToTuningCenterIdx(settings, prev, mode, centerIdx);
     });
   }, [frequencyAdjust, settingsState]);
 
@@ -276,11 +328,12 @@ export function WaterfallView({
     lastFrequencySetNonceRef.current = frequencySet.nonce;
     const span = viewportRef.current.r - viewportRef.current.l;
     setPassband((prev) => {
+      const mode = modeRef.current ?? 'USB';
       const centerIdx = freqHzToIdx(settings, frequencySet.centerHz);
       if (!prev) {
         if (span > 0) setWaterfallRangeRef.current(centerIdx - span / 2, centerIdx + span / 2);
         return clampPassband(
-          passbandFromCenter(settings, frequencySet.centerHz, modeRef.current ?? 'USB'),
+          passbandFromCenter(settings, frequencySet.centerHz, mode),
           settings,
         );
       }
@@ -296,11 +349,11 @@ export function WaterfallView({
           const targetL = freqHzToIdx(settings, band.startHz - padHz);
           const targetR = freqHzToIdx(settings, band.endHz + padHz);
           setWaterfallRangeRef.current(targetL, targetR);
-          return movePassbandToCenterIdx(settings, prev, centerIdx);
+          return movePassbandToTuningCenterIdx(settings, prev, mode, centerIdx);
         }
       }
       if (span > 0) setWaterfallRangeRef.current(centerIdx - span / 2, centerIdx + span / 2);
-      return movePassbandToCenterIdx(settings, prev, centerIdx);
+      return movePassbandToTuningCenterIdx(settings, prev, mode, centerIdx);
     });
   }, [frequencySet, settingsState]);
 
@@ -317,19 +370,37 @@ export function WaterfallView({
       let leftHz = idxToFreqHz(settings, prev.l);
       let rightHz = idxToFreqHz(settings, prev.r);
       const currentWidthHz = Math.max(0, rightHz - leftHz);
-      const ssbLowCutHz = 300;
+
+      const defaultSsbLowCutHzRaw = settings.defaults?.ssb_lowcut_hz ?? 100;
+      const defaultSsbLowCutHz = Math.max(0, Math.floor(Number(defaultSsbLowCutHzRaw) || 0));
 
       const currentMode = modeRef.current ?? 'USB';
       if (currentMode === 'USB') {
+        const inferredLowCutHz = Math.max(0, leftHz - centerHz);
+        const lowCutHz = inferredLowCutHz > 0 ? inferredLowCutHz : defaultSsbLowCutHz;
         let nextWidthHz = currentWidthHz + deltaHz;
         if (nextWidthHz < 50) nextWidthHz = 50;
-        leftHz = centerHz + ssbLowCutHz;
+        leftHz = centerHz + lowCutHz;
         rightHz = leftHz + nextWidthHz;
       } else if (currentMode === 'LSB') {
+        const inferredLowCutHz = Math.max(0, centerHz - rightHz);
+        const lowCutHz = inferredLowCutHz > 0 ? inferredLowCutHz : defaultSsbLowCutHz;
         let nextWidthHz = currentWidthHz + deltaHz;
         if (nextWidthHz < 50) nextWidthHz = 50;
-        rightHz = centerHz - ssbLowCutHz;
+        rightHz = centerHz - lowCutHz;
         leftHz = rightHz - nextWidthHz;
+      } else if (currentMode === 'CW') {
+        // CW passband is offset from the carrier (BFO). Keep the tone center stable while resizing.
+        const toneCenterHz = (leftHz + rightHz) / 2;
+        let nextWidthHz = currentWidthHz + deltaHz;
+        if (nextWidthHz < 50) nextWidthHz = 50;
+        leftHz = toneCenterHz - nextWidthHz / 2;
+        rightHz = toneCenterHz + nextWidthHz / 2;
+        // Keep CW on the USB side of the carrier by default.
+        if (leftHz < centerHz) {
+          rightHz += centerHz - leftHz;
+          leftHz = centerHz;
+        }
       } else {
         let nextWidthHz = currentWidthHz + deltaHz;
         if (nextWidthHz < 50) nextWidthHz = 50;
@@ -979,9 +1050,12 @@ export function WaterfallView({
   useEffect(() => {
     const settings = settingsRef.current;
     if (!settings) return;
+    const prevMode = lastModeForPassbandRef.current;
+    lastModeForPassbandRef.current = mode;
     setPassband((prev) => {
       if (!prev) return defaultPassband(settings, mode);
-      const centerHz = idxToFreqHz(settings, prev.m);
+      const centerIdx = prevMode === 'CW' ? prev.m + cwBfoIdx(settings) : prev.m;
+      const centerHz = idxToFreqHz(settings, centerIdx);
       return clampPassband(passbandFromCenter(settings, centerHz, mode), settings);
     });
   }, [mode]);
@@ -1119,7 +1193,8 @@ export function WaterfallView({
         setPassband((prev) => {
           if (!prev) return prev;
           const centerIdx = canvasXToIdx(x, rect.width, viewportRef.current);
-          return movePassbandToCenterIdx(settings, prev, centerIdx);
+          const activeMode = modeRef.current ?? mode;
+          return movePassbandToTuningCenterIdx(settings, prev, activeMode, centerIdx);
         });
       }
     }
@@ -1156,7 +1231,7 @@ export function WaterfallView({
         const rect = canvas.getBoundingClientRect();
         const x = clamp(e.clientX - rect.left, 0, rect.width);
         const centerIdx = canvasXToIdx(x, rect.width, viewportRef.current);
-        return movePassbandToCenterIdx(settings, prev, centerIdx);
+        return movePassbandToTuningCenterIdx(settings, prev, modeRef.current ?? mode, centerIdx);
       });
       e.preventDefault();
     },
@@ -1177,7 +1252,7 @@ export function WaterfallView({
       if (!prev) return prev;
       const x = clamp(e.clientX - rect.left, 0, rect.width);
       const centerIdx = canvasXToIdx(x, rect.width, viewportRef.current);
-      return movePassbandToCenterIdx(settings, prev, centerIdx);
+      return movePassbandToTuningCenterIdx(settings, prev, modeRef.current ?? 'USB', centerIdx);
     });
   }, []);
 
@@ -1281,6 +1356,25 @@ export function WaterfallView({
                 </div>
               </div>
           ) : null}
+
+          {/* Other users: subtle tuning indicators (if enabled server-side). */}
+          {otherUsersLayout ? (
+            <div className="pointer-events-none absolute inset-x-0" style={{ top: '2px', height: '10px' }}>
+              <div className="relative h-[10px] w-full">
+                {otherUsersLayout.display.map((p) => {
+                  const xPct = ((p.hz - otherUsersLayout.freqL) / otherUsersLayout.span) * 100;
+                  return (
+                    <div
+                      key={p.key}
+                      className="absolute top-0 h-[10px] w-[2px] bg-indigo-600/80 shadow-[0_0_0_1px_rgba(0,0,0,0.35),0_0_6px_rgba(79,70,229,0.35)] dark:bg-indigo-300/60 dark:shadow-[0_0_0_1px_rgba(0,0,0,0.55),0_0_8px_rgba(129,140,248,0.25)]"
+                      style={{ left: `${xPct}%` }}
+                      aria-hidden="true"
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
         </div>
 
         {/* Hover marker (not markers.json): show in the header area, not over the waterfall. */}
@@ -1357,8 +1451,8 @@ function ssbDefaultsHz(settings: WaterfallSettings): { lowCutHz: number; highCut
   const lowCutHz = Math.max(0, Math.floor(typeof lowRaw === 'number' ? lowRaw : Number(lowRaw ?? NaN)));
   const highCutHz = Math.max(lowCutHz + 1, Math.floor(typeof highRaw === 'number' ? highRaw : Number(highRaw ?? NaN)));
   return {
-    lowCutHz: Number.isFinite(lowCutHz) ? lowCutHz : 300,
-    highCutHz: Number.isFinite(highCutHz) ? highCutHz : 3000,
+    lowCutHz: Number.isFinite(lowCutHz) ? lowCutHz : 100,
+    highCutHz: Number.isFinite(highCutHz) ? highCutHz : 2800,
   };
 }
 
@@ -1370,7 +1464,7 @@ function defaultModeSpanHz(settings: WaterfallSettings, mode: Props['mode']): nu
   if (mode === 'WBFM') return 180_000;
   if (mode === 'AM' || mode === 'SAM') return 10_000;
   if (mode === 'FM' || mode === 'FMC') return 12_000;
-  if (mode === 'CW') return 800;
+  if (mode === 'CW') return 400;
   return 2_700;
 }
 
@@ -1379,6 +1473,7 @@ function passbandFromCenter(settings: WaterfallSettings, centerHz: number, mode:
   const spanHz = defaultModeSpanHz(settings, mode);
   let lHz: number;
   let rHz: number;
+  let mHz = centerHz;
 
   if (mode === 'USB') {
     lHz = centerHz + ssb.lowCutHz;
@@ -1386,6 +1481,18 @@ function passbandFromCenter(settings: WaterfallSettings, centerHz: number, mode:
   } else if (mode === 'LSB') {
     lHz = centerHz - ssb.highCutHz;
     rHz = centerHz - ssb.lowCutHz;
+  } else if (mode === 'CW') {
+    // CW:
+    // - `centerHz` is the tone center (what the user types/clicks)
+    // - `m` is the carrier (toneCenter - BFO) so the tone lands at ~750Hz.
+    const bfoHz = 750;
+    mHz = centerHz - bfoHz;
+    lHz = centerHz - spanHz / 2;
+    rHz = centerHz + spanHz / 2;
+    if (lHz < mHz) {
+      rHz += mHz - lHz;
+      lHz = mHz;
+    }
   } else {
     lHz = centerHz - spanHz / 2;
     rHz = centerHz + spanHz / 2;
@@ -1393,7 +1500,7 @@ function passbandFromCenter(settings: WaterfallSettings, centerHz: number, mode:
 
   return {
     l: freqHzToIdx(settings, lHz),
-    m: freqHzToIdx(settings, centerHz),
+    m: freqHzToIdx(settings, mHz),
     r: freqHzToIdx(settings, rHz),
   };
 }
@@ -1403,6 +1510,7 @@ function passbandFromCenterWithSpan(settings: WaterfallSettings, centerHz: numbe
   const s = clampBandwidthHz(spanHz) ?? defaultModeSpanHz(settings, mode);
   let lHz: number;
   let rHz: number;
+  let mHz = centerHz;
 
   if (mode === 'USB') {
     lHz = centerHz + ssb.lowCutHz;
@@ -1410,6 +1518,15 @@ function passbandFromCenterWithSpan(settings: WaterfallSettings, centerHz: numbe
   } else if (mode === 'LSB') {
     rHz = centerHz - ssb.lowCutHz;
     lHz = rHz - s;
+  } else if (mode === 'CW') {
+    const bfoHz = 750;
+    mHz = centerHz - bfoHz;
+    lHz = centerHz - s / 2;
+    rHz = centerHz + s / 2;
+    if (lHz < mHz) {
+      rHz += mHz - lHz;
+      lHz = mHz;
+    }
   } else {
     lHz = centerHz - s / 2;
     rHz = centerHz + s / 2;
@@ -1417,7 +1534,7 @@ function passbandFromCenterWithSpan(settings: WaterfallSettings, centerHz: numbe
 
   return {
     l: freqHzToIdx(settings, lHz),
-    m: freqHzToIdx(settings, centerHz),
+    m: freqHzToIdx(settings, mHz),
     r: freqHzToIdx(settings, rHz),
   };
 }
@@ -1426,6 +1543,25 @@ function movePassbandToCenterIdx(settings: WaterfallSettings, prev: Passband, ce
   const leftOffset = prev.l - prev.m;
   const rightOffset = prev.r - prev.m;
   return clampPassband({ l: centerIdx + leftOffset, m: centerIdx, r: centerIdx + rightOffset }, settings);
+}
+
+function cwBfoIdx(settings: WaterfallSettings): number {
+  return (750 / settings.total_bandwidth) * settings.fft_result_size;
+}
+
+function movePassbandToToneCenterIdx(settings: WaterfallSettings, prev: Passband, toneCenterIdx: number): Passband {
+  const prevToneIdx = prev.m + cwBfoIdx(settings);
+  const delta = toneCenterIdx - prevToneIdx;
+  return clampPassband({ l: prev.l + delta, m: prev.m + delta, r: prev.r + delta }, settings);
+}
+
+function movePassbandToTuningCenterIdx(
+  settings: WaterfallSettings,
+  prev: Passband,
+  mode: Props['mode'],
+  centerIdx: number,
+): Passband {
+  return mode === 'CW' ? movePassbandToToneCenterIdx(settings, prev, centerIdx) : movePassbandToCenterIdx(settings, prev, centerIdx);
 }
 
 function freqHzToIdx(settings: WaterfallSettings, hz: number): number {
@@ -1541,7 +1677,7 @@ function PassbandTunerBar({
     const centerIdx = viewport.l + (x / rect.width) * span;
     setPassband((prev) => {
       if (!prev) return prev;
-      return clampPassband(movePassbandToCenterIdx(settings, prev, centerIdx), settings);
+      return clampPassband(movePassbandToTuningCenterIdx(settings, prev, mode, centerIdx), settings);
     });
   };
 
@@ -1610,14 +1746,15 @@ function PassbandTunerBar({
     drag.movedPx = Math.max(drag.movedPx, Math.abs(dxPx));
 
     if (drag.kind === 'move') {
-      setPassband(clampPassband(movePassbandToCenterIdx(settings, drag.start, drag.start.m + dxIdx), settings));
+      const startCenter = mode === 'CW' ? (drag.start.l + drag.start.r) / 2 : drag.start.m;
+      setPassband(clampPassband(movePassbandToTuningCenterIdx(settings, drag.start, mode, startCenter + dxIdx), settings));
       return;
     }
 
     if (drag.kind === 'click') {
       const x = clamp(e.clientX - rect.left, 0, rect.width);
       const centerIdx = viewport.l + (x / rect.width) * span;
-      setPassband(clampPassband(movePassbandToCenterIdx(settings, drag.start, centerIdx), settings));
+      setPassband(clampPassband(movePassbandToTuningCenterIdx(settings, drag.start, mode, centerIdx), settings));
       return;
     }
 
@@ -1649,6 +1786,7 @@ function PassbandTunerBar({
   const leftX = toX(passband.l);
   const midX = toX(passband.m);
   const rightX = toX(passband.r);
+  const toneX = mode === 'CW' ? toX((passband.l + passband.r) / 2) : null;
   const pxWidth = Math.max(0, rightX - leftX);
 
   const isVisible = rightX >= 0 && leftX <= barWidth;
@@ -1684,6 +1822,9 @@ function PassbandTunerBar({
       {isVisible && (
         <>
       <div className="pointer-events-none absolute inset-y-0 w-px bg-yellow-500/90" style={{ left: `${midX}px` }} />
+      {toneX != null ? (
+        <div className="pointer-events-none absolute inset-y-0 w-px bg-sky-500/90" style={{ left: `${toneX}px` }} />
+      ) : null}
       <div
         className="pointer-events-none absolute inset-y-0 bg-yellow-500/10"
         style={{ left: `${leftX}px`, width: `${Math.max(1, pxWidth)}px` }}
