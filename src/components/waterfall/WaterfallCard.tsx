@@ -262,8 +262,28 @@ export function WaterfallCard({
   }, [bands, ituRegion]);
 
   const jumpToBand = useCallback(
-    (startHz: number, endHz: number) => {
+    (b: BandOverlay) => {
+      const startHz = b.startHz;
+      const endHz = b.endHz;
       const centerHz = Math.round((startHz + endHz) / 2);
+
+      // Avoid frontend/backend getting into an inconsistent "band vs demodulation" state
+      // that can leave the UI blank until reload (e.g., jumping between broadcast AM and HAM bands).
+      let recommendedMode: typeof mode | null = null;
+      const modeFromBand = b.modes?.find((m) => centerHz >= m.startHz && centerHz <= m.endHz)?.mode ?? null;
+      if (modeFromBand) {
+        recommendedMode = modeFromBand;
+      } else if (/\bAM\b/i.test(b.name) && !/\bHAM\b/i.test(b.name)) {
+        recommendedMode = 'AM';
+      } else if (/\bHAM\b/i.test(b.name)) {
+        recommendedMode = centerHz < 10_000_000 ? 'LSB' : 'USB';
+      }
+      if (recommendedMode && onSetMode) {
+        if (!(mode === 'SAM' && recommendedMode === 'AM')) {
+          onSetMode(recommendedMode);
+        }
+      }
+
       const s = settings;
       if (s && onViewportSet) {
         const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
@@ -277,7 +297,7 @@ export function WaterfallCard({
       }
       onSetFrequencyHz?.(centerHz);
     },
-    [onSetFrequencyHz, onViewportSet, settings],
+    [mode, onSetFrequencyHz, onSetMode, onViewportSet, settings],
   );
 
   const saveBookmark = useCallback(() => {
@@ -498,7 +518,7 @@ export function WaterfallCard({
                               <DropdownMenuItem
                                 key={b.name}
                                 onSelect={() => {
-                                  jumpToBand(b.startHz, b.endHz);
+                                  jumpToBand(b);
                                 }}
                               >
                                 {b.name.toLowerCase()}
@@ -513,7 +533,7 @@ export function WaterfallCard({
                               <DropdownMenuItem
                                 key={b.name}
                                 onSelect={() => {
-                                  jumpToBand(b.startHz, b.endHz);
+                                  jumpToBand(b);
                                 }}
                               >
                                 {b.name.toLowerCase()}
@@ -529,7 +549,7 @@ export function WaterfallCard({
                                 <DropdownMenuItem
                                   key={b.name}
                                   onSelect={() => {
-                                    jumpToBand(b.startHz, b.endHz);
+                                    jumpToBand(b);
                                   }}
                                 >
                                   {b.name.toLowerCase()}
@@ -983,7 +1003,7 @@ export function WaterfallCard({
                 title="Amateur (HAM)"
                 bands={bandGroups.ham}
                 onSelect={(b) => {
-                  jumpToBand(b.startHz, b.endHz);
+                  jumpToBand(b);
                   setMobileBandsOpen(false);
                 }}
               />
@@ -991,7 +1011,7 @@ export function WaterfallCard({
                 title="Broadcast (AM)"
                 bands={bandGroups.broadcast}
                 onSelect={(b) => {
-                  jumpToBand(b.startHz, b.endHz);
+                  jumpToBand(b);
                   setMobileBandsOpen(false);
                 }}
               />
@@ -1000,7 +1020,7 @@ export function WaterfallCard({
                   title="Other"
                   bands={bandGroups.other}
                   onSelect={(b) => {
-                    jumpToBand(b.startHz, b.endHz);
+                    jumpToBand(b);
                     setMobileBandsOpen(false);
                   }}
                 />
