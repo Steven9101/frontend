@@ -164,7 +164,7 @@ export function WebSdrUi({
       if (!Number.isFinite(fft) || fft <= 0) return null;
       if (!Number.isFinite(base) || !Number.isFinite(bw) || bw <= 0) return null;
 
-      const maxIdx = Math.max(0, Math.floor(fft) - 1);
+      const maxIdx = Math.max(0, Math.floor(fft));
 
       const cwBfoHz = 750;
       const carrierHz = nextMode === 'CW' ? hz - cwBfoHz : hz;
@@ -185,42 +185,43 @@ export function WebSdrUi({
               ? 10_000
               : nextMode === 'FM' || nextMode === 'FMC'
                 ? 12_000
-              : nextMode === 'CW'
-                ? 400
-                : 2_700;
+                : nextMode === 'CW'
+                  ? 400
+                  : 2_700;
       const spanIdx = (spanHz / bw) * fft;
       const cwBfoIdx = (cwBfoHz / bw) * fft;
 
-      const clampIdx = (v: number) => Math.max(0, Math.min(maxIdx, Math.round(v)));
+      const clampIdx = (v: number) => Math.max(0, Math.min(maxIdx, v));
       const clampM = (v: number) => Math.max(0, Math.min(maxIdx, v));
+      const carrierIdx = clampM(centerIdx);
       const ssbLowCutIdx = (ssbLowCutHz / bw) * fft;
       const ssbHighCutIdx = (ssbHighCutHz / bw) * fft;
 
-      let l = clampIdx(centerIdx - spanIdx / 2);
-      let r = clampIdx(centerIdx + spanIdx / 2);
+      let l = clampIdx(carrierIdx - spanIdx / 2);
+      let r = clampIdx(carrierIdx + spanIdx / 2);
       if (nextMode === 'USB') {
-        l = clampIdx(centerIdx + ssbLowCutIdx);
-        r = clampIdx(centerIdx + ssbHighCutIdx);
+        l = clampIdx(carrierIdx + ssbLowCutIdx);
+        r = clampIdx(carrierIdx + ssbHighCutIdx);
       } else if (nextMode === 'LSB') {
-        l = clampIdx(centerIdx - ssbHighCutIdx);
-        r = clampIdx(centerIdx - ssbLowCutIdx);
+        l = clampIdx(carrierIdx - ssbHighCutIdx);
+        r = clampIdx(carrierIdx - ssbLowCutIdx);
       } else if (nextMode === 'CW') {
         // CW uses a narrow, BFO-offset window:
         // - `hz` is the tone center (what the user types/clicks)
         // - `m` is the carrier (toneCenter - BFO)
-        const toneCenter = centerIdx + cwBfoIdx;
+        const toneCenter = carrierIdx + cwBfoIdx;
         l = clampIdx(toneCenter - spanIdx / 2);
         r = clampIdx(toneCenter + spanIdx / 2);
         // Keep CW on the USB side of the carrier by default.
-        if (l < centerIdx) {
-          const shift = centerIdx - l;
-          l = centerIdx;
+        if (l < carrierIdx) {
+          const shift = carrierIdx - l;
+          l = carrierIdx;
           r = clampIdx(r + shift);
         }
       }
       if (r < l) [l, r] = [r, l];
       // Keep `m` as a float so switching modes doesn't quantize the displayed frequency.
-      return { l, m: clampM(centerIdx), r };
+      return { l, m: carrierIdx, r };
     },
     [],
   );
