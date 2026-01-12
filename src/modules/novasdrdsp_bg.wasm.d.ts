@@ -1,0 +1,35 @@
+/* tslint:disable */
+/* eslint-disable */
+export const memory: WebAssembly.Memory;
+export const __wbg_audio_free: (a: number, b: number) => void;
+export const audio_new: (a: number, b: number, c: number, d: number) => number;
+export const audio_decode: (a: number, b: number, c: number) => any;
+export const audio_decode_to_pcm_f32: (a: number, b: number, c: number) => any;
+export const audio_process_pcm_f32: (a: number, b: number, c: number) => any;
+export const audio_set_nr: (a: number, b: number) => void;
+export const audio_set_nb: (a: number, b: number) => void;
+export const audio_set_an: (a: number, b: number) => void;
+export const audio_set_decoded_callback: (a: number, b: number) => void;
+export const __wbg_zstdstreamdecoder_free: (a: number, b: number) => void;
+export const zstdstreamdecoder_new: () => number;
+export const zstdstreamdecoder_clear: (a: number) => void;
+export const zstdstreamdecoder_decode: (a: number, b: number, c: number) => [number, number];
+export const main: () => void;
+export const firdes_kaiser_lowpass: (a: number, b: number, c: number) => any;
+export const rust_zstd_wasm_shim_qsort: (a: number, b: number, c: number, d: number) => void;
+export const rust_zstd_wasm_shim_malloc: (a: number) => number;
+export const rust_zstd_wasm_shim_memcmp: (a: number, b: number, c: number) => number;
+export const rust_zstd_wasm_shim_calloc: (a: number, b: number) => number;
+export const rust_zstd_wasm_shim_free: (a: number) => void;
+export const rust_zstd_wasm_shim_memcpy: (a: number, b: number, c: number) => number;
+export const rust_zstd_wasm_shim_memmove: (a: number, b: number, c: number) => number;
+export const rust_zstd_wasm_shim_memset: (a: number, b: number, c: number) => number;
+export const greet: () => void;
+export const __wbindgen_exn_store: (a: number) => void;
+export const __externref_table_alloc: () => number;
+export const __wbindgen_externrefs: WebAssembly.Table;
+export const __wbindgen_free: (a: number, b: number, c: number) => void;
+export const __wbindgen_malloc: (a: number, b: number) => number;
+export const __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
+export const __externref_drop_slice: (a: number, b: number) => void;
+export const __wbindgen_start: () => void;

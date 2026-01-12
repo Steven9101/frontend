@@ -167,8 +167,7 @@ export function WebSdrUi({
       const maxIdx = Math.max(0, Math.floor(fft));
 
       const cwBfoHz = 750;
-      const carrierHz = nextMode === 'CW' ? hz - cwBfoHz : hz;
-      const centerIdx = ((carrierHz - base) / bw) * fft;
+      const centerIdx = ((hz - base) / bw) * fft;
       if (!Number.isFinite(centerIdx)) return null;
 
       const ssbLowCutHzRaw = settings.defaults?.ssb_lowcut_hz ?? 100;
@@ -206,9 +205,6 @@ export function WebSdrUi({
         l = clampIdx(carrierIdx - ssbHighCutIdx);
         r = clampIdx(carrierIdx - ssbLowCutIdx);
       } else if (nextMode === 'CW') {
-        // CW uses a narrow, BFO-offset window:
-        // - `hz` is the tone center (what the user types/clicks)
-        // - `m` is the carrier (toneCenter - BFO)
         const toneCenter = carrierIdx + cwBfoIdx;
         l = clampIdx(toneCenter - spanIdx / 2);
         r = clampIdx(toneCenter + spanIdx / 2);

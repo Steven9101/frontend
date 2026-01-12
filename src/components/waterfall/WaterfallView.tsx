@@ -2,7 +2,7 @@ import { decode as cborDecode } from 'cbor-x';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { ZstdStreamDecoder } from '../../modules/phantomsdrdsp.js';
+import { ZstdStreamDecoder } from '../../modules/novasdrdsp.js';
 import { createPalette } from './colormaps';
 import type { WaterfallSettings } from './protocol';
 import type { WaterfallDisplaySettings } from './viewSettings';
@@ -266,10 +266,7 @@ export function WaterfallView({
     const cb = tuningCallbackRef.current;
     const settings = settingsRef.current;
     if (!cb || !settings || !passband) return;
-    const center =
-      mode === 'CW'
-        ? idxToFreqHz(settings, passband.m + cwBfoIdx(settings))
-        : idxToFreqHz(settings, passband.m);
+    const center = idxToFreqHz(settings, passband.m);
     const left = idxToFreqHz(settings, passband.l);
     const right = idxToFreqHz(settings, passband.r);
     cb({ centerHz: center, bandwidthHz: Math.max(0, right - left) });
@@ -311,8 +308,7 @@ export function WaterfallView({
     setPassband((prev) => {
       if (!prev) return prev;
       const mode = modeRef.current ?? 'USB';
-      const prevCenterIdx = mode === 'CW' ? prev.m + cwBfoIdx(settings) : prev.m;
-      const center = idxToFreqHz(settings, prevCenterIdx) + frequencyAdjust.deltaHz;
+      const center = idxToFreqHz(settings, prev.m) + frequencyAdjust.deltaHz;
       const centerIdx = freqHzToIdx(settings, center);
       if (span > 0) {
         setWaterfallRangeRef.current(centerIdx - span / 2, centerIdx + span / 2);
@@ -1050,12 +1046,10 @@ export function WaterfallView({
   useEffect(() => {
     const settings = settingsRef.current;
     if (!settings) return;
-    const prevMode = lastModeForPassbandRef.current;
     lastModeForPassbandRef.current = mode;
     setPassband((prev) => {
       if (!prev) return defaultPassband(settings, mode);
-      const centerIdx = prevMode === 'CW' ? prev.m + cwBfoIdx(settings) : prev.m;
-      const centerHz = idxToFreqHz(settings, centerIdx);
+      const centerHz = idxToFreqHz(settings, prev.m);
       return clampPassband(passbandFromCenter(settings, centerHz, mode), settings);
     });
   }, [mode]);
@@ -1482,13 +1476,10 @@ function passbandFromCenter(settings: WaterfallSettings, centerHz: number, mode:
     lHz = centerHz - ssb.highCutHz;
     rHz = centerHz - ssb.lowCutHz;
   } else if (mode === 'CW') {
-    // CW:
-    // - `centerHz` is the tone center (what the user types/clicks)
-    // - `m` is the carrier (toneCenter - BFO) so the tone lands at ~750Hz.
     const bfoHz = 750;
-    mHz = centerHz - bfoHz;
-    lHz = centerHz - spanHz / 2;
-    rHz = centerHz + spanHz / 2;
+    const toneHz = centerHz + bfoHz;
+    lHz = toneHz - spanHz / 2;
+    rHz = toneHz + spanHz / 2;
     if (lHz < mHz) {
       rHz += mHz - lHz;
       lHz = mHz;
@@ -1520,9 +1511,9 @@ function passbandFromCenterWithSpan(settings: WaterfallSettings, centerHz: numbe
     lHz = rHz - s;
   } else if (mode === 'CW') {
     const bfoHz = 750;
-    mHz = centerHz - bfoHz;
-    lHz = centerHz - s / 2;
-    rHz = centerHz + s / 2;
+    const toneHz = centerHz + bfoHz;
+    lHz = toneHz - s / 2;
+    rHz = toneHz + s / 2;
     if (lHz < mHz) {
       rHz += mHz - lHz;
       lHz = mHz;
@@ -1545,23 +1536,14 @@ function movePassbandToCenterIdx(settings: WaterfallSettings, prev: Passband, ce
   return clampPassband({ l: centerIdx + leftOffset, m: centerIdx, r: centerIdx + rightOffset }, settings);
 }
 
-function cwBfoIdx(settings: WaterfallSettings): number {
-  return (750 / settings.total_bandwidth) * settings.fft_result_size;
-}
-
-function movePassbandToToneCenterIdx(settings: WaterfallSettings, prev: Passband, toneCenterIdx: number): Passband {
-  const prevToneIdx = prev.m + cwBfoIdx(settings);
-  const delta = toneCenterIdx - prevToneIdx;
-  return clampPassband({ l: prev.l + delta, m: prev.m + delta, r: prev.r + delta }, settings);
-}
-
 function movePassbandToTuningCenterIdx(
   settings: WaterfallSettings,
   prev: Passband,
   mode: Props['mode'],
   centerIdx: number,
 ): Passband {
-  return mode === 'CW' ? movePassbandToToneCenterIdx(settings, prev, centerIdx) : movePassbandToCenterIdx(settings, prev, centerIdx);
+  void mode;
+  return movePassbandToCenterIdx(settings, prev, centerIdx);
 }
 
 function freqHzToIdx(settings: WaterfallSettings, hz: number): number {
