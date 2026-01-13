@@ -1,3 +1,32 @@
+export type HeaderPanelWidgets = {
+  hamqsl: boolean;
+  blitzortung: boolean;
+};
+
+export type HeaderPanelLookups = {
+  callsign: boolean;
+  mwlist: boolean;
+  shortwaveInfo: boolean;
+};
+
+export type HeaderPanelItem = {
+  label: string;
+  value: string;
+};
+
+export type HeaderPanel = {
+  enabled: boolean;
+  title: string;
+  about: string;
+  donationEnabled: boolean;
+  donationUrl: string;
+  donationLabel: string;
+  items: HeaderPanelItem[];
+  images: string[];
+  widgets: HeaderPanelWidgets;
+  lookups: HeaderPanelLookups;
+};
+
 export type ServerInfo = {
   serverName: string;
   location: string;
@@ -5,6 +34,7 @@ export type ServerInfo = {
   email: string;
   chatEnabled: boolean;
   version?: string;
+  headerPanel?: HeaderPanel;
 };
 
 export async function fetchServerInfo(signal?: AbortSignal): Promise<ServerInfo> {

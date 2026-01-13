@@ -1,4 +1,5 @@
-﻿import { ChevronDown, Github, Keyboard, Moon, Settings, Sun } from 'lucide-react';
+import { ChevronDown, ExternalLink, Github, Keyboard, Moon, Search, Settings, Sun } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 
 import type { ReceiverSummary } from '../../lib/receivers';
@@ -7,6 +8,7 @@ import { applyTheme, getStoredTheme, resolveTheme, setStoredTheme, type ThemePre
 import type { AudioDebugStats, AudioUiSettings } from '../audio/types';
 import { AnimatedDialog } from '../ui/animated-dialog';
 import { Button } from '../ui/button';
+import { Input } from '../ui/input';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { SettingsDialog } from './SettingsDialog';
 
@@ -23,6 +25,7 @@ function formatRangeHz(minHz?: number, maxHz?: number): string | null {
 type Props = {
   receivers: ReceiverSummary[] | null;
   receiverId: string | null;
+  tunedHz: number | null;
   onReceiverChange: React.Dispatch<React.SetStateAction<string | null>>;
   audioSettings: AudioUiSettings;
   onAudioSettingsChange: React.Dispatch<React.SetStateAction<AudioUiSettings>>;
@@ -38,6 +41,7 @@ type Props = {
 export function WebSdrHeader({
   receivers,
   receiverId,
+  tunedHz,
   onReceiverChange,
   audioSettings,
   onAudioSettingsChange,
@@ -53,6 +57,8 @@ export function WebSdrHeader({
   const [theme, setTheme] = useState<ThemePreference>(() => getStoredTheme() ?? 'system');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [keybindsOpen, setKeybindsOpen] = useState(false);
+  const [headerExpanded, setHeaderExpanded] = useState(false);
+  const [callsignQuery, setCallsignQuery] = useState('');
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -91,6 +97,30 @@ export function WebSdrHeader({
     return parts.length ? parts.join(' / ') : null;
   }, [info]);
 
+  const headerPanel = useMemo(() => {
+    if (info.kind !== 'ready') return null;
+    const panel = info.value.headerPanel;
+    if (!panel || !panel.enabled) return null;
+    return panel;
+  }, [info]);
+
+  const blitzortungSrc = useMemo(() => {
+    if (info.kind !== 'ready') return null;
+    if (!headerPanel?.widgets.blitzortung) return null;
+
+    const grid = (info.value.location ?? '').trim().toUpperCase();
+    const coords = maidenheadToCoords(grid);
+    const lat = coords?.lat ?? 51.2;
+    const lon = coords?.lon ?? 10.0;
+    const zoom = 5;
+
+    return `https://map.blitzortung.org/index.php?interactive=1&NavigationControl=0&FullScreenControl=0&Cookies=0&InfoDiv=0&MenuButtonDiv=1&ScaleControl=1&LinksCheckboxChecked=1&LinksRangeValue=10&MapStyle=0&MapStyleRangeValue=0&Advertisment=0#${zoom}/${lat.toFixed(3)}/${lon.toFixed(3)}`;
+  }, [headerPanel, info]);
+
+  useEffect(() => {
+    if (!headerPanel) setHeaderExpanded(false);
+  }, [headerPanel]);
+
   const receiverOptions = receivers ?? [];
   const receiverSelectDisabled = receiverOptions.length <= 1 || receiverId == null;
   const activeReceiver = useMemo(() => {
@@ -105,11 +135,25 @@ export function WebSdrHeader({
   const resolvedTheme = useMemo(() => resolveTheme(theme), [theme]);
 
   return (
-    <header className="sticky top-0 z-20 border-b bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
-      <div className="mx-auto flex h-12 w-full max-w-[1320px] items-center gap-2 px-3 sm:px-4">
+    <header className="z-20 border-b bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70">
+      <div className="mx-auto flex h-10 w-full max-w-[1320px] items-center gap-2 px-3 sm:px-4">
+        {headerPanel ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            aria-label={headerExpanded ? 'Collapse receiver info' : 'Expand receiver info'}
+            aria-expanded={headerExpanded}
+            onClick={() => setHeaderExpanded((v) => !v)}
+          >
+            <ChevronDown className={`h-4 w-4 transition-transform ${headerExpanded ? 'rotate-180' : ''}`} />
+          </Button>
+        ) : null}
+
         <div className="min-w-0">
           <div className="truncate text-[13px] font-semibold tracking-tight leading-4">{title}</div>
-          {subtitle ? <div className="truncate text-[11px] text-muted-foreground">{subtitle}</div> : null}
+          {subtitle ? <div className="hidden truncate text-[11px] text-muted-foreground sm:block">{subtitle}</div> : null}
         </div>
 
         <div className="ml-auto flex items-center gap-2">
@@ -119,7 +163,7 @@ export function WebSdrHeader({
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-9 w-[120px] justify-between gap-2 overflow-hidden rounded-md border-border/60 bg-muted/10 px-3 shadow-sm transition-colors hover:bg-muted/20 sm:w-[280px]"
+                  className="h-8 w-[120px] justify-between gap-2 overflow-hidden rounded-md border-border/60 bg-muted/10 px-3 shadow-sm transition-colors hover:bg-muted/20 sm:w-[260px]"
                   aria-label="Switch device"
                 >
                   <span className="flex min-w-0 flex-1 flex-col items-start text-left">
@@ -168,7 +212,7 @@ export function WebSdrHeader({
             size="icon"
             aria-label={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-            className="h-8 w-8"
+            className="h-7 w-7"
           >
             {resolvedTheme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
@@ -178,7 +222,7 @@ export function WebSdrHeader({
             size="icon"
             aria-label="Settings"
             onClick={() => setSettingsOpen(true)}
-            className="h-8 w-8"
+            className="h-7 w-7"
           >
             <Settings className="h-4 w-4" />
           </Button>
@@ -228,6 +272,169 @@ export function WebSdrHeader({
         </div>
       </div>
 
+
+      <AnimatePresence initial={false}>
+        {headerPanel && headerExpanded ? (
+          <motion.div
+            key="header-panel"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }}
+            className="overflow-hidden border-t bg-background/80"
+          >
+            <div className="mx-auto w-full max-w-[1320px] space-y-3 px-3 py-3 sm:px-4">
+              <div className="grid gap-3 lg:grid-cols-12">
+                <div className="space-y-2 lg:col-span-5">
+                  <div className="text-sm font-semibold tracking-tight">{headerPanel.title || 'Receiver'}</div>
+                  {headerPanel.about ? (
+                    <div className="whitespace-pre-line text-xs leading-relaxed text-muted-foreground">{headerPanel.about}</div>
+                  ) : null}
+
+                  {headerPanel.donationEnabled && headerPanel.donationUrl ? (
+                    <a href={headerPanel.donationUrl} target="_blank" rel="noreferrer">
+                      <Button type="button" variant="secondary" size="sm">
+                        {headerPanel.donationLabel || 'Donate'}
+                      </Button>
+                    </a>
+                  ) : null}
+
+                  {headerPanel.items
+                    .filter((i) => (i.label ?? '').trim() && (i.value ?? '').trim())
+                    .slice(0, 10)
+                    .map((i) => (
+                      <HeaderInfoRow key={`${i.label}:${i.value}`} label={i.label} value={i.value} />
+                    ))}
+                </div>
+
+                <div className="space-y-2 lg:col-span-7">
+                  {headerPanel.lookups.callsign ? (
+                    <div className="flex items-center justify-between gap-3 rounded-md border bg-muted/10 px-3 py-2">
+                      <div className="text-xs font-medium text-muted-foreground">Callsign</div>
+                      <div className="flex w-[min(320px,60vw)] items-center gap-2">
+                        <Input
+                          value={callsignQuery}
+                          onChange={(e) => setCallsignQuery(e.target.value)}
+                          placeholder="e.g. DL1ABC"
+                          className="h-8 text-xs"
+                          onKeyDown={(e) => {
+                            if (e.key !== 'Enter') return;
+                            const raw = callsignQuery.trim();
+                            if (!raw) return;
+                            const callsign = raw.replace(/[^A-Za-z0-9/]/g, '').toUpperCase();
+                            if (!callsign) return;
+                            window.open(`https://www.qrz.com/db/${callsign}`, '_blank', 'noreferrer');
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="icon"
+            className="h-7 w-7 rounded-md bg-muted/10 hover:bg-muted/20"
+                          aria-label="Look up callsign"
+                          onClick={() => {
+                            const raw = callsignQuery.trim();
+                            if (!raw) return;
+                            const callsign = raw.replace(/[^A-Za-z0-9/]/g, '').toUpperCase();
+                            if (!callsign) return;
+                            window.open(`https://www.qrz.com/db/${callsign}`, '_blank', 'noreferrer');
+                          }}
+                        >
+                          <Search className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {headerPanel.lookups.mwlist || headerPanel.lookups.shortwaveInfo ? (
+                    <div className="flex items-center justify-between gap-3 rounded-md border bg-muted/10 px-3 py-2">
+                      <div className="text-xs font-medium text-muted-foreground">Frequency</div>
+                      <div className="flex items-center gap-2">
+                        {headerPanel.lookups.mwlist ? (
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            disabled={tunedHz == null}
+                            onClick={() => {
+                              if (tunedHz == null) return;
+                              const khz = Math.round(tunedHz / 1_000);
+                              const url = `https://www.mwlist.org/mwlist_quick_and_easy.php?area=1&kHz=${khz}`;
+                              window.open(url, '_blank', 'noreferrer');
+                            }}
+                            className="gap-2"
+                          >
+                            MWList
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </Button>
+                        ) : null}
+                        {headerPanel.lookups.shortwaveInfo ? (
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            disabled={tunedHz == null}
+                            onClick={() => {
+                              if (tunedHz == null) return;
+                              const khz = Math.round(tunedHz / 1_000);
+                              const url = `https://www.short-wave.info/index.php?timbus=NOW&ip=179&porm=4&freq=${khz}`;
+                              window.open(url, '_blank', 'noreferrer');
+                            }}
+                            className="gap-2"
+                          >
+                            short-wave.info
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </Button>
+                        ) : null}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {headerPanel.widgets.blitzortung && blitzortungSrc ? (
+                    <div className="overflow-hidden rounded-md border bg-muted/10">
+                      <iframe
+                        title="Blitzortung lightning map"
+                        src={blitzortungSrc}
+                        className="h-[260px] w-full"
+                        loading="lazy"
+                      />
+                    </div>
+                  ) : null}
+
+                  {headerPanel.widgets.hamqsl ? (
+                    <a href="https://www.hamqsl.com/solar.html" target="_blank" rel="noreferrer" className="block">
+                      <div className="rounded-md border bg-muted/10 px-3 py-2">
+                        <img
+                          src="https://www.hamqsl.com/solar101vhf.php"
+                          alt="Solar-terrestrial data (HAMQSL)"
+                          loading="lazy"
+                          className="block w-full max-h-[96px] object-contain"
+                        />
+                      </div>
+                    </a>
+                  ) : null}
+                </div>
+              </div>
+
+              {headerPanel.images.length ? (
+                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {headerPanel.images.slice(0, 3).map((src) => (
+                    <img
+                      key={src}
+                      src={src}
+                      alt=""
+                      loading="lazy"
+                      className="h-40 w-full rounded-md border bg-muted/10 object-cover"
+                    />
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+
       <SettingsDialog
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
@@ -244,3 +451,45 @@ export function WebSdrHeader({
     </header>
   );
 }
+
+function HeaderInfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between rounded-md border bg-muted/10 px-3 py-2">
+      <div className="text-xs font-medium text-muted-foreground">{label}</div>
+      <div className="truncate text-xs">{value}</div>
+    </div>
+  );
+}
+
+function maidenheadToCoords(locator: string): { lat: number; lon: number } | null {
+  const chars = locator.trim().toUpperCase();
+  if (chars.length < 4) return null;
+
+  const a = chars.charCodeAt(0) - 65;
+  const b = chars.charCodeAt(1) - 65;
+  const c = Number.parseInt(chars[2] ?? '0', 10);
+  const d = Number.parseInt(chars[3] ?? '0', 10);
+  if (a < 0 || a > 17 || b < 0 || b > 17 || !Number.isFinite(c) || !Number.isFinite(d)) return null;
+
+  let lon = a * 20 - 180;
+  let lat = b * 10 - 90;
+  lon += c * 2;
+  lat += d;
+
+  // Center of the 2x1 degree square.
+  lon += 1;
+  lat += 0.5;
+
+  // Support 6-char locators (subsquares) for better centering.
+  if (chars.length >= 6) {
+    const e = chars.charCodeAt(4) - 65;
+    const f = chars.charCodeAt(5) - 65;
+    if (e >= 0 && e <= 23 && f >= 0 && f <= 23) {
+      lon += e * (5 / 60) + 2.5 / 60;
+      lat += f * (2.5 / 60) + 1.25 / 60;
+    }
+  }
+
+  return { lat, lon };
+}
+

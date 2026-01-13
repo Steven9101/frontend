@@ -137,6 +137,7 @@ export default function App() {
     persistSettings ? readNumber(LS_TUNING_STEP, 100) : 100,
   );
   const [debugStats, setDebugStats] = useState<AudioDebugStats | null>(null);
+  const [tunedHz, setTunedHz] = useState<number | null>(null);
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -227,10 +228,11 @@ export default function App() {
       <div className="relative z-20 flex min-h-dvh flex-col">
         <BackendReconnectOverlay />
         <TimeSyncOverlay />
-        <WebSdrHeader 
-          receivers={receivers.kind === 'ready' ? receivers.value.receivers : null}
-          receiverId={receiverId}
-          onReceiverChange={setReceiverId}
+          <WebSdrHeader 
+            receivers={receivers.kind === 'ready' ? receivers.value.receivers : null}
+            receiverId={receiverId}
+            tunedHz={tunedHz}
+            onReceiverChange={setReceiverId}
           audioSettings={audioSettings} 
           onAudioSettingsChange={setAudioSettings} 
           tuningStepHz={tuningStepHz} 
@@ -245,6 +247,7 @@ export default function App() {
           <WebSdrUi 
             receiverId={receiverId}
             onReceiverChange={setReceiverId}
+            onCenterHzChange={setTunedHz}
             audioSettings={audioSettings} 
             onAudioSettingsChange={setAudioSettings} 
             tuningStepHz={tuningStepHz}

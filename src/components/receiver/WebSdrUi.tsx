@@ -22,6 +22,7 @@ type Props = {
   onAudioSettingsChange: React.Dispatch<React.SetStateAction<AudioUiSettings>>;
   tuningStepHz: number;
   onDebugStatsChange: React.Dispatch<React.SetStateAction<AudioDebugStats | null>>;
+  onCenterHzChange?: (hz: number | null) => void;
   autoBandMode: boolean;
   onPreferReceiverForFrequencyHz?: (hz: number) => string | null;
   initialUrlTune?: { receiverId: string; frequencyHz: number | null; mode: ReceiverMode | null } | null;
@@ -35,6 +36,7 @@ export function WebSdrUi({
   onAudioSettingsChange,
   tuningStepHz,
   onDebugStatsChange,
+  onCenterHzChange,
   autoBandMode,
   onPreferReceiverForFrequencyHz,
   initialUrlTune,
@@ -43,6 +45,10 @@ export function WebSdrUi({
   const [mode, setMode] = useState<'USB' | 'LSB' | 'CW' | 'AM' | 'FM' | 'FMC' | 'WBFM' | 'SAM'>('USB');
   const [centerHz, setCenterHz] = useState<number | null>(null);
   const [bandwidthHz, setBandwidthHz] = useState<number | null>(null);
+
+  useEffect(() => {
+    onCenterHzChange?.(centerHz);
+  }, [centerHz, onCenterHzChange]);
   const [gridLocator, setGridLocator] = useState<string | null>(null);
   const [viewport, setViewport] = useState<{ l: number; r: number } | null>(null);
   const [audioMaxSps, setAudioMaxSps] = useState<number | null>(null);
