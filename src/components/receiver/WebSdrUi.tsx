@@ -78,7 +78,8 @@ export function WebSdrUi({
     passband: { l: number; m: number; r: number } | null;
     viewport: { l: number; r: number } | null;
   }>({ mode, centerHz, bandwidthHz, passband: audioWindow, viewport });
-  const vfoARef = useRef<{
+  const catsyncNotifyRef = useRef<{ hz: number | null; mode: typeof mode | null }>({ hz: null, mode: null });
+  const vfoARef = useRef<{ 
     mode: typeof mode;
     centerHz: number;
     bandwidthHz: number | null;
@@ -240,6 +241,7 @@ export function WebSdrUi({
         v.mode = sanitized;
       });
 
+
       const settings = waterfallSettingsRef.current;
       const hz = liveRef.current.centerHz;
       if (!settings || hz == null) return;
@@ -296,6 +298,121 @@ export function WebSdrUi({
     },
     [canWbfm, onReceiverChange, passbandForTune, receiverId, requestFrequencySetHz, setModeForActiveVfo],
   );
+
+  useEffect(() => {
+    const w = window as any;
+
+    const setfreqImpl = (hz: number) => {
+      const rounded = Math.round(Number(hz));
+      if (!Number.isFinite(rounded) || rounded <= 0) return false;
+      w.__catsync_state = w.__catsync_state || { hz: null, mode: null, requestedHz: null };
+      w.__catsync_state.requestedHz = rounded;
+      w.__catsync_state.hz = rounded;
+      tuneTo(rounded);
+      return true;
+    };
+
+    const setmodeImpl = (rawMode: string) => {
+      const normalized = String(rawMode || '').trim().toUpperCase();
+      const mapped =
+        normalized === 'WFM'
+          ? 'WBFM'
+          : normalized === 'NFM' || normalized === 'NBFM'
+            ? 'FM'
+            : normalized === 'CWU' || normalized === 'CWL'
+              ? 'CW'
+              : normalized === 'DIGU'
+                ? 'USB'
+                : normalized === 'DIGL'
+                  ? 'LSB'
+                  : normalized === 'DSB'
+                    ? 'AM'
+                    : normalized;
+
+      const nextMode: typeof mode =
+        mapped === 'USB' ||
+        mapped === 'LSB' ||
+        mapped === 'CW' ||
+        mapped === 'AM' ||
+        mapped === 'FM' ||
+        mapped === 'FMC' ||
+        mapped === 'WBFM' ||
+        mapped === 'SAM'
+          ? mapped
+          : 'USB';
+
+      w.__catsync_state = w.__catsync_state || { hz: null, mode: null, requestedHz: null };
+      w.__catsync_state.mode = nextMode;
+      setModeForActiveVfo(nextMode);
+      return true;
+    };
+
+    const zoomStepImpl = (action: any) => {
+      const toBand = w.ext_zoom?.TO_BAND;
+      const isToBand = action === toBand || action === 'TO_BAND' || action === 0;
+      if (!isToBand) return true;
+
+      const settings = waterfallSettingsRef.current;
+      if (!settings) return false;
+      const fft = Math.floor(Number(settings.fft_result_size) || 0);
+      if (!Number.isFinite(fft) || fft <= 0) return false;
+
+      viewportSetNonceRef.current += 1;
+      setViewportSet({ nonce: viewportSetNonceRef.current, l: 0, r: fft });
+      return true;
+    };
+
+    w.__catsync_setfreq_impl = setfreqImpl;
+    w.__catsync_setmode_impl = setmodeImpl;
+    w.__catsync_zoom_step_impl = zoomStepImpl;
+    if (typeof w.__catsync_flush === 'function') w.__catsync_flush();
+
+    return () => {
+      if (w.__catsync_setfreq_impl === setfreqImpl) delete w.__catsync_setfreq_impl;
+      if (w.__catsync_setmode_impl === setmodeImpl) delete w.__catsync_setmode_impl;
+      if (w.__catsync_zoom_step_impl === zoomStepImpl) delete w.__catsync_zoom_step_impl;
+    };
+  }, [setModeForActiveVfo, tuneTo]);
+
+  useEffect(() => {
+    const w = window as any;
+    if (!w.__catsync_state) return;
+
+    if (centerHz != null) w.__catsync_state.hz = Math.round(centerHz);
+    w.__catsync_state.mode = mode;
+
+    const nextHz = centerHz != null ? Math.round(centerHz) : null;
+    const nextMode = mode;
+    const last = catsyncNotifyRef.current;
+    const freqChanged = nextHz != null && nextHz !== last.hz;
+    const modeChanged = nextMode !== last.mode;
+
+    if (freqChanged || modeChanged) {
+      last.hz = nextHz;
+      last.mode = nextMode;
+      try {
+        if (typeof w.injection_environment_changed === 'function') {
+          console.debug('[NovaSDR CATsync] injection_environment_changed', { freqChanged, modeChanged, nextHz, nextMode });
+          w.injection_environment_changed({ freq: freqChanged, mode: modeChanged });
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    const requestedHz = w.__catsync_state.requestedHz;
+    if (requestedHz != null && centerHz != null && Math.round(centerHz) === requestedHz) {
+      try {
+        const noop = w.__catsync_noop_freqset_complete;
+        if (typeof w.freqset_complete === 'function' && w.freqset_complete !== noop) {
+          w.freqset_complete();
+        }
+      } catch {
+        // ignore
+      }
+      w.__catsync_state.requestedHz = null;
+    }
+  }, [centerHz, mode]);
 
   useEffect(() => {
     if (!initialUrlTune || initialUrlTuneAppliedRef.current) return;
