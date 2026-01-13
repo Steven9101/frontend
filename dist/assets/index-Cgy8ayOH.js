@@ -129,7 +129,7 @@
     function ie(D, B) {
       return J(D.type, B, D.props);
     }
-    function te(D) {
+    function ee(D) {
       return typeof D == "object" && D !== null && D.$$typeof === e;
     }
     function ye(D) {
@@ -188,7 +188,7 @@
       }
       if (Ae) return pe = pe(D), Ae = re === "" ? "." + oe(D, 0) : re, O(pe) ? (X = "", Ae != null && (X = Ae.replace(H, "$&/") + "/"), T(pe, B, X, "", function(wt) {
         return wt;
-      })) : pe != null && (te(pe) && (pe = ie(pe, X + (pe.key == null || D && D.key === pe.key ? "" : ("" + pe.key).replace(H, "$&/") + "/") + Ae)), B.push(pe)), 1;
+      })) : pe != null && (ee(pe) && (pe = ie(pe, X + (pe.key == null || D && D.key === pe.key ? "" : ("" + pe.key).replace(H, "$&/") + "/") + Ae)), B.push(pe)), 1;
       Ae = 0;
       var Je = re === "" ? "." : re + ":";
       if (O(D)) for (var Ie = 0; Ie < D.length; Ie++) re = D[Ie], Ce = Je + oe(re, Ie), Ae += T(re, B, X, Ce, pe);
@@ -251,7 +251,7 @@
         }) || [];
       },
       only: function(D) {
-        if (!te(D)) throw Error("React.Children.only expected to receive a single React element child.");
+        if (!ee(D)) throw Error("React.Children.only expected to receive a single React element child.");
         return D;
       }
     };
@@ -309,7 +309,7 @@
         $$typeof: h,
         render: D
       };
-    }, rt.isValidElement = te, rt.lazy = function(D) {
+    }, rt.isValidElement = ee, rt.lazy = function(D) {
       return {
         $$typeof: v,
         _payload: {
@@ -456,7 +456,7 @@
       function ie() {
         return _ ? true : !(e.unstable_now() - J < L);
       }
-      function te() {
+      function ee() {
         if (_ = false, G) {
           var T = e.unstable_now();
           J = T;
@@ -499,15 +499,15 @@
       }
       var ye;
       if (typeof N == "function") ye = function() {
-        N(te);
+        N(ee);
       };
       else if (typeof MessageChannel < "u") {
         var H = new MessageChannel(), oe = H.port2;
-        H.port1.onmessage = te, ye = function() {
+        H.port1.onmessage = ee, ye = function() {
           oe.postMessage(null);
         };
       } else ye = function() {
-        R(te, 0);
+        R(ee, 0);
       };
       function K(T, j) {
         V = R(function() {
@@ -849,9 +849,9 @@
       }
       return null;
     }
-    var x = Object.assign, b = /* @__PURE__ */ Symbol.for("react.element"), S = /* @__PURE__ */ Symbol.for("react.transitional.element"), C = /* @__PURE__ */ Symbol.for("react.portal"), M = /* @__PURE__ */ Symbol.for("react.fragment"), _ = /* @__PURE__ */ Symbol.for("react.strict_mode"), R = /* @__PURE__ */ Symbol.for("react.profiler"), z = /* @__PURE__ */ Symbol.for("react.consumer"), N = /* @__PURE__ */ Symbol.for("react.context"), k = /* @__PURE__ */ Symbol.for("react.forward_ref"), O = /* @__PURE__ */ Symbol.for("react.suspense"), G = /* @__PURE__ */ Symbol.for("react.suspense_list"), V = /* @__PURE__ */ Symbol.for("react.memo"), L = /* @__PURE__ */ Symbol.for("react.lazy"), J = /* @__PURE__ */ Symbol.for("react.activity"), ie = /* @__PURE__ */ Symbol.for("react.memo_cache_sentinel"), te = Symbol.iterator;
+    var x = Object.assign, b = /* @__PURE__ */ Symbol.for("react.element"), S = /* @__PURE__ */ Symbol.for("react.transitional.element"), C = /* @__PURE__ */ Symbol.for("react.portal"), M = /* @__PURE__ */ Symbol.for("react.fragment"), _ = /* @__PURE__ */ Symbol.for("react.strict_mode"), R = /* @__PURE__ */ Symbol.for("react.profiler"), z = /* @__PURE__ */ Symbol.for("react.consumer"), N = /* @__PURE__ */ Symbol.for("react.context"), k = /* @__PURE__ */ Symbol.for("react.forward_ref"), O = /* @__PURE__ */ Symbol.for("react.suspense"), G = /* @__PURE__ */ Symbol.for("react.suspense_list"), V = /* @__PURE__ */ Symbol.for("react.memo"), L = /* @__PURE__ */ Symbol.for("react.lazy"), J = /* @__PURE__ */ Symbol.for("react.activity"), ie = /* @__PURE__ */ Symbol.for("react.memo_cache_sentinel"), ee = Symbol.iterator;
     function ye(t) {
-      return t === null || typeof t != "object" ? null : (t = te && t[te] || t["@@iterator"], typeof t == "function" ? t : null);
+      return t === null || typeof t != "object" ? null : (t = ee && t[ee] || t["@@iterator"], typeof t == "function" ? t : null);
     }
     var H = /* @__PURE__ */ Symbol.for("react.client.reference");
     function oe(t) {
@@ -977,14 +977,14 @@
                   try {
                     Reflect.construct(me, []);
                   } catch (ae) {
-                    var ee = ae;
+                    var te = ae;
                   }
                   Reflect.construct(t, [], me);
                 } else {
                   try {
                     me.call();
                   } catch (ae) {
-                    ee = ae;
+                    te = ae;
                   }
                   t.call(me.prototype);
                 }
@@ -992,15 +992,15 @@
                 try {
                   throw Error();
                 } catch (ae) {
-                  ee = ae;
+                  te = ae;
                 }
                 (me = t()) && typeof me.catch == "function" && me.catch(function() {
                 });
               }
             } catch (ae) {
-              if (ae && ee && typeof ae.stack == "string") return [
+              if (ae && te && typeof ae.stack == "string") return [
                 ae.stack,
-                ee.stack
+                te.stack
               ];
             }
             return [
@@ -1213,9 +1213,9 @@ Error generating stack: ` + l.message + `
       for (a = w & ~a; 0 < a; ) {
         var le = 31 - Qt(a), me = 1 << le;
         A[le] = 0, U[le] = -1;
-        var ee = Q[le];
-        if (ee !== null) for (Q[le] = null, le = 0; le < ee.length; le++) {
-          var ae = ee[le];
+        var te = Q[le];
+        if (te !== null) for (Q[le] = null, le = 0; le < te.length; le++) {
+          var ae = te[le];
           ae !== null && (ae.lane &= -536870913);
         }
         a &= ~me;
@@ -2984,7 +2984,7 @@ Error generating stack: ` + l.message + `
         }
         return null;
       }
-      function ee($, q, W, he) {
+      function te($, q, W, he) {
         var qe = q !== null ? q.key : null;
         if (typeof W == "string" && W !== "" || typeof W == "number" || typeof W == "bigint") return qe !== null ? null : A($, q, "" + W, he);
         if (typeof W == "object" && W !== null) {
@@ -2994,11 +2994,11 @@ Error generating stack: ` + l.message + `
             case C:
               return W.key === qe ? Q($, q, W, he) : null;
             case L:
-              return W = Oa(W), ee($, q, W, he);
+              return W = Oa(W), te($, q, W, he);
           }
           if (K(W) || ye(W)) return qe !== null ? null : le($, q, W, he, null);
-          if (typeof W.then == "function") return ee($, q, bc(W), he);
-          if (W.$$typeof === N) return ee($, q, gc($, W), he);
+          if (typeof W.then == "function") return te($, q, bc(W), he);
+          if (W.$$typeof === N) return te($, q, gc($, W), he);
           wc($, W);
         }
         return null;
@@ -3024,7 +3024,7 @@ Error generating stack: ` + l.message + `
       function Oe($, q, W, he) {
         for (var qe = null, Ct = null, Fe = q, ot = q = 0, dt = null; Fe !== null && ot < W.length; ot++) {
           Fe.index > ot ? (dt = Fe, Fe = null) : dt = Fe.sibling;
-          var At = ee($, Fe, W[ot], he);
+          var At = te($, Fe, W[ot], he);
           if (At === null) {
             Fe === null && (Fe = dt);
             break;
@@ -3045,7 +3045,7 @@ Error generating stack: ` + l.message + `
         if (W == null) throw Error(o(151));
         for (var qe = null, Ct = null, Fe = q, ot = q = 0, dt = null, At = W.next(); Fe !== null && !At.done; ot++, At = W.next()) {
           Fe.index > ot ? (dt = Fe, Fe = null) : dt = Fe.sibling;
-          var ua = ee($, Fe, At.value, he);
+          var ua = te($, Fe, At.value, he);
           if (ua === null) {
             Fe === null && (Fe = dt);
             break;
@@ -3226,9 +3226,9 @@ Error generating stack: ` + l.message + `
         var me = f.baseState;
         w = 0, le = Q = U = null, A = g;
         do {
-          var ee = A.lane & -536870913, ae = ee !== A.lane;
-          if (ae ? (ft & ee) === ee : (l & ee) === ee) {
-            ee !== 0 && ee === xo && (Rd = true), le !== null && (le = le.next = {
+          var te = A.lane & -536870913, ae = te !== A.lane;
+          if (ae ? (ft & te) === te : (l & te) === te) {
+            te !== 0 && te === xo && (Rd = true), le !== null && (le = le.next = {
               lane: 0,
               tag: A.tag,
               payload: A.payload,
@@ -3237,12 +3237,12 @@ Error generating stack: ` + l.message + `
             });
             e: {
               var Oe = t, $e = A;
-              ee = r;
+              te = r;
               var kt = a;
               switch ($e.tag) {
                 case 1:
                   if (Oe = $e.payload, typeof Oe == "function") {
-                    me = Oe.call(kt, me, ee);
+                    me = Oe.call(kt, me, te);
                     break e;
                   }
                   me = Oe;
@@ -3250,23 +3250,23 @@ Error generating stack: ` + l.message + `
                 case 3:
                   Oe.flags = Oe.flags & -65537 | 128;
                 case 0:
-                  if (Oe = $e.payload, ee = typeof Oe == "function" ? Oe.call(kt, me, ee) : Oe, ee == null) break e;
-                  me = x({}, me, ee);
+                  if (Oe = $e.payload, te = typeof Oe == "function" ? Oe.call(kt, me, te) : Oe, te == null) break e;
+                  me = x({}, me, te);
                   break e;
                 case 2:
                   Ys = true;
               }
             }
-            ee = A.callback, ee !== null && (t.flags |= 64, ae && (t.flags |= 8192), ae = f.callbacks, ae === null ? f.callbacks = [
-              ee
-            ] : ae.push(ee));
+            te = A.callback, te !== null && (t.flags |= 64, ae && (t.flags |= 8192), ae = f.callbacks, ae === null ? f.callbacks = [
+              te
+            ] : ae.push(te));
           } else ae = {
-            lane: ee,
+            lane: te,
             tag: A.tag,
             payload: A.payload,
             callback: A.callback,
             next: null
-          }, le === null ? (Q = le = ae, U = me) : le = le.next = ae, w |= ee;
+          }, le === null ? (Q = le = ae, U = me) : le = le.next = ae, w |= te;
           if (A = A.next, A === null) {
             if (A = f.shared.pending, A === null) break;
             ae = A, A = ae.next, ae.next = null, f.lastBaseUpdate = ae, f.shared.pending = null;
@@ -3474,8 +3474,8 @@ Error generating stack: ` + l.message + `
         do {
           var me = Q.lane & -536870913;
           if (me !== Q.lane ? (ft & me) === me : (Ss & me) === me) {
-            var ee = Q.revertLane;
-            if (ee === 0) U !== null && (U = U.next = {
+            var te = Q.revertLane;
+            if (te === 0) U !== null && (U = U.next = {
               lane: 0,
               revertLane: 0,
               gesture: null,
@@ -3484,8 +3484,8 @@ Error generating stack: ` + l.message + `
               eagerState: Q.eagerState,
               next: null
             }), me === xo && (le = true);
-            else if ((Ss & ee) === ee) {
-              Q = Q.next, ee === xo && (le = true);
+            else if ((Ss & te) === te) {
+              Q = Q.next, te === xo && (le = true);
               continue;
             } else me = {
               lane: 0,
@@ -3495,9 +3495,9 @@ Error generating stack: ` + l.message + `
               hasEagerState: Q.hasEagerState,
               eagerState: Q.eagerState,
               next: null
-            }, U === null ? (A = U = me, w = g) : U = U.next = me, at.lanes |= ee, ea |= ee;
+            }, U === null ? (A = U = me, w = g) : U = U.next = me, at.lanes |= te, ea |= te;
             me = Q.action, Ba && a(g, me), g = Q.hasEagerState ? Q.eagerState : a(g, me);
-          } else ee = {
+          } else te = {
             lane: me,
             revertLane: Q.revertLane,
             gesture: Q.gesture,
@@ -3505,7 +3505,7 @@ Error generating stack: ` + l.message + `
             hasEagerState: Q.hasEagerState,
             eagerState: Q.eagerState,
             next: null
-          }, U === null ? (A = U = ee, w = g) : U = U.next = ee, at.lanes |= me, ea |= me;
+          }, U === null ? (A = U = te, w = g) : U = U.next = te, at.lanes |= me, ea |= me;
           Q = Q.next;
         } while (Q !== null && Q !== r);
         if (U === null ? w = g : U.next = A, !gr(g, t.memoizedState) && (yn = true, le && (a = bo, a !== null))) throw a;
@@ -4575,12 +4575,12 @@ Error generating stack: ` + l.message + `
         w = mo, typeof le == "object" && le !== null && (w = Hn(le));
         var me = a.getDerivedStateFromProps;
         le = typeof me == "function" || typeof g.getSnapshotBeforeUpdate == "function", A = r.pendingProps !== A, le || typeof g.UNSAFE_componentWillReceiveProps != "function" && typeof g.componentWillReceiveProps != "function" || (A || Q !== w) && Qy(r, g, l, w), Ys = false;
-        var ee = r.memoizedState;
-        g.state = ee, Bi(r, l, g, f), Hi(), Q = r.memoizedState, A || ee !== Q || Ys ? (typeof me == "function" && (Wd(r, a, me, l), Q = r.memoizedState), (U = Ys || Zy(r, a, U, l, ee, Q, w)) ? (le || typeof g.UNSAFE_componentWillMount != "function" && typeof g.componentWillMount != "function" || (typeof g.componentWillMount == "function" && g.componentWillMount(), typeof g.UNSAFE_componentWillMount == "function" && g.UNSAFE_componentWillMount()), typeof g.componentDidMount == "function" && (r.flags |= 4194308)) : (typeof g.componentDidMount == "function" && (r.flags |= 4194308), r.memoizedProps = l, r.memoizedState = Q), g.props = l, g.state = Q, g.context = w, l = U) : (typeof g.componentDidMount == "function" && (r.flags |= 4194308), l = false);
+        var te = r.memoizedState;
+        g.state = te, Bi(r, l, g, f), Hi(), Q = r.memoizedState, A || te !== Q || Ys ? (typeof me == "function" && (Wd(r, a, me, l), Q = r.memoizedState), (U = Ys || Zy(r, a, U, l, te, Q, w)) ? (le || typeof g.UNSAFE_componentWillMount != "function" && typeof g.componentWillMount != "function" || (typeof g.componentWillMount == "function" && g.componentWillMount(), typeof g.UNSAFE_componentWillMount == "function" && g.UNSAFE_componentWillMount()), typeof g.componentDidMount == "function" && (r.flags |= 4194308)) : (typeof g.componentDidMount == "function" && (r.flags |= 4194308), r.memoizedProps = l, r.memoizedState = Q), g.props = l, g.state = Q, g.context = w, l = U) : (typeof g.componentDidMount == "function" && (r.flags |= 4194308), l = false);
       } else {
-        g = r.stateNode, Td(t, r), w = r.memoizedProps, le = Ua(a, w), g.props = le, me = r.pendingProps, ee = g.context, Q = a.contextType, U = mo, typeof Q == "object" && Q !== null && (U = Hn(Q)), A = a.getDerivedStateFromProps, (Q = typeof A == "function" || typeof g.getSnapshotBeforeUpdate == "function") || typeof g.UNSAFE_componentWillReceiveProps != "function" && typeof g.componentWillReceiveProps != "function" || (w !== me || ee !== U) && Qy(r, g, l, U), Ys = false, ee = r.memoizedState, g.state = ee, Bi(r, l, g, f), Hi();
+        g = r.stateNode, Td(t, r), w = r.memoizedProps, le = Ua(a, w), g.props = le, me = r.pendingProps, te = g.context, Q = a.contextType, U = mo, typeof Q == "object" && Q !== null && (U = Hn(Q)), A = a.getDerivedStateFromProps, (Q = typeof A == "function" || typeof g.getSnapshotBeforeUpdate == "function") || typeof g.UNSAFE_componentWillReceiveProps != "function" && typeof g.componentWillReceiveProps != "function" || (w !== me || te !== U) && Qy(r, g, l, U), Ys = false, te = r.memoizedState, g.state = te, Bi(r, l, g, f), Hi();
         var ae = r.memoizedState;
-        w !== me || ee !== ae || Ys || t !== null && t.dependencies !== null && pc(t.dependencies) ? (typeof A == "function" && (Wd(r, a, A, l), ae = r.memoizedState), (le = Ys || Zy(r, a, le, l, ee, ae, U) || t !== null && t.dependencies !== null && pc(t.dependencies)) ? (Q || typeof g.UNSAFE_componentWillUpdate != "function" && typeof g.componentWillUpdate != "function" || (typeof g.componentWillUpdate == "function" && g.componentWillUpdate(l, ae, U), typeof g.UNSAFE_componentWillUpdate == "function" && g.UNSAFE_componentWillUpdate(l, ae, U)), typeof g.componentDidUpdate == "function" && (r.flags |= 4), typeof g.getSnapshotBeforeUpdate == "function" && (r.flags |= 1024)) : (typeof g.componentDidUpdate != "function" || w === t.memoizedProps && ee === t.memoizedState || (r.flags |= 4), typeof g.getSnapshotBeforeUpdate != "function" || w === t.memoizedProps && ee === t.memoizedState || (r.flags |= 1024), r.memoizedProps = l, r.memoizedState = ae), g.props = l, g.state = ae, g.context = U, l = le) : (typeof g.componentDidUpdate != "function" || w === t.memoizedProps && ee === t.memoizedState || (r.flags |= 4), typeof g.getSnapshotBeforeUpdate != "function" || w === t.memoizedProps && ee === t.memoizedState || (r.flags |= 1024), l = false);
+        w !== me || te !== ae || Ys || t !== null && t.dependencies !== null && pc(t.dependencies) ? (typeof A == "function" && (Wd(r, a, A, l), ae = r.memoizedState), (le = Ys || Zy(r, a, le, l, te, ae, U) || t !== null && t.dependencies !== null && pc(t.dependencies)) ? (Q || typeof g.UNSAFE_componentWillUpdate != "function" && typeof g.componentWillUpdate != "function" || (typeof g.componentWillUpdate == "function" && g.componentWillUpdate(l, ae, U), typeof g.UNSAFE_componentWillUpdate == "function" && g.UNSAFE_componentWillUpdate(l, ae, U)), typeof g.componentDidUpdate == "function" && (r.flags |= 4), typeof g.getSnapshotBeforeUpdate == "function" && (r.flags |= 1024)) : (typeof g.componentDidUpdate != "function" || w === t.memoizedProps && te === t.memoizedState || (r.flags |= 4), typeof g.getSnapshotBeforeUpdate != "function" || w === t.memoizedProps && te === t.memoizedState || (r.flags |= 1024), r.memoizedProps = l, r.memoizedState = ae), g.props = l, g.state = ae, g.context = U, l = le) : (typeof g.componentDidUpdate != "function" || w === t.memoizedProps && te === t.memoizedState || (r.flags |= 4), typeof g.getSnapshotBeforeUpdate != "function" || w === t.memoizedProps && te === t.memoizedState || (r.flags |= 1024), l = false);
       }
       return g = l, zc(t, r), l = (r.flags & 128) !== 0, g || l ? (g = r.stateNode, a = l && typeof a.getDerivedStateFromError != "function" ? null : g.render(), r.flags |= 1, t !== null && l ? (r.child = Ha(r, t.child, null, f), r.child = Ha(r, null, a, f)) : Bn(t, r, a, f), r.memoizedState = g.state, t = r.child) : t = Cs(t, r, f), t;
     }
@@ -5360,13 +5360,13 @@ Error generating stack: ` + l.message + `
               a = null;
               break e;
             }
-            var w = 0, A = -1, U = -1, Q = 0, le = 0, me = t, ee = null;
+            var w = 0, A = -1, U = -1, Q = 0, le = 0, me = t, te = null;
             t: for (; ; ) {
-              for (var ae; me !== a || f !== 0 && me.nodeType !== 3 || (A = w + f), me !== g || l !== 0 && me.nodeType !== 3 || (U = w + l), me.nodeType === 3 && (w += me.nodeValue.length), (ae = me.firstChild) !== null; ) ee = me, me = ae;
+              for (var ae; me !== a || f !== 0 && me.nodeType !== 3 || (A = w + f), me !== g || l !== 0 && me.nodeType !== 3 || (U = w + l), me.nodeType === 3 && (w += me.nodeValue.length), (ae = me.firstChild) !== null; ) te = me, me = ae;
               for (; ; ) {
                 if (me === t) break t;
-                if (ee === a && ++Q === f && (A = w), ee === g && ++le === l && (U = w), (ae = me.nextSibling) !== null) break;
-                me = ee, ee = me.parentNode;
+                if (te === a && ++Q === f && (A = w), te === g && ++le === l && (U = w), (ae = me.nextSibling) !== null) break;
+                me = te, te = me.parentNode;
               }
               me = ae;
             }
@@ -5743,8 +5743,8 @@ Error generating stack: ` + l.message + `
                   if (g = U.stateNode, f) w = g.style, typeof w.setProperty == "function" ? w.setProperty("display", "none", "important") : w.display = "none";
                   else {
                     A = U.stateNode;
-                    var me = U.memoizedProps.style, ee = me != null && me.hasOwnProperty("display") ? me.display : null;
-                    A.style.display = ee == null || typeof ee == "boolean" ? "" : ("" + ee).trim();
+                    var me = U.memoizedProps.style, te = me != null && me.hasOwnProperty("display") ? me.display : null;
+                    A.style.display = te == null || typeof te == "boolean" ? "" : ("" + te).trim();
                   }
                 } catch (Oe) {
                   Rt(U, U.return, Oe);
@@ -6233,7 +6233,7 @@ Error generating stack: ` + l.message + `
       } while (true);
       ns(t);
     }
-    function Fv(t, r, a, l, f, g, w, A, U, Q, le, me, ee, ae) {
+    function Fv(t, r, a, l, f, g, w, A, U, Q, le, me, te, ae) {
       if (t.timeoutHandle = -1, me = r.subtreeFlags, me & 8192 || (me & 16785408) === 16785408) {
         me = {
           stylesheets: null,
@@ -6247,7 +6247,7 @@ Error generating stack: ` + l.message + `
         }, zv(r, g, me);
         var Oe = (g & 62914560) === g ? Pc - Mt() : (g & 4194048) === g ? Bv - Mt() : 0;
         if (Oe = NE(me, Oe), Oe !== null) {
-          js = g, t.cancelPendingCommit = Oe(Wv.bind(null, t, r, g, a, l, f, w, A, U, le, me, null, ee, ae)), ra(t, g, w, !Q);
+          js = g, t.cancelPendingCommit = Oe(Wv.bind(null, t, r, g, a, l, f, w, A, U, le, me, null, te, ae)), ra(t, g, w, !Q);
           return;
         }
       }
@@ -6550,9 +6550,9 @@ Error generating stack: ` + l.message + `
                 var Q = U.start, le = U.end;
                 if (le === void 0 && (le = Q), "selectionStart" in A) A.selectionStart = Q, A.selectionEnd = Math.min(le, A.value.length);
                 else {
-                  var me = A.ownerDocument || document, ee = me && me.defaultView || window;
-                  if (ee.getSelection) {
-                    var ae = ee.getSelection(), Oe = A.textContent.length, $e = Math.min(U.start, Oe), kt = U.end === void 0 ? $e : Math.min(U.end, Oe);
+                  var me = A.ownerDocument || document, te = me && me.defaultView || window;
+                  if (te.getSelection) {
+                    var ae = te.getSelection(), Oe = A.textContent.length, $e = Math.min(U.start, Oe), kt = U.end === void 0 ? $e : Math.min(U.end, Oe);
                     !ae.extend && $e > kt && (w = kt, kt = $e, $e = w);
                     var $ = Og(A, $e), q = Og(A, kt);
                     if ($ && q && (ae.rangeCount !== 1 || ae.anchorNode !== $.node || ae.anchorOffset !== $.offset || ae.focusNode !== q.node || ae.focusOffset !== q.offset)) {
@@ -6957,8 +6957,8 @@ Error generating stack: ` + l.message + `
       gg(function() {
         var Q = g, le = $f(a), me = [];
         e: {
-          var ee = Ig.get(t);
-          if (ee !== void 0) {
+          var te = Ig.get(t);
+          if (te !== void 0) {
             var ae = oc, Oe = t;
             switch (t) {
               case "keypress":
@@ -7039,24 +7039,24 @@ Error generating stack: ` + l.message + `
               case "beforetoggle":
                 ae = iT;
             }
-            var $e = (r & 4) !== 0, kt = !$e && (t === "scroll" || t === "scrollend"), $ = $e ? ee !== null ? ee + "Capture" : null : ee;
+            var $e = (r & 4) !== 0, kt = !$e && (t === "scroll" || t === "scrollend"), $ = $e ? te !== null ? te + "Capture" : null : te;
             $e = [];
             for (var q = Q, W; q !== null; ) {
               var he = q;
               if (W = he.stateNode, he = he.tag, he !== 5 && he !== 26 && he !== 27 || W === null || $ === null || (he = wi(q, $), he != null && $e.push(el(q, he, W))), kt) break;
               q = q.return;
             }
-            0 < $e.length && (ee = new ae(ee, Oe, null, a, le), me.push({
-              event: ee,
+            0 < $e.length && (te = new ae(te, Oe, null, a, le), me.push({
+              event: te,
               listeners: $e
             }));
           }
         }
         if ((r & 7) === 0) {
           e: {
-            if (ee = t === "mouseover" || t === "pointerover", ae = t === "mouseout" || t === "pointerout", ee && a !== Yf && (Oe = a.relatedTarget || a.fromElement) && (Xe(Oe) || Oe[ke])) break e;
-            if ((ae || ee) && (ee = le.window === le ? le : (ee = le.ownerDocument) ? ee.defaultView || ee.parentWindow : window, ae ? (Oe = a.relatedTarget || a.toElement, ae = Q, Oe = Oe ? Xe(Oe) : null, Oe !== null && (kt = c(Oe), $e = Oe.tag, Oe !== kt || $e !== 5 && $e !== 27 && $e !== 6) && (Oe = null)) : (ae = null, Oe = Q), ae !== Oe)) {
-              if ($e = xg, he = "onMouseLeave", $ = "onMouseEnter", q = "mouse", (t === "pointerout" || t === "pointerover") && ($e = wg, he = "onPointerLeave", $ = "onPointerEnter", q = "pointer"), kt = ae == null ? ee : Ve(ae), W = Oe == null ? ee : Ve(Oe), ee = new $e(he, q + "leave", ae, a, le), ee.target = kt, ee.relatedTarget = W, he = null, Xe(le) === Q && ($e = new $e($, q + "enter", Oe, a, le), $e.target = W, $e.relatedTarget = kt, he = $e), kt = he, ae && Oe) t: {
+            if (te = t === "mouseover" || t === "pointerover", ae = t === "mouseout" || t === "pointerout", te && a !== Yf && (Oe = a.relatedTarget || a.fromElement) && (Xe(Oe) || Oe[ke])) break e;
+            if ((ae || te) && (te = le.window === le ? le : (te = le.ownerDocument) ? te.defaultView || te.parentWindow : window, ae ? (Oe = a.relatedTarget || a.toElement, ae = Q, Oe = Oe ? Xe(Oe) : null, Oe !== null && (kt = c(Oe), $e = Oe.tag, Oe !== kt || $e !== 5 && $e !== 27 && $e !== 6) && (Oe = null)) : (ae = null, Oe = Q), ae !== Oe)) {
+              if ($e = xg, he = "onMouseLeave", $ = "onMouseEnter", q = "mouse", (t === "pointerout" || t === "pointerover") && ($e = wg, he = "onPointerLeave", $ = "onPointerEnter", q = "pointer"), kt = ae == null ? te : Ve(ae), W = Oe == null ? te : Ve(Oe), te = new $e(he, q + "leave", ae, a, le), te.target = kt, te.relatedTarget = W, he = null, Xe(le) === Q && ($e = new $e($, q + "enter", Oe, a, le), $e.target = W, $e.relatedTarget = kt, he = $e), kt = he, ae && Oe) t: {
                 for ($e = oE, $ = ae, q = Oe, W = 0, he = $; he; he = $e(he)) W++;
                 he = 0;
                 for (var qe = q; qe; qe = $e(qe)) he++;
@@ -7072,22 +7072,22 @@ Error generating stack: ` + l.message + `
                 $e = null;
               }
               else $e = null;
-              ae !== null && dx(me, ee, ae, $e, false), Oe !== null && kt !== null && dx(me, kt, Oe, $e, true);
+              ae !== null && dx(me, te, ae, $e, false), Oe !== null && kt !== null && dx(me, kt, Oe, $e, true);
             }
           }
           e: {
-            if (ee = Q ? Ve(Q) : window, ae = ee.nodeName && ee.nodeName.toLowerCase(), ae === "select" || ae === "input" && ee.type === "file") var Ct = Rg;
-            else if (Tg(ee)) if (Ng) Ct = yT;
+            if (te = Q ? Ve(Q) : window, ae = te.nodeName && te.nodeName.toLowerCase(), ae === "select" || ae === "input" && te.type === "file") var Ct = Rg;
+            else if (Tg(te)) if (Ng) Ct = yT;
             else {
               Ct = pT;
               var Fe = mT;
             }
-            else ae = ee.nodeName, !ae || ae.toLowerCase() !== "input" || ee.type !== "checkbox" && ee.type !== "radio" ? Q && Xf(Q.elementType) && (Ct = Rg) : Ct = gT;
+            else ae = te.nodeName, !ae || ae.toLowerCase() !== "input" || te.type !== "checkbox" && te.type !== "radio" ? Q && Xf(Q.elementType) && (Ct = Rg) : Ct = gT;
             if (Ct && (Ct = Ct(t, Q))) {
               Eg(me, Ct, a, le);
               break e;
             }
-            Fe && Fe(t, ee, Q), t === "focusout" && Q && ee.type === "number" && Q.memoizedProps.value != null && Gf(ee, "number", ee.value);
+            Fe && Fe(t, te, Q), t === "focusout" && Q && te.type === "number" && Q.memoizedProps.value != null && Gf(te, "number", te.value);
           }
           switch (Fe = Q ? Ve(Q) : window, t) {
             case "focusin":
@@ -7580,9 +7580,9 @@ Error generating stack: ` + l.message + `
                 l.hasOwnProperty(ae) || Dt(t, r, ae, null, l, me);
             }
           }
-          for (var ee in l) {
-            var ae = l[ee];
-            if (me = a[ee], l.hasOwnProperty(ee) && (ae != null || me != null)) switch (ee) {
+          for (var te in l) {
+            var ae = l[te];
+            if (me = a[te], l.hasOwnProperty(te) && (ae != null || me != null)) switch (te) {
               case "type":
                 g = ae;
                 break;
@@ -7606,13 +7606,13 @@ Error generating stack: ` + l.message + `
                 if (ae != null) throw Error(o(137, r));
                 break;
               default:
-                ae !== me && Dt(t, r, ee, ae, l, me);
+                ae !== me && Dt(t, r, te, ae, l, me);
             }
           }
           If(t, w, A, U, Q, le, g, f);
           return;
         case "select":
-          ae = w = A = ee = null;
+          ae = w = A = te = null;
           for (g in a) if (U = a[g], a.hasOwnProperty(g) && U != null) switch (g) {
             case "value":
               break;
@@ -7623,7 +7623,7 @@ Error generating stack: ` + l.message + `
           }
           for (f in l) if (g = l[f], U = a[f], l.hasOwnProperty(f) && (g != null || U != null)) switch (f) {
             case "value":
-              ee = g;
+              te = g;
               break;
             case "defaultValue":
               A = g;
@@ -7633,10 +7633,10 @@ Error generating stack: ` + l.message + `
             default:
               g !== U && Dt(t, r, f, g, l, U);
           }
-          r = A, a = w, l = ae, ee != null ? ao(t, !!a, ee, false) : !!l != !!a && (r != null ? ao(t, !!a, r, true) : ao(t, !!a, a ? [] : "", false));
+          r = A, a = w, l = ae, te != null ? ao(t, !!a, te, false) : !!l != !!a && (r != null ? ao(t, !!a, r, true) : ao(t, !!a, a ? [] : "", false));
           return;
         case "textarea":
-          ae = ee = null;
+          ae = te = null;
           for (A in a) if (f = a[A], a.hasOwnProperty(A) && f != null && !l.hasOwnProperty(A)) switch (A) {
             case "value":
               break;
@@ -7647,7 +7647,7 @@ Error generating stack: ` + l.message + `
           }
           for (w in l) if (f = l[w], g = a[w], l.hasOwnProperty(w) && (f != null || g != null)) switch (w) {
             case "value":
-              ee = f;
+              te = f;
               break;
             case "defaultValue":
               ae = f;
@@ -7660,11 +7660,11 @@ Error generating stack: ` + l.message + `
             default:
               f !== g && Dt(t, r, w, f, l, g);
           }
-          fg(t, ee, ae);
+          fg(t, te, ae);
           return;
         case "option":
-          for (var Oe in a) ee = a[Oe], a.hasOwnProperty(Oe) && ee != null && !l.hasOwnProperty(Oe) && (Oe === "selected" ? t.selected = false : Dt(t, r, Oe, null, l, ee));
-          for (U in l) ee = l[U], ae = a[U], l.hasOwnProperty(U) && ee !== ae && (ee != null || ae != null) && (U === "selected" ? t.selected = ee && typeof ee != "function" && typeof ee != "symbol" : Dt(t, r, U, ee, l, ae));
+          for (var Oe in a) te = a[Oe], a.hasOwnProperty(Oe) && te != null && !l.hasOwnProperty(Oe) && (Oe === "selected" ? t.selected = false : Dt(t, r, Oe, null, l, te));
+          for (U in l) te = l[U], ae = a[U], l.hasOwnProperty(U) && te !== ae && (te != null || ae != null) && (U === "selected" ? t.selected = te && typeof te != "function" && typeof te != "symbol" : Dt(t, r, U, te, l, ae));
           return;
         case "img":
         case "link":
@@ -7681,25 +7681,25 @@ Error generating stack: ` + l.message + `
         case "track":
         case "wbr":
         case "menuitem":
-          for (var $e in a) ee = a[$e], a.hasOwnProperty($e) && ee != null && !l.hasOwnProperty($e) && Dt(t, r, $e, null, l, ee);
-          for (Q in l) if (ee = l[Q], ae = a[Q], l.hasOwnProperty(Q) && ee !== ae && (ee != null || ae != null)) switch (Q) {
+          for (var $e in a) te = a[$e], a.hasOwnProperty($e) && te != null && !l.hasOwnProperty($e) && Dt(t, r, $e, null, l, te);
+          for (Q in l) if (te = l[Q], ae = a[Q], l.hasOwnProperty(Q) && te !== ae && (te != null || ae != null)) switch (Q) {
             case "children":
             case "dangerouslySetInnerHTML":
-              if (ee != null) throw Error(o(137, r));
+              if (te != null) throw Error(o(137, r));
               break;
             default:
-              Dt(t, r, Q, ee, l, ae);
+              Dt(t, r, Q, te, l, ae);
           }
           return;
         default:
           if (Xf(r)) {
-            for (var kt in a) ee = a[kt], a.hasOwnProperty(kt) && ee !== void 0 && !l.hasOwnProperty(kt) && Dh(t, r, kt, void 0, l, ee);
-            for (le in l) ee = l[le], ae = a[le], !l.hasOwnProperty(le) || ee === ae || ee === void 0 && ae === void 0 || Dh(t, r, le, ee, l, ae);
+            for (var kt in a) te = a[kt], a.hasOwnProperty(kt) && te !== void 0 && !l.hasOwnProperty(kt) && Dh(t, r, kt, void 0, l, te);
+            for (le in l) te = l[le], ae = a[le], !l.hasOwnProperty(le) || te === ae || te === void 0 && ae === void 0 || Dh(t, r, le, te, l, ae);
             return;
           }
       }
-      for (var $ in a) ee = a[$], a.hasOwnProperty($) && ee != null && !l.hasOwnProperty($) && Dt(t, r, $, null, l, ee);
-      for (me in l) ee = l[me], ae = a[me], !l.hasOwnProperty(me) || ee === ae || ee == null && ae == null || Dt(t, r, me, ee, l, ae);
+      for (var $ in a) te = a[$], a.hasOwnProperty($) && te != null && !l.hasOwnProperty($) && Dt(t, r, $, null, l, te);
+      for (me in l) te = l[me], ae = a[me], !l.hasOwnProperty(me) || te === ae || te == null && ae == null || Dt(t, r, me, te, l, ae);
     }
     function px(t) {
       switch (t) {
@@ -9715,14 +9715,14 @@ Error generating stack: ` + l.message + `
     "skew",
     "skewX",
     "skewY"
-  ], pi = new Set(mi), db = (e) => e === hi || e === Qe, e3 = /* @__PURE__ */ new Set([
+  ], pi = new Set(mi), db = (e) => e === hi || e === Qe, eN = /* @__PURE__ */ new Set([
     "x",
     "y",
     "z"
-  ]), t3 = mi.filter((e) => !e3.has(e));
-  function n3(e) {
+  ]), tN = mi.filter((e) => !eN.has(e));
+  function nN(e) {
     const n = [];
-    return t3.forEach((s) => {
+    return tN.forEach((s) => {
       const o = e.getValue(s);
       o !== void 0 && (n.push([
         s,
@@ -9748,7 +9748,7 @@ Error generating stack: ` + l.message + `
     if (ep) {
       const e = Array.from(Ka).filter((o) => o.needsMeasurement), n = new Set(e.map((o) => o.element)), s = /* @__PURE__ */ new Map();
       n.forEach((o) => {
-        const i = n3(o);
+        const i = nN(o);
         i.length && (s.set(o, i), o.render());
       }), e.forEach((o) => o.measureInitialState()), n.forEach((o) => {
         o.render();
@@ -9768,7 +9768,7 @@ Error generating stack: ` + l.message + `
       e.readKeyframes(), e.needsMeasurement && (ep = true);
     });
   }
-  function r3() {
+  function rN() {
     tp = true, C2(), M2(), tp = false;
   }
   class o0 {
@@ -9811,16 +9811,16 @@ Error generating stack: ` + l.message + `
       this.state === "pending" && this.scheduleResolve();
     }
   }
-  const s3 = (e) => e.startsWith("--");
-  function a3(e, n, s) {
-    s3(n) ? e.style.setProperty(n, s) : e.style[n] = s;
+  const sN = (e) => e.startsWith("--");
+  function aN(e, n, s) {
+    sN(n) ? e.style.setProperty(n, s) : e.style[n] = s;
   }
-  const o3 = $p(() => window.ScrollTimeline !== void 0), i3 = {};
-  function l3(e, n) {
+  const oN = $p(() => window.ScrollTimeline !== void 0), iN = {};
+  function lN(e, n) {
     const s = $p(e);
-    return () => i3[n] ?? s();
+    return () => iN[n] ?? s();
   }
-  const A2 = l3(() => {
+  const A2 = lN(() => {
     try {
       document.createElement("div").animate({
         opacity: 0
@@ -9865,7 +9865,7 @@ Error generating stack: ` + l.message + `
   function _2(e, n) {
     if (e) return typeof e == "function" ? A2() ? b2(e, n) : "ease-out" : c2(e) ? ml(e) : Array.isArray(e) ? e.map((s) => _2(s, n) || hb.easeOut) : hb[e];
   }
-  function c3(e, n, s, { delay: o = 0, duration: i = 300, repeat: c = 0, repeatType: u = "loop", ease: h = "easeOut", times: p } = {}, y = void 0) {
+  function cN(e, n, s, { delay: o = 0, duration: i = 300, repeat: c = 0, repeatType: u = "loop", ease: h = "easeOut", times: p } = {}, y = void 0) {
     const v = {
       [n]: s
     };
@@ -9885,19 +9885,19 @@ Error generating stack: ` + l.message + `
   function T2(e) {
     return typeof e == "function" && "applyToOptions" in e;
   }
-  function u3({ type: e, ...n }) {
+  function uN({ type: e, ...n }) {
     return T2(e) && A2() ? e.applyToOptions(n) : (n.duration ?? (n.duration = 300), n.ease ?? (n.ease = "easeOut"), n);
   }
-  class f3 extends s0 {
+  class fN extends s0 {
     constructor(n) {
       if (super(), this.finishedTime = null, this.isStopped = false, !n) return;
       const { element: s, name: o, keyframes: i, pseudoElement: c, allowFlatten: u = false, finalKeyframe: h, onComplete: p } = n;
       this.isPseudoElement = !!c, this.allowFlatten = u, this.options = n, Yp(typeof n.type != "string");
-      const y = u3(n);
-      this.animation = c3(s, o, i, y, c), y.autoplay === false && this.animation.pause(), this.animation.onfinish = () => {
+      const y = uN(n);
+      this.animation = cN(s, o, i, y, c), y.autoplay === false && this.animation.pause(), this.animation.onfinish = () => {
         if (this.finishedTime = this.time, !c) {
           const v = r0(i, this.options, h, this.speed);
-          this.updateMotionValue ? this.updateMotionValue(v) : a3(s, o, v), this.animation.cancel();
+          this.updateMotionValue ? this.updateMotionValue(v) : aN(s, o, v), this.animation.cancel();
         }
         p == null ? void 0 : p(), this.notifyFinished();
       };
@@ -9962,7 +9962,7 @@ Error generating stack: ` + l.message + `
       var _a;
       return this.allowFlatten && ((_a = this.animation.effect) == null ? void 0 : _a.updateTiming({
         easing: "linear"
-      })), this.animation.onfinish = null, n && o3() ? (this.animation.timeline = n, Vr) : s(this);
+      })), this.animation.onfinish = null, n && oN() ? (this.animation.timeline = n, Vr) : s(this);
     }
   }
   const E2 = {
@@ -9970,16 +9970,16 @@ Error generating stack: ` + l.message + `
     backInOut: s2,
     circInOut: i2
   };
-  function d3(e) {
+  function dN(e) {
     return e in E2;
   }
-  function h3(e) {
-    typeof e.ease == "string" && d3(e.ease) && (e.ease = E2[e.ease]);
+  function hN(e) {
+    typeof e.ease == "string" && dN(e.ease) && (e.ease = E2[e.ease]);
   }
   const mb = 10;
-  class m3 extends f3 {
+  class mN extends fN {
     constructor(n) {
-      h3(n), S2(n), super(n), n.startTime && (this.startTime = n.startTime), this.options = n;
+      hN(n), S2(n), super(n), n.startTime && (this.startTime = n.startTime), this.options = n;
     }
     updateMotionValue(n) {
       const { motionValue: s, onUpdate: o, onComplete: i, element: c, ...u } = this.options;
@@ -9996,36 +9996,36 @@ Error generating stack: ` + l.message + `
     }
   }
   const pb = (e, n) => n === "zIndex" ? false : !!(typeof e == "number" || Array.isArray(e) || typeof e == "string" && (ba.test(e) || e === "0") && !e.startsWith("url("));
-  function p3(e) {
+  function pN(e) {
     const n = e[0];
     if (e.length === 1) return true;
     for (let s = 0; s < e.length; s++) if (e[s] !== n) return true;
   }
-  function g3(e, n, s, o) {
+  function gN(e, n, s, o) {
     const i = e[0];
     if (i === null) return false;
     if (n === "display" || n === "visibility") return true;
     const c = e[e.length - 1], u = pb(i, n), h = pb(c, n);
-    return !u || !h ? false : p3(e) || (s === "spring" || T2(s)) && o;
+    return !u || !h ? false : pN(e) || (s === "spring" || T2(s)) && o;
   }
   function np(e) {
     e.duration = 0, e.type = "keyframes";
   }
-  const y3 = /* @__PURE__ */ new Set([
+  const yN = /* @__PURE__ */ new Set([
     "opacity",
     "clipPath",
     "filter",
     "transform"
-  ]), v3 = $p(() => Object.hasOwnProperty.call(Element.prototype, "animate"));
-  function x3(e) {
+  ]), vN = $p(() => Object.hasOwnProperty.call(Element.prototype, "animate"));
+  function xN(e) {
     var _a;
     const { motionValue: n, name: s, repeatDelay: o, repeatType: i, damping: c, type: u } = e;
     if (!(((_a = n == null ? void 0 : n.owner) == null ? void 0 : _a.current) instanceof HTMLElement)) return false;
     const { onUpdate: p, transformTemplate: y } = n.owner.getProps();
-    return v3() && s && y3.has(s) && (s !== "transform" || !y) && !p && !o && i !== "mirror" && c !== 0 && u !== "inertia";
+    return vN() && s && yN.has(s) && (s !== "transform" || !y) && !p && !o && i !== "mirror" && c !== 0 && u !== "inertia";
   }
-  const b3 = 40;
-  class w3 extends s0 {
+  const bN = 40;
+  class wN extends s0 {
     constructor({ autoplay: n = true, delay: s = 0, type: o = "keyframes", repeat: i = 0, repeatDelay: c = 0, repeatType: u = "loop", keyframes: h, name: p, motionValue: y, element: v, ...x }) {
       var _a;
       super(), this.stop = () => {
@@ -10049,13 +10049,13 @@ Error generating stack: ` + l.message + `
     onKeyframesResolved(n, s, o, i) {
       this.keyframeResolver = void 0;
       const { name: c, type: u, velocity: h, delay: p, isHandoff: y, onUpdate: v } = o;
-      this.resolvedAt = cr.now(), g3(n, c, u, h) || ((Bs.instantAnimations || !p) && (v == null ? void 0 : v(r0(n, o, s))), n[0] = n[n.length - 1], np(o), o.repeat = 0);
+      this.resolvedAt = cr.now(), gN(n, c, u, h) || ((Bs.instantAnimations || !p) && (v == null ? void 0 : v(r0(n, o, s))), n[0] = n[n.length - 1], np(o), o.repeat = 0);
       const b = {
-        startTime: i ? this.resolvedAt ? this.resolvedAt - this.createdAt > b3 ? this.resolvedAt : this.createdAt : this.createdAt : void 0,
+        startTime: i ? this.resolvedAt ? this.resolvedAt - this.createdAt > bN ? this.resolvedAt : this.createdAt : this.createdAt : void 0,
         finalKeyframe: s,
         ...o,
         keyframes: n
-      }, S = !y && x3(b) ? new m3({
+      }, S = !y && xN(b) ? new mN({
         ...b,
         element: b.motionValue.owner.current
       }) : new a0(b);
@@ -10070,7 +10070,7 @@ Error generating stack: ` + l.message + `
     }
     get animation() {
       var _a;
-      return this._animation || ((_a = this.keyframeResolver) == null ? void 0 : _a.resume(), r3()), this._animation;
+      return this._animation || ((_a = this.keyframeResolver) == null ? void 0 : _a.resume(), rN()), this._animation;
     }
     get duration() {
       return this.animation.duration;
@@ -10113,9 +10113,9 @@ Error generating stack: ` + l.message + `
       this._animation && this.animation.cancel(), (_a = this.keyframeResolver) == null ? void 0 : _a.cancel();
     }
   }
-  const S3 = /^var\(--(?:([\w-]+)|([\w-]+), ?([a-zA-Z\d ()%#.,-]+))\)/u;
-  function M3(e) {
-    const n = S3.exec(e);
+  const SN = /^var\(--(?:([\w-]+)|([\w-]+), ?([a-zA-Z\d ()%#.,-]+))\)/u;
+  function MN(e) {
+    const n = SN.exec(e);
     if (!n) return [
       ,
     ];
@@ -10126,7 +10126,7 @@ Error generating stack: ` + l.message + `
     ];
   }
   function R2(e, n, s = 1) {
-    const [o, i] = M3(e);
+    const [o, i] = MN(e);
     if (!o) return;
     const c = window.getComputedStyle(n).getPropertyValue(o);
     if (c) {
@@ -10146,7 +10146,7 @@ Error generating stack: ` + l.message + `
     "right",
     "bottom",
     ...mi
-  ]), C3 = {
+  ]), CN = {
     test: (e) => e === "auto",
     parse: (e) => e
   }, j2 = (e) => (n) => n.test(e), D2 = [
@@ -10156,36 +10156,36 @@ Error generating stack: ` + l.message + `
     pa,
     pR,
     mR,
-    C3
+    CN
   ], gb = (e) => D2.find(j2(e));
-  function A3(e) {
+  function AN(e) {
     return typeof e == "number" ? e === 0 : e !== null ? e === "none" || e === "0" || Qw(e) : true;
   }
-  const _3 = /* @__PURE__ */ new Set([
+  const _N = /* @__PURE__ */ new Set([
     "brightness",
     "contrast",
     "saturate",
     "opacity"
   ]);
-  function T3(e) {
+  function TN(e) {
     const [n, s] = e.slice(0, -1).split("(");
     if (n === "drop-shadow") return e;
     const [o] = s.match(Jp) || [];
     if (!o) return e;
     const i = s.replace(o, "");
-    let c = _3.has(n) ? 1 : 0;
+    let c = _N.has(n) ? 1 : 0;
     return o !== s && (c *= 100), n + "(" + c + i + ")";
   }
-  const E3 = /\b([a-z-]*)\(.*?\)/gu, rp = {
+  const EN = /\b([a-z-]*)\(.*?\)/gu, rp = {
     ...ba,
     getAnimatableNone: (e) => {
-      const n = e.match(E3);
-      return n ? n.map(T3).join(" ") : e;
+      const n = e.match(EN);
+      return n ? n.map(TN).join(" ") : e;
     }
   }, yb = {
     ...hi,
     transform: Math.round
-  }, R3 = {
+  }, RN = {
     rotate: pa,
     rotateX: pa,
     rotateY: pa,
@@ -10242,12 +10242,12 @@ Error generating stack: ` + l.message + `
     marginLeft: Qe,
     backgroundPositionX: Qe,
     backgroundPositionY: Qe,
-    ...R3,
+    ...RN,
     zIndex: yb,
     fillOpacity: Tl,
     strokeOpacity: Tl,
     numOctaves: yb
-  }, N3 = {
+  }, NN = {
     ...l0,
     color: xn,
     backgroundColor: xn,
@@ -10261,25 +10261,25 @@ Error generating stack: ` + l.message + `
     borderLeftColor: xn,
     filter: rp,
     WebkitFilter: rp
-  }, k2 = (e) => N3[e];
+  }, k2 = (e) => NN[e];
   function z2(e, n) {
     let s = k2(e);
     return s !== rp && (s = ba), s.getAnimatableNone ? s.getAnimatableNone(n) : void 0;
   }
-  const j3 = /* @__PURE__ */ new Set([
+  const jN = /* @__PURE__ */ new Set([
     "auto",
     "none",
     "0"
   ]);
-  function D3(e, n, s) {
+  function DN(e, n, s) {
     let o = 0, i;
     for (; o < e.length && !i; ) {
       const c = e[o];
-      typeof c == "string" && !j3.has(c) && El(c).values.length && (i = e[o]), o++;
+      typeof c == "string" && !jN.has(c) && El(c).values.length && (i = e[o]), o++;
     }
     if (i && s) for (const c of n) e[c] = z2(s, i);
   }
-  class k3 extends o0 {
+  class kN extends o0 {
     constructor(n, s, o, i, c) {
       super(n, s, o, i, c, true);
     }
@@ -10304,8 +10304,8 @@ Error generating stack: ` + l.message + `
     }
     resolveNoneKeyframes() {
       const { unresolvedKeyframes: n, name: s } = this, o = [];
-      for (let i = 0; i < n.length; i++) (n[i] === null || A3(n[i])) && o.push(i);
-      o.length && D3(n, o, s);
+      for (let i = 0; i < n.length; i++) (n[i] === null || AN(n[i])) && o.push(i);
+      o.length && DN(n, o, s);
     }
     measureInitialState() {
       const { element: n, unresolvedKeyframes: s, name: o } = this;
@@ -10326,7 +10326,7 @@ Error generating stack: ` + l.message + `
       }), this.resolveNoneKeyframes();
     }
   }
-  function z3(e, n, s) {
+  function zN(e, n, s) {
     if (e instanceof EventTarget) return [
       e
     ];
@@ -10341,8 +10341,8 @@ Error generating stack: ` + l.message + `
   function L2(e) {
     return Zw(e) && "offsetHeight" in e;
   }
-  const vb = 30, O3 = (e) => !isNaN(parseFloat(e));
-  class L3 {
+  const vb = 30, ON = (e) => !isNaN(parseFloat(e));
+  class LN {
     constructor(n, s = {}) {
       this.canTrackVelocity = null, this.events = {}, this.updateAndNotify = (o) => {
         var _a;
@@ -10351,7 +10351,7 @@ Error generating stack: ` + l.message + `
       }, this.hasAnimated = false, this.setCurrent(n), this.owner = s.owner;
     }
     setCurrent(n) {
-      this.current = n, this.updatedAt = cr.now(), this.canTrackVelocity === null && n !== void 0 && (this.canTrackVelocity = O3(this.current));
+      this.current = n, this.updatedAt = cr.now(), this.canTrackVelocity === null && n !== void 0 && (this.canTrackVelocity = ON(this.current));
     }
     setPrevFrameValue(n = this.current) {
       this.prevFrameValue = n, this.prevUpdatedAt = this.updatedAt;
@@ -10427,7 +10427,7 @@ Error generating stack: ` + l.message + `
     }
   }
   function ii(e, n) {
-    return new L3(e, n);
+    return new LN(e, n);
   }
   const { schedule: c0 } = u2(queueMicrotask, false), $r = {
     x: false,
@@ -10436,7 +10436,7 @@ Error generating stack: ` + l.message + `
   function H2() {
     return $r.x || $r.y;
   }
-  function H3(e) {
+  function HN(e) {
     return e === "x" || e === "y" ? $r[e] ? null : ($r[e] = true, () => {
       $r[e] = false;
     }) : $r.x || $r.y ? null : ($r.x = $r.y = true, () => {
@@ -10444,7 +10444,7 @@ Error generating stack: ` + l.message + `
     });
   }
   function B2(e, n) {
-    const s = z3(e), o = new AbortController(), i = {
+    const s = zN(e), o = new AbortController(), i = {
       passive: true,
       ...n,
       signal: o.signal
@@ -10458,7 +10458,7 @@ Error generating stack: ` + l.message + `
   function xb(e) {
     return !(e.pointerType === "touch" || H2());
   }
-  function B3(e, n, s = {}) {
+  function BN(e, n, s = {}) {
     const [o, i, c] = B2(e, s), u = (h) => {
       if (!xb(h)) return;
       const { target: p } = h, y = n(p, h);
@@ -10472,15 +10472,15 @@ Error generating stack: ` + l.message + `
       h.addEventListener("pointerenter", u, i);
     }), c;
   }
-  const U2 = (e, n) => n ? e === n ? true : U2(e, n.parentElement) : false, u0 = (e) => e.pointerType === "mouse" ? typeof e.button != "number" || e.button <= 0 : e.isPrimary !== false, U3 = /* @__PURE__ */ new Set([
+  const U2 = (e, n) => n ? e === n ? true : U2(e, n.parentElement) : false, u0 = (e) => e.pointerType === "mouse" ? typeof e.button != "number" || e.button <= 0 : e.isPrimary !== false, UN = /* @__PURE__ */ new Set([
     "BUTTON",
     "INPUT",
     "SELECT",
     "TEXTAREA",
     "A"
   ]);
-  function P3(e) {
-    return U3.has(e.tagName) || e.tabIndex !== -1;
+  function PN(e) {
+    return UN.has(e.tagName) || e.tabIndex !== -1;
   }
   const Nu = /* @__PURE__ */ new WeakSet();
   function bb(e) {
@@ -10494,7 +10494,7 @@ Error generating stack: ` + l.message + `
       bubbles: true
     }));
   }
-  const V3 = (e, n) => {
+  const VN = (e, n) => {
     const s = e.currentTarget;
     if (!s) return;
     const o = bb(() => {
@@ -10510,7 +10510,7 @@ Error generating stack: ` + l.message + `
   function wb(e) {
     return u0(e) && !H2();
   }
-  function F3(e, n, s = {}) {
+  function FN(e, n, s = {}) {
     const [o, i, c] = B2(e, s), u = (h) => {
       const p = h.currentTarget;
       if (!wb(h)) return;
@@ -10527,20 +10527,20 @@ Error generating stack: ` + l.message + `
       window.addEventListener("pointerup", x, i), window.addEventListener("pointercancel", b, i);
     };
     return o.forEach((h) => {
-      (s.useGlobalTarget ? window : h).addEventListener("pointerdown", u, i), L2(h) && (h.addEventListener("focus", (y) => V3(y, i)), !P3(h) && !h.hasAttribute("tabindex") && (h.tabIndex = 0));
+      (s.useGlobalTarget ? window : h).addEventListener("pointerdown", u, i), L2(h) && (h.addEventListener("focus", (y) => VN(y, i)), !PN(h) && !h.hasAttribute("tabindex") && (h.tabIndex = 0));
     }), c;
   }
   function P2(e) {
     return Zw(e) && "ownerSVGElement" in e;
   }
-  function q3(e) {
+  function qN(e) {
     return P2(e) && e.tagName === "svg";
   }
-  const Gn = (e) => !!(e && e.getVelocity), I3 = [
+  const Gn = (e) => !!(e && e.getVelocity), IN = [
     ...D2,
     xn,
     ba
-  ], G3 = (e) => I3.find(j2(e)), Rl = m.createContext({
+  ], GN = (e) => IN.find(j2(e)), Rl = m.createContext({
     transformPagePoint: (e) => e,
     isStatic: false,
     reducedMotion: "never"
@@ -10549,7 +10549,7 @@ Error generating stack: ` + l.message + `
     if (typeof e == "function") return e(n);
     e != null && (e.current = n);
   }
-  function X3(...e) {
+  function XN(...e) {
     return (n) => {
       let s = false;
       const o = e.map((i) => {
@@ -10564,10 +10564,10 @@ Error generating stack: ` + l.message + `
       };
     };
   }
-  function Y3(...e) {
-    return m.useCallback(X3(...e), e);
+  function YN(...e) {
+    return m.useCallback(XN(...e), e);
   }
-  class $3 extends m.Component {
+  class $N extends m.Component {
     getSnapshotBeforeUpdate(n) {
       const s = this.props.childRef.current;
       if (s && n.isPresent && !this.props.isPresent) {
@@ -10582,14 +10582,14 @@ Error generating stack: ` + l.message + `
       return this.props.children;
     }
   }
-  function K3({ children: e, isPresent: n, anchorX: s, root: o }) {
+  function KN({ children: e, isPresent: n, anchorX: s, root: o }) {
     const i = m.useId(), c = m.useRef(null), u = m.useRef({
       width: 0,
       height: 0,
       top: 0,
       left: 0,
       right: 0
-    }), { nonce: h } = m.useContext(Rl), p = Y3(c, e == null ? void 0 : e.ref);
+    }), { nonce: h } = m.useContext(Rl), p = YN(c, e == null ? void 0 : e.ref);
     return m.useInsertionEffect(() => {
       const { width: y, height: v, top: x, left: b, right: S } = u.current;
       if (n || !c.current || !y || !v) return;
@@ -10611,7 +10611,7 @@ Error generating stack: ` + l.message + `
       };
     }, [
       n
-    ]), d.jsx($3, {
+    ]), d.jsx($N, {
       isPresent: n,
       childRef: c,
       sizeRef: u,
@@ -10620,8 +10620,8 @@ Error generating stack: ` + l.message + `
       })
     });
   }
-  const W3 = ({ children: e, initial: n, isPresent: s, onExitComplete: o, custom: i, presenceAffectsLayout: c, mode: u, anchorX: h, root: p }) => {
-    const y = mf(Z3), v = m.useId();
+  const WN = ({ children: e, initial: n, isPresent: s, onExitComplete: o, custom: i, presenceAffectsLayout: c, mode: u, anchorX: h, root: p }) => {
+    const y = mf(ZN), v = m.useId();
     let x = true, b = m.useMemo(() => (x = false, {
       id: v,
       initial: n,
@@ -10648,7 +10648,7 @@ Error generating stack: ` + l.message + `
       !s && !y.size && o && o();
     }, [
       s
-    ]), u === "popLayout" && (e = d.jsx(K3, {
+    ]), u === "popLayout" && (e = d.jsx(KN, {
       isPresent: s,
       anchorX: h,
       root: p,
@@ -10658,7 +10658,7 @@ Error generating stack: ` + l.message + `
       children: e
     });
   };
-  function Z3() {
+  function ZN() {
     return /* @__PURE__ */ new Map();
   }
   function V2(e = true) {
@@ -10725,11 +10725,11 @@ Error generating stack: ` + l.message + `
           if (M.has(V)) M.set(V, true);
           else return;
           let ie = true;
-          M.forEach((te) => {
-            te || (ie = false);
+          M.forEach((ee) => {
+            ee || (ie = false);
           }), ie && (O == null ? void 0 : O(), N(C.current), u && (v == null ? void 0 : v()), o && o());
         };
-        return d.jsx(W3, {
+        return d.jsx(WN, {
           isPresent: L,
           initial: !S.current || s ? void 0 : false,
           custom: n,
@@ -10795,13 +10795,13 @@ Error generating stack: ` + l.message + `
   for (const e in Cb) li[e] = {
     isEnabled: (n) => Cb[e].some((s) => !!n[s])
   };
-  function Q3(e) {
+  function QN(e) {
     for (const n in e) li[n] = {
       ...li[n],
       ...e[n]
     };
   }
-  const J3 = /* @__PURE__ */ new Set([
+  const JN = /* @__PURE__ */ new Set([
     "animate",
     "exit",
     "variants",
@@ -10834,7 +10834,7 @@ Error generating stack: ` + l.message + `
     "viewport"
   ]);
   function Gu(e) {
-    return e.startsWith("while") || e.startsWith("drag") && e !== "draggable" || e.startsWith("layout") || e.startsWith("onTap") || e.startsWith("onPan") || e.startsWith("onLayout") || J3.has(e);
+    return e.startsWith("while") || e.startsWith("drag") && e !== "draggable" || e.startsWith("layout") || e.startsWith("onTap") || e.startsWith("onPan") || e.startsWith("onLayout") || JN.has(e);
   }
   let q2 = (e) => !Gu(e);
   function I2(e) {
@@ -10844,12 +10844,12 @@ Error generating stack: ` + l.message + `
     I2(require("@emotion/is-prop-valid").default);
   } catch {
   }
-  function eN(e, n, s) {
+  function e3(e, n, s) {
     const o = {};
     for (const i in e) i === "values" && typeof e.values == "object" || (q2(i) || s === true && Gu(i) || !n && !Gu(i) || e.draggable && i.startsWith("onDrag")) && (o[i] = e[i]);
     return o;
   }
-  function tN({ children: e, isValidProp: n, ...s }) {
+  function t3({ children: e, isValidProp: n, ...s }) {
     n && I2(n), s = {
       ...m.useContext(Rl),
       ...s
@@ -10889,7 +10889,7 @@ Error generating stack: ` + l.message + `
   function G2(e) {
     return !!(vf(e) || e.variants);
   }
-  function nN(e, n) {
+  function n3(e, n) {
     if (vf(e)) {
       const { initial: s, animate: o } = e;
       return {
@@ -10899,8 +10899,8 @@ Error generating stack: ` + l.message + `
     }
     return e.inherit !== false ? n : {};
   }
-  function rN(e) {
-    const { initial: n, animate: s } = nN(e, m.useContext(gf));
+  function r3(e) {
+    const { initial: n, animate: s } = n3(e, m.useContext(gf));
     return m.useMemo(() => ({
       initial: n,
       animate: s
@@ -10923,7 +10923,7 @@ Error generating stack: ` + l.message + `
       const s = _b(e, n.target.x), o = _b(e, n.target.y);
       return `${s}% ${o}%`;
     }
-  }, sN = {
+  }, s3 = {
     correct: (e, { treeScale: n, projectionDelta: s }) => {
       const o = e, i = ba.parse(e);
       if (i.length > 5) return o;
@@ -10946,20 +10946,20 @@ Error generating stack: ` + l.message + `
     borderTopRightRadius: ul,
     borderBottomLeftRadius: ul,
     borderBottomRightRadius: ul,
-    boxShadow: sN
+    boxShadow: s3
   };
   function X2(e, { layout: n, layoutId: s }) {
     return pi.has(e) || e.startsWith("origin") || (n || s !== void 0) && (!!sp[e] || e === "opacity");
   }
-  const aN = {
+  const a3 = {
     x: "translateX",
     y: "translateY",
     z: "translateZ",
     transformPerspective: "perspective"
-  }, oN = mi.length;
-  function iN(e, n, s) {
+  }, o3 = mi.length;
+  function i3(e, n, s) {
     let o = "", i = true;
-    for (let c = 0; c < oN; c++) {
+    for (let c = 0; c < o3; c++) {
       const u = mi[c], h = e[u];
       if (h === void 0) continue;
       let p = true;
@@ -10967,7 +10967,7 @@ Error generating stack: ` + l.message + `
         const y = O2(h, l0[u]);
         if (!p) {
           i = false;
-          const v = aN[u] || u;
+          const v = a3[u] || u;
           o += `${v}(${y}) `;
         }
         s && (n[u] = y);
@@ -10991,7 +10991,7 @@ Error generating stack: ` + l.message + `
         p.startsWith("origin") ? (h = true, c[p] = v) : o[p] = v;
       }
     }
-    if (n.transform || (u || s ? o.transform = iN(n, e.transform, s) : o.transform && (o.transform = "none")), h) {
+    if (n.transform || (u || s ? o.transform = i3(n, e.transform, s) : o.transform && (o.transform = "none")), h) {
       const { originX: p = "50%", originY: y = "50%", originZ: v = 0 } = c;
       o.transformOrigin = `${p} ${y} ${v}`;
     }
@@ -11005,7 +11005,7 @@ Error generating stack: ` + l.message + `
   function Y2(e, n, s) {
     for (const o in n) !Gn(n[o]) && !X2(o, s) && (e[o] = n[o]);
   }
-  function lN({ transformTemplate: e }, n) {
+  function l3({ transformTemplate: e }, n) {
     return m.useMemo(() => {
       const s = m0();
       return h0(s, n, e), Object.assign({}, s.vars, s.style);
@@ -11013,24 +11013,24 @@ Error generating stack: ` + l.message + `
       n
     ]);
   }
-  function cN(e, n) {
+  function c3(e, n) {
     const s = e.style || {}, o = {};
-    return Y2(o, s, e), Object.assign(o, lN(e, n)), o;
+    return Y2(o, s, e), Object.assign(o, l3(e, n)), o;
   }
-  function uN(e, n) {
-    const s = {}, o = cN(e, n);
+  function u3(e, n) {
+    const s = {}, o = c3(e, n);
     return e.drag && e.dragListener !== false && (s.draggable = false, o.userSelect = o.WebkitUserSelect = o.WebkitTouchCallout = "none", o.touchAction = e.drag === true ? "none" : `pan-${e.drag === "x" ? "y" : "x"}`), e.tabIndex === void 0 && (e.onTap || e.onTapStart || e.whileTap) && (s.tabIndex = 0), s.style = o, s;
   }
-  const fN = {
+  const f3 = {
     offset: "stroke-dashoffset",
     array: "stroke-dasharray"
-  }, dN = {
+  }, d3 = {
     offset: "strokeDashoffset",
     array: "strokeDasharray"
   };
-  function hN(e, n, s = 1, o = 0, i = true) {
+  function h3(e, n, s = 1, o = 0, i = true) {
     e.pathLength = 1;
-    const c = i ? fN : dN;
+    const c = i ? f3 : d3;
     e[c.offset] = Qe.transform(-o);
     const u = Qe.transform(n), h = Qe.transform(s);
     e[c.array] = `${u} ${h}`;
@@ -11042,13 +11042,13 @@ Error generating stack: ` + l.message + `
     }
     e.attrs = e.style, e.style = {};
     const { attrs: x, style: b } = e;
-    x.transform && (b.transform = x.transform, delete x.transform), (b.transform || x.transformOrigin) && (b.transformOrigin = x.transformOrigin ?? "50% 50%", delete x.transformOrigin), b.transform && (b.transformBox = (v == null ? void 0 : v.transformBox) ?? "fill-box", delete x.transformBox), n !== void 0 && (x.x = n), s !== void 0 && (x.y = s), o !== void 0 && (x.scale = o), i !== void 0 && hN(x, i, c, u, false);
+    x.transform && (b.transform = x.transform, delete x.transform), (b.transform || x.transformOrigin) && (b.transformOrigin = x.transformOrigin ?? "50% 50%", delete x.transformOrigin), b.transform && (b.transformBox = (v == null ? void 0 : v.transformBox) ?? "fill-box", delete x.transformBox), n !== void 0 && (x.x = n), s !== void 0 && (x.y = s), o !== void 0 && (x.scale = o), i !== void 0 && h3(x, i, c, u, false);
   }
   const K2 = () => ({
     ...m0(),
     attrs: {}
   }), W2 = (e) => typeof e == "string" && e.toLowerCase() === "svg";
-  function mN(e, n, s, o) {
+  function m3(e, n, s, o) {
     const i = m.useMemo(() => {
       const c = K2();
       return $2(c, n, W2(o), e.transformTemplate, e.style), {
@@ -11069,7 +11069,7 @@ Error generating stack: ` + l.message + `
     }
     return i;
   }
-  const pN = [
+  const p3 = [
     "animate",
     "circle",
     "defs",
@@ -11097,10 +11097,10 @@ Error generating stack: ` + l.message + `
     "view"
   ];
   function p0(e) {
-    return typeof e != "string" || e.includes("-") ? false : !!(pN.indexOf(e) > -1 || /[A-Z]/u.test(e));
+    return typeof e != "string" || e.includes("-") ? false : !!(p3.indexOf(e) > -1 || /[A-Z]/u.test(e));
   }
-  function gN(e, n, s, { latestValues: o }, i, c = false) {
-    const h = (p0(e) ? mN : uN)(n, o, i, e), p = eN(n, typeof e == "string", c), y = e !== m.Fragment ? {
+  function g3(e, n, s, { latestValues: o }, i, c = false) {
+    const h = (p0(e) ? m3 : u3)(n, o, i, e), p = e3(n, typeof e == "string", c), y = e !== m.Fragment ? {
       ...p,
       ...h,
       ref: s
@@ -11135,13 +11135,13 @@ Error generating stack: ` + l.message + `
   function ju(e) {
     return Gn(e) ? e.get() : e;
   }
-  function yN({ scrapeMotionValuesFromProps: e, createRenderState: n }, s, o, i) {
+  function y3({ scrapeMotionValuesFromProps: e, createRenderState: n }, s, o, i) {
     return {
-      latestValues: vN(s, o, i, e),
+      latestValues: v3(s, o, i, e),
       renderState: n()
     };
   }
-  function vN(e, n, s, o) {
+  function v3(e, n, s, o) {
     const i = {}, c = o(e, {});
     for (const b in c) i[b] = ju(c[b]);
     let { initial: u, animate: h } = e;
@@ -11173,7 +11173,7 @@ Error generating stack: ` + l.message + `
     return i;
   }
   const Z2 = (e) => (n, s) => {
-    const o = m.useContext(gf), i = m.useContext(pf), c = () => yN(e, n, o, i);
+    const o = m.useContext(gf), i = m.useContext(pf), c = () => y3(e, n, o, i);
     return s ? c() : mf(c);
   };
   function y0(e, n, s) {
@@ -11182,7 +11182,7 @@ Error generating stack: ` + l.message + `
     for (const c in o) (Gn(o[c]) || n.style && Gn(n.style[c]) || X2(c, e) || ((_a = s == null ? void 0 : s.getValue(c)) == null ? void 0 : _a.liveStyle) !== void 0) && (i[c] = o[c]);
     return i;
   }
-  const xN = Z2({
+  const x3 = Z2({
     scrapeMotionValuesFromProps: y0,
     createRenderState: m0
   });
@@ -11194,22 +11194,22 @@ Error generating stack: ` + l.message + `
     }
     return o;
   }
-  const bN = Z2({
+  const b3 = Z2({
     scrapeMotionValuesFromProps: Q2,
     createRenderState: K2
-  }), wN = /* @__PURE__ */ Symbol.for("motionComponentSymbol");
+  }), w3 = /* @__PURE__ */ Symbol.for("motionComponentSymbol");
   function Ko(e) {
     return e && typeof e == "object" && Object.prototype.hasOwnProperty.call(e, "current");
   }
-  function SN(e, n, s) {
+  function S3(e, n, s) {
     return m.useCallback((o) => {
       o && e.onMount && e.onMount(o), n && (o ? n.mount(o) : n.unmount()), s && (typeof s == "function" ? s(o) : Ko(s) && (s.current = o));
     }, [
       n
     ]);
   }
-  const v0 = (e) => e.replace(/([a-z])([A-Z])/gu, "$1-$2").toLowerCase(), MN = "framerAppearId", J2 = "data-" + v0(MN), eS = m.createContext({});
-  function CN(e, n, s, o, i) {
+  const v0 = (e) => e.replace(/([a-z])([A-Z])/gu, "$1-$2").toLowerCase(), M3 = "framerAppearId", J2 = "data-" + v0(M3), eS = m.createContext({});
+  function C3(e, n, s, o, i) {
     var _a, _b2;
     const { visualElement: c } = m.useContext(gf), u = m.useContext(F2), h = m.useContext(pf), p = m.useContext(Rl).reducedMotion, y = m.useRef(null);
     o = o || u.renderer, !y.current && o && (y.current = o(e, {
@@ -11221,7 +11221,7 @@ Error generating stack: ` + l.message + `
       reducedMotionConfig: p
     }));
     const v = y.current, x = m.useContext(eS);
-    v && !v.projection && i && (v.type === "html" || v.type === "svg") && AN(y.current, s, i, x);
+    v && !v.projection && i && (v.type === "html" || v.type === "svg") && A3(y.current, s, i, x);
     const b = m.useRef(false);
     m.useInsertionEffect(() => {
       v && b.current && v.update(s, h);
@@ -11236,7 +11236,7 @@ Error generating stack: ` + l.message + `
       }), C.current = false), v.enteringChildren = void 0);
     }), v;
   }
-  function AN(e, n, s, o) {
+  function A3(e, n, s, o) {
     const { layoutId: i, layout: c, drag: u, dragConstraints: h, layoutScroll: p, layoutRoot: y, layoutCrossfade: v } = n;
     e.projection = new s(e.latestValues, n["data-framer-portal-id"] ? void 0 : tS(e.parent)), e.projection.setOptions({
       layoutId: i,
@@ -11254,19 +11254,19 @@ Error generating stack: ` + l.message + `
     if (e) return e.options.allowProjection !== false ? e.projection : tS(e.parent);
   }
   function lm(e, { forwardMotionProps: n = false } = {}, s, o) {
-    s && Q3(s);
-    const i = p0(e) ? bN : xN;
+    s && QN(s);
+    const i = p0(e) ? b3 : x3;
     function c(h, p) {
       let y;
       const v = {
         ...m.useContext(Rl),
         ...h,
-        layoutId: _N(h)
-      }, { isStatic: x } = v, b = rN(h), S = i(h, x);
+        layoutId: _3(h)
+      }, { isStatic: x } = v, b = r3(h), S = i(h, x);
       if (!x && Ip) {
-        TN();
-        const C = EN(v);
-        y = C.MeasureLayout, b.visualElement = CN(e, S, v, o, C.ProjectionNode);
+        T3();
+        const C = E3(v);
+        y = C.MeasureLayout, b.visualElement = C3(e, S, v, o, C.ProjectionNode);
       }
       return d.jsxs(gf.Provider, {
         value: b,
@@ -11275,22 +11275,22 @@ Error generating stack: ` + l.message + `
             visualElement: b.visualElement,
             ...v
           }) : null,
-          gN(e, h, SN(S, b.visualElement, p), S, x, n)
+          g3(e, h, S3(S, b.visualElement, p), S, x, n)
         ]
       });
     }
     c.displayName = `motion.${typeof e == "string" ? e : `create(${e.displayName ?? e.name ?? ""})`}`;
     const u = m.forwardRef(c);
-    return u[wN] = e, u;
+    return u[w3] = e, u;
   }
-  function _N({ layoutId: e }) {
+  function _3({ layoutId: e }) {
     const n = m.useContext(qp).id;
     return n && e !== void 0 ? n + "-" + e : e;
   }
-  function TN(e, n) {
+  function T3(e, n) {
     m.useContext(F2).strict;
   }
-  function EN(e) {
+  function E3(e) {
     const { drag: n, layout: s } = li;
     if (!n && !s) return {};
     const o = {
@@ -11302,7 +11302,7 @@ Error generating stack: ` + l.message + `
       ProjectionNode: o.ProjectionNode
     };
   }
-  function RN(e, n) {
+  function R3(e, n) {
     if (typeof Proxy > "u") return lm;
     const s = /* @__PURE__ */ new Map(), o = (c, u) => lm(c, u, e, n), i = (c, u) => o(c, u);
     return new Proxy(i, {
@@ -11321,7 +11321,7 @@ Error generating stack: ` + l.message + `
       }
     };
   }
-  function NN({ x: e, y: n }) {
+  function N3({ x: e, y: n }) {
     return {
       top: n.min,
       right: e.max,
@@ -11329,7 +11329,7 @@ Error generating stack: ` + l.message + `
       left: e.min
     };
   }
-  function jN(e, n) {
+  function j3(e, n) {
     if (!n) return e;
     const s = n({
       x: e.left,
@@ -11374,7 +11374,7 @@ Error generating stack: ` + l.message + `
     op(e.x, n.translate, n.scale, n.originPoint), op(e.y, s.translate, s.scale, s.originPoint);
   }
   const Nb = 0.999999999999, jb = 1.0000000000001;
-  function DN(e, n, s, o = false) {
+  function D3(e, n, s, o = false) {
     const i = s.length;
     if (!i) return;
     n.x = n.y = 1;
@@ -11400,9 +11400,9 @@ Error generating stack: ` + l.message + `
     Db(e.x, n.x, n.scaleX, n.scale, n.originX), Db(e.y, n.y, n.scaleY, n.scale, n.originY);
   }
   function aS(e, n) {
-    return nS(jN(e.getBoundingClientRect(), n));
+    return nS(j3(e.getBoundingClientRect(), n));
   }
-  function kN(e, n, s) {
+  function k3(e, n, s) {
     const o = aS(e, s), { scroll: i } = n;
     return i && (Wo(o.x, i.offset.x), Wo(o.y, i.offset.y)), o;
   }
@@ -11425,14 +11425,14 @@ Error generating stack: ` + l.message + `
   }, oS = {
     current: false
   };
-  function zN() {
+  function z3() {
     if (oS.current = true, !!Ip) if (window.matchMedia) {
       const e = window.matchMedia("(prefers-reduced-motion)"), n = () => ip.current = e.matches;
       e.addEventListener("change", n), n();
     } else ip.current = false;
   }
-  const ON = /* @__PURE__ */ new WeakMap();
-  function LN(e, n, s) {
+  const O3 = /* @__PURE__ */ new WeakMap();
+  function L3(e, n, s) {
     for (const o in n) {
       const i = n[o], c = s[o];
       if (Gn(i)) e.addValue(o, i);
@@ -11461,7 +11461,7 @@ Error generating stack: ` + l.message + `
     "LayoutAnimationStart",
     "LayoutAnimationComplete"
   ];
-  class HN {
+  class H3 {
     scrapeMotionValuesFromProps(n, s, o) {
       return {};
     }
@@ -11486,7 +11486,7 @@ Error generating stack: ` + l.message + `
     }
     mount(n) {
       var _a;
-      this.current = n, ON.set(n, this), this.projection && !this.projection.instance && this.projection.mount(n), this.parent && this.isVariantNode && !this.isControllingVariants && (this.removeFromVariantTree = this.parent.addVariantChild(this)), this.values.forEach((s, o) => this.bindToMotionValue(o, s)), oS.current || zN(), this.shouldReduceMotion = this.reducedMotionConfig === "never" ? false : this.reducedMotionConfig === "always" ? true : ip.current, (_a = this.parent) == null ? void 0 : _a.addChild(this), this.update(this.props, this.presenceContext);
+      this.current = n, O3.set(n, this), this.projection && !this.projection.instance && this.projection.mount(n), this.parent && this.isVariantNode && !this.isControllingVariants && (this.removeFromVariantTree = this.parent.addVariantChild(this)), this.values.forEach((s, o) => this.bindToMotionValue(o, s)), oS.current || z3(), this.shouldReduceMotion = this.reducedMotionConfig === "never" ? false : this.reducedMotionConfig === "always" ? true : ip.current, (_a = this.parent) == null ? void 0 : _a.addChild(this), this.update(this.props, this.presenceContext);
     }
     unmount() {
       var _a;
@@ -11551,7 +11551,7 @@ Error generating stack: ` + l.message + `
         const c = "on" + i, u = n[c];
         u && (this.propEventSubscriptions[i] = this.on(i, u));
       }
-      this.prevMotionValues = LN(this, this.scrapeMotionValuesFromProps(n, this.prevProps, this), this.prevMotionValues), this.handleChildMotionValue && this.handleChildMotionValue();
+      this.prevMotionValues = L3(this, this.scrapeMotionValuesFromProps(n, this.prevProps, this), this.prevMotionValues), this.handleChildMotionValue && this.handleChildMotionValue();
     }
     getProps() {
       return this.props;
@@ -11593,7 +11593,7 @@ Error generating stack: ` + l.message + `
     }
     readValue(n, s) {
       let o = this.latestValues[n] !== void 0 || !this.current ? this.latestValues[n] : this.getBaseTargetFromProps(this.props, n) ?? this.readValueFromInstance(this.current, n, this.options);
-      return o != null && (typeof o == "string" && (Ww(o) || Qw(o)) ? o = parseFloat(o) : !G3(o) && ba.test(s) && (o = z2(n, s)), this.setBaseTarget(n, Gn(o) ? o.get() : o)), Gn(o) ? o.get() : o;
+      return o != null && (typeof o == "string" && (Ww(o) || Qw(o)) ? o = parseFloat(o) : !GN(o) && ba.test(s) && (o = z2(n, s)), this.setBaseTarget(n, Gn(o) ? o.get() : o)), Gn(o) ? o.get() : o;
     }
     setBaseTarget(n, s) {
       this.baseTarget[n] = s;
@@ -11620,9 +11620,9 @@ Error generating stack: ` + l.message + `
       c0.render(this.render);
     }
   }
-  class iS extends HN {
+  class iS extends H3 {
     constructor() {
-      super(...arguments), this.KeyframeResolver = k3;
+      super(...arguments), this.KeyframeResolver = kN;
     }
     sortInstanceNodePosition(n, s) {
       return n.compareDocumentPosition(s) & 2 ? 1 : -1;
@@ -11648,10 +11648,10 @@ Error generating stack: ` + l.message + `
     i == null ? void 0 : i.applyProjectionStyles(c, o);
     for (u in s) c.setProperty(u, s[u]);
   }
-  function BN(e) {
+  function B3(e) {
     return window.getComputedStyle(e);
   }
-  class UN extends iS {
+  class U3 extends iS {
     constructor() {
       super(...arguments), this.type = "html", this.renderInstance = lS;
     }
@@ -11659,7 +11659,7 @@ Error generating stack: ` + l.message + `
       var _a;
       if (pi.has(s)) return ((_a = this.projection) == null ? void 0 : _a.isProjecting) ? Zm(s) : QR(n, s);
       {
-        const o = BN(n), i = (d2(s) ? o.getPropertyValue(s) : o[s]) || 0;
+        const o = B3(n), i = (d2(s) ? o.getPropertyValue(s) : o[s]) || 0;
         return typeof i == "string" ? i.trim() : i;
       }
     }
@@ -11698,11 +11698,11 @@ Error generating stack: ` + l.message + `
     "textLength",
     "lengthAdjust"
   ]);
-  function PN(e, n, s, o) {
+  function P3(e, n, s, o) {
     lS(e, n, void 0, o);
     for (const i in n.attrs) e.setAttribute(cS.has(i) ? i : v0(i), n.attrs[i]);
   }
-  class VN extends iS {
+  class V3 extends iS {
     constructor() {
       super(...arguments), this.type = "svg", this.isSVGTag = false, this.measureInstanceViewportBox = Tn;
     }
@@ -11723,13 +11723,13 @@ Error generating stack: ` + l.message + `
       $2(n, s, this.isSVGTag, o.transformTemplate, o.style);
     }
     renderInstance(n, s, o, i) {
-      PN(n, s, o, i);
+      P3(n, s, o, i);
     }
     mount(n) {
       this.isSVGTag = W2(n.tagName), super.mount(n);
     }
   }
-  const FN = (e, n) => p0(e) ? new VN(n) : new UN(n, {
+  const F3 = (e, n) => p0(e) ? new V3(n) : new U3(n, {
     allowProjection: e !== m.Fragment
   });
   function ni(e, n, s) {
@@ -11737,13 +11737,13 @@ Error generating stack: ` + l.message + `
     return g0(o, n, s !== void 0 ? s : o.custom, e);
   }
   const lp = (e) => Array.isArray(e);
-  function qN(e, n, s) {
+  function q3(e, n, s) {
     e.hasValue(n) ? e.getValue(n).set(s) : e.addValue(n, ii(s));
   }
-  function IN(e) {
+  function I3(e) {
     return lp(e) ? e[e.length - 1] || 0 : e;
   }
-  function GN(e, n) {
+  function G3(e, n) {
     const s = ni(e, n);
     let { transitionEnd: o = {}, transition: i = {}, ...c } = s || {};
     c = {
@@ -11751,16 +11751,16 @@ Error generating stack: ` + l.message + `
       ...o
     };
     for (const u in c) {
-      const h = IN(c[u]);
-      qN(e, u, h);
+      const h = I3(c[u]);
+      q3(e, u, h);
     }
   }
-  function XN(e) {
+  function X3(e) {
     return !!(Gn(e) && e.add);
   }
   function cp(e, n) {
     const s = e.getValue("willChange");
-    if (XN(s)) return s.add(n);
+    if (X3(s)) return s.add(n);
     if (!s && Bs.WillChange) {
       const o = new Bs.WillChange("auto");
       e.addValue("willChange", o), o.add(n);
@@ -11769,25 +11769,25 @@ Error generating stack: ` + l.message + `
   function uS(e) {
     return e.props[J2];
   }
-  const YN = (e) => e !== null;
-  function $N(e, { repeat: n, repeatType: s = "loop" }, o) {
-    const i = e.filter(YN), c = n && s !== "loop" && n % 2 === 1 ? 0 : i.length - 1;
+  const Y3 = (e) => e !== null;
+  function $3(e, { repeat: n, repeatType: s = "loop" }, o) {
+    const i = e.filter(Y3), c = n && s !== "loop" && n % 2 === 1 ? 0 : i.length - 1;
     return i[c];
   }
-  const KN = {
+  const K3 = {
     type: "spring",
     stiffness: 500,
     damping: 25,
     restSpeed: 10
-  }, WN = (e) => ({
+  }, W3 = (e) => ({
     type: "spring",
     stiffness: 550,
     damping: e === 0 ? 2 * Math.sqrt(550) : 30,
     restSpeed: 10
-  }), ZN = {
+  }), Z3 = {
     type: "keyframes",
     duration: 0.8
-  }, QN = {
+  }, Q3 = {
     type: "keyframes",
     ease: [
       0.25,
@@ -11796,7 +11796,7 @@ Error generating stack: ` + l.message + `
       1
     ],
     duration: 0.3
-  }, JN = (e, { keyframes: n }) => n.length > 2 ? ZN : pi.has(e) ? e.startsWith("scale") ? WN(n[1]) : KN : QN;
+  }, J3 = (e, { keyframes: n }) => n.length > 2 ? Z3 : pi.has(e) ? e.startsWith("scale") ? W3(n[1]) : K3 : Q3;
   function e4({ when: e, delay: n, delayChildren: s, staggerChildren: o, staggerDirection: i, repeat: c, repeatType: u, repeatDelay: h, from: p, elapsed: y, ...v }) {
     return !!Object.keys(v).length;
   }
@@ -11823,10 +11823,10 @@ Error generating stack: ` + l.message + `
       motionValue: n,
       element: c ? void 0 : i
     };
-    e4(h) || Object.assign(v, JN(e, v)), v.duration && (v.duration = ls(v.duration)), v.repeatDelay && (v.repeatDelay = ls(v.repeatDelay)), v.from !== void 0 && (v.keyframes[0] = v.from);
+    e4(h) || Object.assign(v, J3(e, v)), v.duration && (v.duration = ls(v.duration)), v.repeatDelay && (v.repeatDelay = ls(v.repeatDelay)), v.from !== void 0 && (v.keyframes[0] = v.from);
     let x = false;
     if ((v.type === false || v.duration === 0 && !v.repeatDelay) && (np(v), v.delay === 0 && (x = true)), (Bs.instantAnimations || Bs.skipAnimations) && (x = true, np(v), v.delay = 0), v.allowFlatten = !h.type && !h.ease, x && !c && n.get() !== void 0) {
-      const b = $N(v.keyframes, h);
+      const b = $3(v.keyframes, h);
       if (b !== void 0) {
         Kt.update(() => {
           v.onUpdate(b), v.onComplete();
@@ -11834,7 +11834,7 @@ Error generating stack: ` + l.message + `
         return;
       }
     }
-    return h.isSync ? new a0(v) : new w3(v);
+    return h.isSync ? new a0(v) : new wN(v);
   };
   function t4({ protectedKeys: e, needsAnimating: n }, s) {
     const o = e.hasOwnProperty(s) && n[s] !== true;
@@ -11868,7 +11868,7 @@ Error generating stack: ` + l.message + `
     }
     return u && Promise.all(p).then(() => {
       Kt.update(() => {
-        u && GN(e, u);
+        u && G3(e, u);
       });
     }), p;
   }
@@ -11982,25 +11982,25 @@ Error generating stack: ` + l.message + `
         const ie = Array.isArray(N) ? N : [
           N
         ];
-        let te = ie.reduce(i(R), {});
-        O === false && (te = {});
+        let ee = ie.reduce(i(R), {});
+        O === false && (ee = {});
         const { prevResolvedValues: ye = {} } = z, H = {
           ...ye,
-          ...te
+          ...ee
         }, oe = (j) => {
           L = true, b.has(j) && (J = true, b.delete(j)), z.needsAnimating[j] = true;
           const E = e.getValue(j);
           E && (E.liveStyle = false);
         };
         for (const j in H) {
-          const E = te[j], I = ye[j];
+          const E = ee[j], I = ye[j];
           if (S.hasOwnProperty(j)) continue;
           let ne = false;
           lp(E) && lp(I) ? ne = !hS(E, I) : ne = E !== I, ne ? E != null ? oe(j) : b.add(j) : E !== void 0 && b.has(j) ? oe(j) : z.protectedKeys[j] = true;
         }
-        z.prevProp = N, z.prevResolvedValues = te, z.isActive && (S = {
+        z.prevProp = N, z.prevResolvedValues = ee, z.isActive && (S = {
           ...S,
-          ...te
+          ...ee
         }), o && e.blockInitialAnimation && (L = false);
         const K = G && V;
         L && (!K || J) && x.push(...ie.map((j) => {
@@ -12351,7 +12351,7 @@ Error generating stack: ` + l.message + `
         b ? this.pauseAnimation() : this.stopAnimation(), s && this.snapToCursor(Xl(x).point);
       }, u = (x, b) => {
         const { drag: S, dragPropagation: C, onDragStart: M } = this.getProps();
-        if (S && !C && (this.openDragLock && this.openDragLock(), this.openDragLock = H3(S), !this.openDragLock)) return;
+        if (S && !C && (this.openDragLock && this.openDragLock(), this.openDragLock = HN(S), !this.openDragLock)) return;
         this.latestPointerEvent = x, this.latestPanInfo = b, this.isDragging = true, this.currentDirection = null, this.resolveConstraints(), this.visualElement.projection && (this.visualElement.projection.isAnimationBlocked = true, this.visualElement.projection.target = void 0), Hr((R) => {
           let z = this.getAxisMotionValue(R).get() || 0;
           if (cs.test(z)) {
@@ -12428,10 +12428,10 @@ Error generating stack: ` + l.message + `
       if (!n || !Ko(n)) return false;
       const o = n.current, { projection: i } = this.visualElement;
       if (!i || !i.layout) return false;
-      const c = kN(o, i.root, this.visualElement.getTransformPagePoint());
+      const c = k3(o, i.root, this.visualElement.getTransformPagePoint());
       let u = _4(i.layout.layoutBox, c);
       if (s) {
-        const h = s(NN(u));
+        const h = s(N3(u));
         this.hasMutatedConstraints = !!h, h && (u = nS(h));
       }
       return u;
@@ -12870,7 +12870,7 @@ Error generating stack: ` + l.message + `
       }
       mount(u) {
         if (this.instance) return;
-        this.isSVG = P2(u) && !q3(u), this.instance = u;
+        this.isSVG = P2(u) && !qN(u), this.instance = u;
         const { layoutId: h, layout: p, visualElement: y } = this.options;
         if (y && !y.current && y.mount(u), this.root.nodes.add(this), this.parent && this.parent.children.add(this), this.root.hasTreeAnimated && (p || h) && (this.isLayoutDirty = true), e) {
           let v, x = 0;
@@ -13101,7 +13101,7 @@ Error generating stack: ` + l.message + `
         if (this.isTreeAnimating = !!(this.parent && this.parent.isTreeAnimating || this.currentAnimation || this.pendingAnimation), this.isTreeAnimating || (this.targetDelta = this.relativeTarget = void 0), !this.layout || !(y || v)) return;
         Yr(this.layoutCorrected, this.layout.layoutBox);
         const x = this.treeScale.x, b = this.treeScale.y;
-        DN(this.layoutCorrected, this.treeScale, this.path, h), u.layout && !u.target && (this.treeScale.x !== 1 || this.treeScale.y !== 1) && (u.target = u.layout.layoutBox, u.targetWithTransforms = Tn());
+        D3(this.layoutCorrected, this.treeScale, this.path, h), u.layout && !u.target && (this.treeScale.x !== 1 || this.treeScale.y !== 1) && (u.target = u.layout.layoutBox, u.targetWithTransforms = Tn());
         const { target: S } = u;
         if (!S) {
           this.prevProjectionDelta && (this.createProjectionDeltas(), this.scheduleRender());
@@ -13436,7 +13436,7 @@ Error generating stack: ` + l.message + `
   class p5 extends Ma {
     mount() {
       const { current: n } = this.node;
-      n && (this.unmount = B3(n, (s, o) => (m1(this.node, o, "Start"), (i) => m1(this.node, i, "End"))));
+      n && (this.unmount = BN(n, (s, o) => (m1(this.node, o, "Start"), (i) => m1(this.node, i, "End"))));
     }
     unmount() {
     }
@@ -13473,7 +13473,7 @@ Error generating stack: ` + l.message + `
   class y5 extends Ma {
     mount() {
       const { current: n } = this.node;
-      n && (this.unmount = F3(n, (s, o) => (p1(this.node, o, "Start"), (i, { success: c }) => p1(this.node, i, c ? "End" : "Cancel")), {
+      n && (this.unmount = FN(n, (s, o) => (p1(this.node, o, "Start"), (i, { success: c }) => p1(this.node, i, c ? "End" : "Cancel")), {
         useGlobalTarget: this.node.props.globalTapTarget
       }));
     }
@@ -13565,7 +13565,7 @@ Error generating stack: ` + l.message + `
     ...A5,
     ...m5,
     ..._5
-  }, Qn = RN(T5, FN);
+  }, Qn = R3(T5, F3);
   const E5 = (e) => e.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase(), R5 = (e) => e.replace(/^([A-Z])|[\s-_]+(\w)/g, (n, s, o) => o ? o.toUpperCase() : s.toLowerCase()), g1 = (e) => {
     const n = R5(e);
     return n.charAt(0).toUpperCase() + n.slice(1);
@@ -15981,9 +15981,9 @@ Error generating stack: ` + l.message + `
       if ("touches" in M && V === "h" && G.type === "range") return false;
       var L = window.getSelection(), J = L && L.anchorNode, ie = J ? J === G || J.contains(G) : false;
       if (ie) return false;
-      var te = L1(V, G);
-      if (!te) return true;
-      if (te ? O = V : (O = V === "v" ? "h" : "v", te = L1(V, G)), !te) return false;
+      var ee = L1(V, G);
+      if (!ee) return true;
+      if (ee ? O = V : (O = V === "v" ? "h" : "v", ee = L1(V, G)), !ee) return false;
       if (!o.current && "changedTouches" in M && (N || k) && (o.current = O), !O) return true;
       var ye = o.current || O;
       return p8(ye, _, M, ye === "h" ? N : k);
@@ -16305,7 +16305,7 @@ Error generating stack: ` + l.message + `
   function T0(e) {
     return e ? "open" : "closed";
   }
-  var hM = "DialogTitleWarning", [kH, mM] = iD(hM, {
+  var hM = "DialogTitleWarning", [DH, mM] = iD(hM, {
     contentName: Za,
     titleName: _0,
     docsSlug: "dialog"
@@ -16639,7 +16639,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       "subgrid",
       He,
       Le
-    ], te = () => [
+    ], ee = () => [
       "auto",
       {
         span: [
@@ -17204,7 +17204,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         ],
         "col-start-end": [
           {
-            col: te()
+            col: ee()
           }
         ],
         "col-start": [
@@ -17224,7 +17224,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         ],
         "row-start-end": [
           {
-            row: te()
+            row: ee()
           }
         ],
         "row-start": [
@@ -20083,7 +20083,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       }, S = D0(i), C = j0(S), M = await u.getDimensions(y), _ = S === "y", R = _ ? "top" : "left", z = _ ? "bottom" : "right", N = _ ? "clientHeight" : "clientWidth", k = c.reference[C] + c.reference[S] - b[S] - c.floating[C], O = b[S] - c.reference[S], G = await (u.getOffsetParent == null ? void 0 : u.getOffsetParent(y));
       let V = G ? G[N] : 0;
       (!V || !await (u.isElement == null ? void 0 : u.isElement(G))) && (V = h.floating[N] || c.floating[C]);
-      const L = k / 2 - O / 2, J = V / 2 - M[C] / 2 - 1, ie = wa(x[R], J), te = wa(x[z], J), ye = ie, H = V - M[C] - te, oe = V / 2 - M[C] / 2 + L, K = gp(ye, oe, H), T = !p.arrow && vi(i) != null && oe !== K && c.reference[C] / 2 - (oe < ye ? ie : te) - M[C] / 2 < 0, j = T ? oe < ye ? oe - ye : oe - H : 0;
+      const L = k / 2 - O / 2, J = V / 2 - M[C] / 2 - 1, ie = wa(x[R], J), ee = wa(x[z], J), ye = ie, H = V - M[C] - ee, oe = V / 2 - M[C] / 2 + L, K = gp(ye, oe, H), T = !p.arrow && vi(i) != null && oe !== K && c.reference[C] / 2 - (oe < ye ? ie : ee) - M[C] / 2 < 0, j = T ? oe < ye ? oe - ye : oe - H : 0;
       return {
         [S]: b[S] + j,
         data: {
@@ -20124,8 +20124,8 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
             overflows: J
           }
         ], !J.every((oe) => oe <= 0)) {
-          var te, ye;
-          const oe = (((te = c.flip) == null ? void 0 : te.index) || 0) + 1, K = V[oe];
+          var ee, ye;
+          const oe = (((ee = c.flip) == null ? void 0 : ee.index) || 0) + 1, K = V[oe];
           if (K && (!(x === "alignment" ? z !== is(K) : false) || ie.every((E) => is(E.placement) === z ? E.overflows[0] > 0 : true))) return {
             data: {
               index: oe,
@@ -20342,8 +20342,8 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         const z = M - v.top - v.bottom, N = C - v.left - v.right, k = wa(M - v[_], z), O = wa(C - v[R], N), G = !n.middlewareData.shift;
         let V = k, L = O;
         if ((s = n.middlewareData.shift) != null && s.enabled.x && (L = N), (o = n.middlewareData.shift) != null && o.enabled.y && (V = z), G && !b) {
-          const ie = Cr(v.left, 0), te = Cr(v.right, 0), ye = Cr(v.top, 0), H = Cr(v.bottom, 0);
-          S ? L = C - 2 * (ie !== 0 || te !== 0 ? ie + te : Cr(v.left, v.right)) : V = M - 2 * (ye !== 0 || H !== 0 ? ye + H : Cr(v.top, v.bottom));
+          const ie = Cr(v.left, 0), ee = Cr(v.right, 0), ye = Cr(v.top, 0), H = Cr(v.bottom, 0);
+          S ? L = C - 2 * (ie !== 0 || ee !== 0 ? ie + ee : Cr(v.left, v.right)) : V = M - 2 * (ye !== 0 || H !== 0 ? ye + H : Cr(v.top, v.bottom));
         }
         await p({
           ...n,
@@ -20894,14 +20894,14 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       E !== G.current && (G.current = E, M(E));
     }, []), N = m.useCallback((E) => {
       E !== V.current && (V.current = E, R(E));
-    }, []), k = c || C, O = u || _, G = m.useRef(null), V = m.useRef(null), L = m.useRef(v), J = p != null, ie = Em(p), te = Em(i), ye = Em(y), H = m.useCallback(() => {
+    }, []), k = c || C, O = u || _, G = m.useRef(null), V = m.useRef(null), L = m.useRef(v), J = p != null, ie = Em(p), ee = Em(i), ye = Em(y), H = m.useCallback(() => {
       if (!G.current || !V.current) return;
       const E = {
         placement: n,
         strategy: s,
         middleware: b
       };
-      te.current && (E.platform = te.current), Ak(G.current, V.current, E).then((I) => {
+      ee.current && (E.platform = ee.current), Ak(G.current, V.current, E).then((I) => {
         const ne = {
           ...I,
           isPositioned: ye.current !== false
@@ -20914,7 +20914,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       b,
       n,
       s,
-      te,
+      ee,
       ye
     ]);
     Ou(() => {
@@ -21129,11 +21129,11 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       bottom: 0,
       left: 0,
       ...v
-    }, te = Array.isArray(y) ? y : [
+    }, ee = Array.isArray(y) ? y : [
       y
-    ], ye = te.length > 0, H = {
+    ], ye = ee.length > 0, H = {
       padding: ie,
-      boundary: te.filter(qk),
+      boundary: ee.filter(qk),
       altBoundary: ye
     }, { refs: oe, floatingStyles: K, placement: T, isPositioned: j, middlewareData: E } = Ek({
       strategy: "fixed",
@@ -21354,10 +21354,10 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
           if (L.target === L.currentTarget && J && !R) {
             const ie = new CustomEvent(Rm, Gk);
             if (L.currentTarget.dispatchEvent(ie), !ie.defaultPrevented) {
-              const te = k().filter((T) => T.focusable), ye = te.find((T) => T.active), H = te.find((T) => T.id === M), K = [
+              const ee = k().filter((T) => T.focusable), ye = ee.find((T) => T.active), H = ee.find((T) => T.id === M), K = [
                 ye,
                 H,
-                ...te
+                ...ee
               ].filter(Boolean).map((T) => T.ref.current);
               cC(K, v);
             }
@@ -21600,7 +21600,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       onDismiss: () => s.onOpenChange(false)
     });
   }), hz = kl("MenuContent.ScrollLock"), q0 = m.forwardRef((e, n) => {
-    const { __scopeMenu: s, loop: o = false, trapFocus: i, onOpenAutoFocus: c, onCloseAutoFocus: u, disableOutsidePointerEvents: h, onEntryFocus: p, onEscapeKeyDown: y, onPointerDownOutside: v, onFocusOutside: x, onInteractOutside: b, onDismiss: S, disableOutsideScroll: C, ...M } = e, _ = Aa(Fr, s), R = Ql(Fr, s), z = Zl(s), N = mC(s), k = az(s), [O, G] = m.useState(null), V = m.useRef(null), L = xt(n, V, _.onContentChange), J = m.useRef(0), ie = m.useRef(""), te = m.useRef(0), ye = m.useRef(null), H = m.useRef("right"), oe = m.useRef(0), K = C ? C0 : m.Fragment, T = C ? {
+    const { __scopeMenu: s, loop: o = false, trapFocus: i, onOpenAutoFocus: c, onCloseAutoFocus: u, disableOutsidePointerEvents: h, onEntryFocus: p, onEscapeKeyDown: y, onPointerDownOutside: v, onFocusOutside: x, onInteractOutside: b, onDismiss: S, disableOutsideScroll: C, ...M } = e, _ = Aa(Fr, s), R = Ql(Fr, s), z = Zl(s), N = mC(s), k = az(s), [O, G] = m.useState(null), V = m.useRef(null), L = xt(n, V, _.onContentChange), J = m.useRef(0), ie = m.useRef(""), ee = m.useRef(0), ye = m.useRef(null), H = m.useRef("right"), oe = m.useRef(0), K = C ? C0 : m.Fragment, T = C ? {
       as: hz,
       allowPinchZoom: true
     } : void 0, j = (I) => {
@@ -21634,7 +21634,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       }, [
         E
       ]),
-      pointerGraceTimerRef: te,
+      pointerGraceTimerRef: ee,
       onPointerGraceIntentChange: m.useCallback((I) => {
         ye.current = I;
       }, []),
@@ -23022,24 +23022,24 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       return ne.length ? ne.join(" / ") : null;
     }, [
       S
-    ]), te = m.useMemo(() => {
+    ]), ee = m.useMemo(() => {
       if (S.kind !== "ready") return null;
       const E = S.value.headerPanel;
       return !E || !E.enabled ? null : E;
     }, [
       S
     ]), ye = m.useMemo(() => {
-      if (S.kind !== "ready" || !(te == null ? void 0 : te.widgets.blitzortung)) return null;
-      const E = (S.value.location ?? "").trim().toUpperCase(), I = CO(E), ne = (I == null ? void 0 : I.lat) ?? 51.2, D = (I == null ? void 0 : I.lon) ?? 10;
+      if (S.kind !== "ready" || !(ee == null ? void 0 : ee.widgets.blitzortung)) return null;
+      const E = (S.value.location ?? "").trim().toUpperCase(), I = MO(E), ne = (I == null ? void 0 : I.lat) ?? 51.2, D = (I == null ? void 0 : I.lon) ?? 10;
       return `https://map.blitzortung.org/index.php?interactive=1&NavigationControl=0&FullScreenControl=0&Cookies=0&InfoDiv=0&MenuButtonDiv=1&ScaleControl=1&LinksCheckboxChecked=1&LinksRangeValue=10&MapStyle=0&MapStyleRangeValue=0&Advertisment=0#5/${ne.toFixed(3)}/${D.toFixed(3)}`;
     }, [
-      te,
+      ee,
       S
     ]);
     m.useEffect(() => {
-      te || G(false);
+      ee || G(false);
     }, [
-      te
+      ee
     ]);
     const H = e ?? [], oe = H.length <= 1 || n == null, K = m.useMemo(() => n ? H.find((E) => E.id === n) ?? null : null, [
       n,
@@ -23056,7 +23056,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         d.jsxs("div", {
           className: "mx-auto flex h-10 w-full max-w-[1320px] items-center gap-2 px-3 sm:px-4",
           children: [
-            te ? d.jsx(Ue, {
+            ee ? d.jsx(Ue, {
               type: "button",
               variant: "ghost",
               size: "icon",
@@ -23254,7 +23254,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         }),
         d.jsx(va, {
           initial: false,
-          children: te && O ? d.jsx(Qn.div, {
+          children: ee && O ? d.jsx(Qn.div, {
             initial: {
               height: 0,
               opacity: 0
@@ -23277,174 +23277,231 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
               ]
             },
             className: "overflow-hidden border-t bg-background/80",
-            children: d.jsxs("div", {
+            children: d.jsx("div", {
               className: "mx-auto w-full max-w-[1320px] space-y-3 px-3 py-3 sm:px-4",
-              children: [
-                d.jsxs("div", {
-                  className: "grid gap-3 lg:grid-cols-12",
-                  children: [
-                    d.jsxs("div", {
-                      className: "space-y-2 lg:col-span-5",
-                      children: [
-                        d.jsx("div", {
-                          className: "text-sm font-semibold tracking-tight",
-                          children: te.title || "Receiver"
-                        }),
-                        te.about ? d.jsx("div", {
-                          className: "whitespace-pre-line text-xs leading-relaxed text-muted-foreground",
-                          children: te.about
-                        }) : null,
-                        te.donationEnabled && te.donationUrl ? d.jsx("a", {
-                          href: te.donationUrl,
-                          target: "_blank",
-                          rel: "noreferrer",
-                          children: d.jsx(Ue, {
-                            type: "button",
-                            variant: "secondary",
-                            size: "sm",
-                            children: te.donationLabel || "Donate"
-                          })
-                        }) : null,
-                        te.items.filter((E) => (E.label ?? "").trim() && (E.value ?? "").trim()).slice(0, 10).map((E) => d.jsx(MO, {
-                          label: E.label,
-                          value: E.value
-                        }, `${E.label}:${E.value}`))
-                      ]
-                    }),
-                    d.jsxs("div", {
-                      className: "space-y-2 lg:col-span-7",
-                      children: [
-                        te.lookups.callsign ? d.jsxs("div", {
-                          className: "flex items-center justify-between gap-3 rounded-md border bg-muted/10 px-3 py-2",
+              children: d.jsxs("div", {
+                className: "grid gap-3 lg:grid-cols-12",
+                children: [
+                  d.jsxs("div", {
+                    className: "space-y-3 lg:col-span-5",
+                    children: [
+                      d.jsx("div", {
+                        className: "rounded-lg border bg-muted/10 px-3 py-2.5",
+                        children: d.jsxs("div", {
+                          className: "flex items-start justify-between gap-3",
                           children: [
-                            d.jsx("div", {
-                              className: "text-xs font-medium text-muted-foreground",
-                              children: "Callsign"
-                            }),
                             d.jsxs("div", {
-                              className: "flex w-[min(320px,60vw)] items-center gap-2",
+                              className: "min-w-0",
                               children: [
-                                d.jsx(or, {
-                                  value: V,
-                                  onChange: (E) => L(E.target.value),
-                                  placeholder: "e.g. DL1ABC",
-                                  className: "h-8 text-xs",
-                                  onKeyDown: (E) => {
-                                    if (E.key !== "Enter") return;
-                                    const I = V.trim();
-                                    if (!I) return;
-                                    const ne = I.replace(/[^A-Za-z0-9/]/g, "").toUpperCase();
-                                    ne && window.open(`https://www.qrz.com/db/${ne}`, "_blank", "noreferrer");
-                                  }
+                                d.jsx("div", {
+                                  className: "truncate text-sm font-semibold tracking-tight",
+                                  children: ee.title || "Receiver"
                                 }),
-                                d.jsx(Ue, {
-                                  type: "button",
-                                  variant: "secondary",
-                                  size: "icon",
-                                  className: "h-7 w-7 rounded-md bg-muted/10 hover:bg-muted/20",
-                                  "aria-label": "Look up callsign",
-                                  onClick: () => {
-                                    const E = V.trim();
-                                    if (!E) return;
-                                    const I = E.replace(/[^A-Za-z0-9/]/g, "").toUpperCase();
-                                    I && window.open(`https://www.qrz.com/db/${I}`, "_blank", "noreferrer");
-                                  },
-                                  children: d.jsx(OS, {
-                                    className: "h-4 w-4"
-                                  })
-                                })
-                              ]
-                            })
-                          ]
-                        }) : null,
-                        te.lookups.mwlist || te.lookups.shortwaveInfo ? d.jsxs("div", {
-                          className: "flex items-center justify-between gap-3 rounded-md border bg-muted/10 px-3 py-2",
-                          children: [
-                            d.jsx("div", {
-                              className: "text-xs font-medium text-muted-foreground",
-                              children: "Frequency"
-                            }),
-                            d.jsxs("div", {
-                              className: "flex items-center gap-2",
-                              children: [
-                                te.lookups.mwlist ? d.jsxs(Ue, {
-                                  type: "button",
-                                  variant: "secondary",
-                                  size: "sm",
-                                  disabled: s == null,
-                                  onClick: () => {
-                                    if (s == null) return;
-                                    const I = `https://www.mwlist.org/mwlist_quick_and_easy.php?area=1&kHz=${Math.round(s / 1e3)}`;
-                                    window.open(I, "_blank", "noreferrer");
-                                  },
-                                  className: "gap-2",
-                                  children: [
-                                    "MWList",
-                                    d.jsx(b1, {
-                                      className: "h-3.5 w-3.5"
-                                    })
-                                  ]
-                                }) : null,
-                                te.lookups.shortwaveInfo ? d.jsxs(Ue, {
-                                  type: "button",
-                                  variant: "secondary",
-                                  size: "sm",
-                                  disabled: s == null,
-                                  onClick: () => {
-                                    if (s == null) return;
-                                    const I = `https://www.short-wave.info/index.php?timbus=NOW&ip=179&porm=4&freq=${Math.round(s / 1e3)}`;
-                                    window.open(I, "_blank", "noreferrer");
-                                  },
-                                  className: "gap-2",
-                                  children: [
-                                    "short-wave.info",
-                                    d.jsx(b1, {
-                                      className: "h-3.5 w-3.5"
-                                    })
-                                  ]
+                                ee.about ? d.jsx("div", {
+                                  className: "mt-1 whitespace-pre-line text-xs leading-relaxed text-muted-foreground",
+                                  children: ee.about
                                 }) : null
                               ]
+                            }),
+                            ee.donationEnabled && ee.donationUrl ? d.jsx("a", {
+                              href: ee.donationUrl,
+                              target: "_blank",
+                              rel: "noreferrer",
+                              className: "shrink-0",
+                              children: d.jsx(Ue, {
+                                type: "button",
+                                variant: "secondary",
+                                size: "sm",
+                                className: "h-8 px-3",
+                                children: ee.donationLabel || "Donate"
+                              })
+                            }) : null
+                          ]
+                        })
+                      }),
+                      ee.items.some((E) => (E.label ?? "").trim() && (E.value ?? "").trim()) ? d.jsx("div", {
+                        className: "grid gap-2 sm:grid-cols-2",
+                        children: ee.items.filter((E) => (E.label ?? "").trim() && (E.value ?? "").trim()).slice(0, 10).map((E) => d.jsxs("div", {
+                          className: "rounded-lg border bg-muted/10 px-3 py-2",
+                          children: [
+                            d.jsx("div", {
+                              className: "text-[11px] font-medium text-muted-foreground",
+                              children: E.label
+                            }),
+                            d.jsx("div", {
+                              className: "mt-0.5 break-words text-xs",
+                              children: E.value
                             })
                           ]
-                        }) : null,
-                        te.widgets.blitzortung && ye ? d.jsx("div", {
-                          className: "overflow-hidden rounded-md border bg-muted/10",
-                          children: d.jsx("iframe", {
+                        }, `${E.label}:${E.value}`))
+                      }) : null,
+                      ee.images.length ? d.jsx("div", {
+                        className: "grid gap-2 sm:grid-cols-2",
+                        children: ee.images.slice(0, 3).map((E) => d.jsx("img", {
+                          src: E,
+                          alt: "",
+                          loading: "lazy",
+                          className: "h-28 w-full rounded-lg border bg-muted/10 object-cover"
+                        }, E))
+                      }) : null
+                    ]
+                  }),
+                  d.jsxs("div", {
+                    className: "space-y-3 lg:col-span-7",
+                    children: [
+                      ee.lookups.callsign || ee.lookups.mwlist || ee.lookups.shortwaveInfo ? d.jsxs("div", {
+                        className: "rounded-lg border bg-muted/10 px-3 py-2.5",
+                        children: [
+                          d.jsx("div", {
+                            className: "text-[11px] font-medium text-muted-foreground",
+                            children: "Lookups"
+                          }),
+                          d.jsxs("div", {
+                            className: "mt-2 space-y-2",
+                            children: [
+                              ee.lookups.callsign ? d.jsxs("div", {
+                                className: "flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between",
+                                children: [
+                                  d.jsx("div", {
+                                    className: "text-xs",
+                                    children: "Callsign"
+                                  }),
+                                  d.jsxs("div", {
+                                    className: "flex min-w-0 items-center gap-2 sm:w-[min(360px,60vw)]",
+                                    children: [
+                                      d.jsx(or, {
+                                        value: V,
+                                        onChange: (E) => L(E.target.value),
+                                        placeholder: "e.g. DL1ABC",
+                                        className: "h-8 min-w-0 text-xs",
+                                        onKeyDown: (E) => {
+                                          if (E.key !== "Enter") return;
+                                          const I = V.trim();
+                                          if (!I) return;
+                                          const ne = I.replace(/[^A-Za-z0-9/]/g, "").toUpperCase();
+                                          ne && window.open(`https://www.qrz.com/db/${ne}`, "_blank", "noreferrer");
+                                        }
+                                      }),
+                                      d.jsx(Ue, {
+                                        type: "button",
+                                        variant: "secondary",
+                                        size: "icon",
+                                        className: "h-8 w-8",
+                                        "aria-label": "Look up callsign",
+                                        onClick: () => {
+                                          const E = V.trim();
+                                          if (!E) return;
+                                          const I = E.replace(/[^A-Za-z0-9/]/g, "").toUpperCase();
+                                          I && window.open(`https://www.qrz.com/db/${I}`, "_blank", "noreferrer");
+                                        },
+                                        children: d.jsx(OS, {
+                                          className: "h-4 w-4"
+                                        })
+                                      })
+                                    ]
+                                  })
+                                ]
+                              }) : null,
+                              ee.lookups.mwlist || ee.lookups.shortwaveInfo ? d.jsxs("div", {
+                                className: "flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between",
+                                children: [
+                                  d.jsx("div", {
+                                    className: "text-xs",
+                                    children: "Frequency"
+                                  }),
+                                  d.jsxs("div", {
+                                    className: "flex flex-wrap gap-2 sm:justify-end",
+                                    children: [
+                                      ee.lookups.mwlist ? d.jsxs(Ue, {
+                                        type: "button",
+                                        variant: "secondary",
+                                        size: "sm",
+                                        disabled: s == null,
+                                        onClick: () => {
+                                          if (s == null) return;
+                                          const I = `https://www.mwlist.org/mwlist_quick_and_easy.php?area=1&kHz=${Math.round(s / 1e3)}`;
+                                          window.open(I, "_blank", "noreferrer");
+                                        },
+                                        className: "h-8 gap-2",
+                                        children: [
+                                          "MWList",
+                                          d.jsx(b1, {
+                                            className: "h-3.5 w-3.5"
+                                          })
+                                        ]
+                                      }) : null,
+                                      ee.lookups.shortwaveInfo ? d.jsxs(Ue, {
+                                        type: "button",
+                                        variant: "secondary",
+                                        size: "sm",
+                                        disabled: s == null,
+                                        onClick: () => {
+                                          if (s == null) return;
+                                          const I = `https://www.short-wave.info/index.php?timbus=NOW&ip=179&porm=4&freq=${Math.round(s / 1e3)}`;
+                                          window.open(I, "_blank", "noreferrer");
+                                        },
+                                        className: "h-8 gap-2",
+                                        children: [
+                                          "short-wave.info",
+                                          d.jsx(b1, {
+                                            className: "h-3.5 w-3.5"
+                                          })
+                                        ]
+                                      }) : null
+                                    ]
+                                  })
+                                ]
+                              }) : null
+                            ]
+                          })
+                        ]
+                      }) : null,
+                      ee.widgets.blitzortung && ye ? d.jsxs("div", {
+                        className: "overflow-hidden rounded-lg border bg-muted/10",
+                        children: [
+                          d.jsx("div", {
+                            className: "px-3 py-2.5",
+                            children: d.jsx("div", {
+                              className: "text-[11px] font-medium text-muted-foreground",
+                              children: "Blitzortung"
+                            })
+                          }),
+                          d.jsx("iframe", {
                             title: "Blitzortung lightning map",
                             src: ye,
-                            className: "h-[260px] w-full",
+                            className: "h-[240px] w-full sm:h-[280px]",
                             loading: "lazy"
                           })
-                        }) : null,
-                        te.widgets.hamqsl ? d.jsx("a", {
-                          href: "https://www.hamqsl.com/solar.html",
-                          target: "_blank",
-                          rel: "noreferrer",
-                          className: "block",
-                          children: d.jsx("div", {
-                            className: "rounded-md border bg-muted/10 px-3 py-2",
+                        ]
+                      }) : null,
+                      ee.widgets.hamqsl ? d.jsxs("div", {
+                        className: "overflow-hidden rounded-lg border bg-muted/10",
+                        children: [
+                          d.jsx("div", {
+                            className: "px-3 py-2.5",
+                            children: d.jsx("div", {
+                              className: "text-[11px] font-medium text-muted-foreground",
+                              children: "Solar-terrestrial"
+                            })
+                          }),
+                          d.jsx("a", {
+                            href: "https://www.hamqsl.com/solar.html",
+                            target: "_blank",
+                            rel: "noreferrer",
+                            className: "block px-3 pb-3",
                             children: d.jsx("img", {
                               src: "https://www.hamqsl.com/solar101vhf.php",
                               alt: "Solar-terrestrial data (HAMQSL)",
                               loading: "lazy",
-                              className: "block w-full max-h-[96px] object-contain"
+                              className: "block w-full max-h-[110px] object-contain"
                             })
                           })
-                        }) : null
-                      ]
-                    })
-                  ]
-                }),
-                te.images.length ? d.jsx("div", {
-                  className: "grid gap-2 sm:grid-cols-2 lg:grid-cols-3",
-                  children: te.images.slice(0, 3).map((E) => d.jsx("img", {
-                    src: E,
-                    alt: "",
-                    loading: "lazy",
-                    className: "h-40 w-full rounded-md border bg-muted/10 object-cover"
-                  }, E))
-                }) : null
-              ]
+                        ]
+                      }) : null
+                    ]
+                  })
+                ]
+              })
             })
           }, "header-panel") : null
         }),
@@ -23464,22 +23521,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       ]
     });
   }
-  function MO({ label: e, value: n }) {
-    return d.jsxs("div", {
-      className: "flex items-center justify-between rounded-md border bg-muted/10 px-3 py-2",
-      children: [
-        d.jsx("div", {
-          className: "text-xs font-medium text-muted-foreground",
-          children: e
-        }),
-        d.jsx("div", {
-          className: "truncate text-xs",
-          children: n
-        })
-      ]
-    });
-  }
-  function CO(e) {
+  function MO(e) {
     const n = e.trim().toUpperCase();
     if (n.length < 4) return null;
     const s = n.charCodeAt(0) - 65, o = n.charCodeAt(1) - 65, i = Number.parseInt(n[2] ?? "0", 10), c = Number.parseInt(n[3] ?? "0", 10);
@@ -23500,7 +23542,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     if (!e) throw new Error("useBackendConnection must be used within BackendConnectionProvider");
     return e;
   }
-  const AO = zM("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors", {
+  const CO = zM("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors", {
     variants: {
       variant: {
         default: "border-transparent bg-secondary text-secondary-foreground",
@@ -23513,7 +23555,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
   });
   function aw({ className: e, variant: n, ...s }) {
     return d.jsx("div", {
-      className: Bt(AO({
+      className: Bt(CO({
         variant: n
       }), e),
       ...s
@@ -23522,13 +23564,13 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
   function ow(e) {
     return e === "audio" ? "Audio" : e === "waterfall" ? "Waterfall" : e === "events" ? "Events" : e === "chat" ? "Chat" : e ? `${e.slice(0, 1).toUpperCase()}${e.slice(1)}` : "Backend";
   }
-  function _O(e) {
+  function AO(e) {
     return e === "connecting" ? "connecting" : e === "reconnecting" ? "reconnecting" : e === "disconnected" ? "disconnected" : "connecting";
   }
-  function TO(e) {
+  function _O(e) {
     return e === "connected" ? "bg-emerald-500" : e === "reconnecting" ? "bg-amber-500" : e === "disconnected" ? "bg-rose-500" : "bg-muted-foreground";
   }
-  function EO() {
+  function TO() {
     const { snapshot: e, everConnected: n } = W0(), [s, o] = m.useState(() => Date.now()), [i, c] = m.useState(null), [u, h] = m.useState(false), p = m.useRef(null), y = m.useMemo(() => Object.entries(e).filter(([, C]) => C.state !== "connected"), [
       e
     ]), v = n && y.length > 0, x = m.useMemo(() => {
@@ -23581,7 +23623,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       if (y.length === 0) return null;
       const M = [
         ...y
-      ].sort(([z], [N]) => z.localeCompare(N)).map(([z, N]) => `${ow(z)} ${_O(N.state)}`), _ = M.length <= 2 ? M.join(" / ") : `${M.slice(0, 2).join(" / ")} / +${M.length - 2} more`, R = b == null ? "" : ` (${b}s)`;
+      ].sort(([z], [N]) => z.localeCompare(N)).map(([z, N]) => `${ow(z)} ${AO(N.state)}`), _ = M.length <= 2 ? M.join(" / ") : `${M.slice(0, 2).join(" / ")} / +${M.length - 2} more`, R = b == null ? "" : ` (${b}s)`;
       return `${_}${R}`;
     }, [
       b,
@@ -23664,7 +23706,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
                           d.jsx("span", {
                             className: "mr-1 inline-flex items-center",
                             children: d.jsx("span", {
-                              className: `h-1.5 w-1.5 rounded-full ${TO(M.state)}`
+                              className: `h-1.5 w-1.5 rounded-full ${_O(M.state)}`
                             })
                           }),
                           ow(C)
@@ -23707,7 +23749,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       return 0;
     }
   }
-  function RO() {
+  function EO() {
     try {
       return window.localStorage.getItem(MA) !== AA();
     } catch {
@@ -23720,7 +23762,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     } catch {
     }
   }
-  async function NO() {
+  async function RO() {
     const e = Date.now(), n = await fetch("https://worldtimeapi.org/api/ip", {
       cache: "no-store"
     }), s = Date.now();
@@ -23739,7 +23781,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     const c = Math.round((e + s) / 2);
     return i - c;
   }
-  function jO() {
+  function NO() {
     const { snapshot: e, everConnected: n } = W0(), [s, o] = m.useState(false), [i, c] = m.useState("checking"), [u, h] = m.useState(null), [p, y] = m.useState("Checking browser clock\u2026"), v = m.useRef(null), x = m.useRef(false), b = m.useRef(null), S = m.useRef(null), C = m.useMemo(() => {
       const z = Object.keys(e);
       return !n || z.length === 0 ? false : Object.values(e).every((N) => N.state === "connected");
@@ -23756,11 +23798,11 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     }, [
       C
     ]), m.useEffect(() => {
-      if (!(typeof window < "u" && (new URLSearchParams(window.location.search).get("force_time_sync") === "1" || new URLSearchParams(window.location.search).get("force_time_sync") === "true")) && !RO() || !C || x.current) return;
+      if (!(typeof window < "u" && (new URLSearchParams(window.location.search).get("force_time_sync") === "1" || new URLSearchParams(window.location.search).get("force_time_sync") === "true")) && !EO() || !C || x.current) return;
       x.current = true;
       const N = 2500, k = 1200, O = 1500, G = 6e3, V = 3200;
       let L = false;
-      const J = b.current ?? Date.now(), ie = Date.now() - J, te = Math.max(0, N - ie) + k, ye = window.setTimeout(() => {
+      const J = b.current ?? Date.now(), ie = Date.now() - J, ee = Math.max(0, N - ie) + k, ye = window.setTimeout(() => {
         if (!C) {
           x.current = false;
           return;
@@ -23771,7 +23813,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
           let K = false, T = null;
           for (let B = 0; B < 3; B += 1) try {
             B > 0 && y(`Retrying time sync (${B}/2)\u2026`);
-            const X = await NO();
+            const X = await RO();
             K = true, T = X;
             break;
           } catch {
@@ -23792,7 +23834,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
             o(false), v.current = null, S.current = null;
           }, D);
         })();
-      }, te);
+      }, ee);
       return () => {
         L = true, window.clearTimeout(ye), x.current = false, v.current != null && (window.clearTimeout(v.current), v.current = null);
       };
@@ -23971,7 +24013,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       return false;
     }
   }
-  async function DO() {
+  async function jO() {
     const e = "/background.jpg";
     if (await lw(e)) return {
       url: e,
@@ -23983,12 +24025,12 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       kind: "png"
     } : null;
   }
-  function kO() {
+  function DO() {
     const [e, n] = m.useState(null);
     return m.useEffect(() => {
       let s = false;
       return (async () => {
-        const o = await DO();
+        const o = await jO();
         s || n((o == null ? void 0 : o.url) ?? null);
       })(), () => {
         s = true;
@@ -24009,7 +24051,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       ]
     }) : null;
   }
-  const zO = "/assets/novasdrdsp_bg-wMY-2PDD.wasm", OO = async (e = {}, n) => {
+  const kO = "/assets/novasdrdsp_bg-wMY-2PDD.wasm", zO = async (e = {}, n) => {
     let s;
     if (n.startsWith("data:")) {
       const o = n.replace(/^data:.*?base64,/, "");
@@ -24032,23 +24074,23 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     return s.instance.exports;
   };
   let vt;
-  function LO(e) {
+  function OO(e) {
     vt = e;
   }
   function _A(e) {
     const n = vt.__externref_table_alloc();
     return vt.__wbindgen_externrefs.set(n, e), n;
   }
-  function HO(e, n) {
+  function LO(e, n) {
     return e = e >>> 0, TA().subarray(e / 4, e / 4 + n);
   }
-  function BO(e, n) {
+  function HO(e, n) {
     e = e >>> 0;
     const s = Cp(), o = [];
     for (let i = e; i < e + 4 * n; i += 4) o.push(vt.__wbindgen_externrefs.get(s.getUint32(i, true)));
     return vt.__externref_drop_slice(e, n), o;
   }
-  function UO(e, n) {
+  function BO(e, n) {
     return e = e >>> 0, oi().subarray(e / 1, e / 1 + n);
   }
   let qo = null;
@@ -24060,13 +24102,13 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     return (Mu === null || Mu.byteLength === 0) && (Mu = new Float32Array(vt.memory.buffer)), Mu;
   }
   function EA(e, n) {
-    return e = e >>> 0, GO(e, n);
+    return e = e >>> 0, IO(e, n);
   }
   let Cu = null;
   function oi() {
     return (Cu === null || Cu.byteLength === 0) && (Cu = new Uint8Array(vt.memory.buffer)), Cu;
   }
-  function PO(e, n) {
+  function UO(e, n) {
     try {
       return e.apply(this, n);
     } catch (s) {
@@ -24074,18 +24116,18 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       vt.__wbindgen_exn_store(o);
     }
   }
-  function VO(e) {
+  function PO(e) {
     return e == null;
   }
   function Ap(e, n) {
     const s = n(e.length * 1, 1) >>> 0;
     return oi().set(e, s / 1), Ls = e.length, s;
   }
-  function FO(e, n) {
+  function VO(e, n) {
     const s = n(e.length * 4, 4) >>> 0;
     return TA().set(e, s / 4), Ls = e.length, s;
   }
-  function qO(e, n, s) {
+  function FO(e, n, s) {
     if (s === void 0) {
       const h = Ml.encode(e), p = n(h.length, 1) >>> 0;
       return oi().subarray(p, p + h.length).set(h), Ls = h.length, p;
@@ -24110,10 +24152,10 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     fatal: true
   });
   Uu.decode();
-  const IO = 2146435072;
+  const qO = 2146435072;
   let jm = 0;
-  function GO(e, n) {
-    return jm += n, jm >= IO && (Uu = new TextDecoder("utf-8", {
+  function IO(e, n) {
+    return jm += n, jm >= qO && (Uu = new TextDecoder("utf-8", {
       ignoreBOM: true,
       fatal: true
     }), Uu.decode(), jm = n), Uu.decode(oi().subarray(e, e + n));
@@ -24160,7 +24202,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       return vt.audio_decode_to_pcm_f32(this.__wbg_ptr, s, o);
     }
     process_pcm_f32(n) {
-      const s = FO(n, vt.__wbindgen_malloc), o = Ls;
+      const s = VO(n, vt.__wbindgen_malloc), o = Ls;
       return vt.audio_process_pcm_f32(this.__wbg_ptr, s, o);
     }
     set_nr(n) {
@@ -24173,11 +24215,11 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       vt.audio_set_an(this.__wbg_ptr, n);
     }
     set_decoded_callback(n) {
-      vt.audio_set_decoded_callback(this.__wbg_ptr, VO(n) ? 0 : _A(n));
+      vt.audio_set_decoded_callback(this.__wbg_ptr, PO(n) ? 0 : _A(n));
     }
   }
   Symbol.dispose && (sf.prototype[Symbol.dispose] = sf.prototype.free);
-  const XO = Object.freeze({
+  const GO = Object.freeze({
     Flac: 0,
     0: "Flac",
     Opus: 1,
@@ -24201,20 +24243,20 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     }
     decode(n) {
       const s = Ap(n, vt.__wbindgen_malloc), o = Ls, i = vt.zstdstreamdecoder_decode(this.__wbg_ptr, s, o);
-      var c = BO(i[0], i[1]).slice();
+      var c = HO(i[0], i[1]).slice();
       return vt.__wbindgen_free(i[0], i[1] * 4, 4), c;
     }
   }
   Symbol.dispose && (af.prototype[Symbol.dispose] = af.prototype.free);
-  function YO(e, n) {
+  function XO(e, n) {
     throw new Error(EA(e, n));
   }
-  function $O() {
-    return PO(function(e, n, s) {
+  function YO() {
+    return UO(function(e, n, s) {
       return e.call(n, s);
     }, arguments);
   }
-  function KO(e, n) {
+  function $O(e, n) {
     let s, o;
     try {
       s = e, o = n, console.error(EA(e, n));
@@ -24222,80 +24264,80 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       vt.__wbindgen_free(s, o, 1);
     }
   }
-  function WO() {
+  function KO() {
     return new Error();
   }
+  function WO(e, n) {
+    return new Float32Array(LO(e, n));
+  }
   function ZO(e, n) {
-    return new Float32Array(HO(e, n));
+    return new Uint8Array(BO(e, n));
   }
-  function QO(e, n) {
-    return new Uint8Array(UO(e, n));
-  }
-  function JO(e) {
+  function QO(e) {
     return new Float32Array(e >>> 0);
   }
-  function e9(e, n) {
-    const s = n.stack, o = qO(s, vt.__wbindgen_malloc, vt.__wbindgen_realloc), i = Ls;
+  function JO(e, n) {
+    const s = n.stack, o = FO(s, vt.__wbindgen_malloc, vt.__wbindgen_realloc), i = Ls;
     Cp().setInt32(e + 4, i, true), Cp().setInt32(e + 0, o, true);
   }
-  function t9() {
+  function e9() {
     const e = vt.__wbindgen_externrefs, n = e.grow(4);
     e.set(0, void 0), e.set(n + 0, void 0), e.set(n + 1, null), e.set(n + 2, true), e.set(n + 3, false);
   }
   URL = globalThis.URL;
-  const bt = await OO({
+  const bt = await zO({
     "./novasdrdsp_bg.js": {
-      __wbg_new_8a6f238a6ece86ea: WO,
-      __wbg_stack_0ed75d68575b0f3c: e9,
-      __wbg_error_7534b8e9a36f1ab4: KO,
-      __wbg_new_from_slice_41e2764a343e3cb1: ZO,
-      __wbg_new_with_length_95ba657dfb7d3dfb: JO,
-      __wbg_call_3020136f7a2d6e44: $O,
-      __wbg_new_from_slice_f9c22b9153b26992: QO,
-      __wbg___wbindgen_throw_dd24417ed36fc46e: YO,
-      __wbindgen_init_externref_table: t9
+      __wbg_new_8a6f238a6ece86ea: KO,
+      __wbg_stack_0ed75d68575b0f3c: JO,
+      __wbg_error_7534b8e9a36f1ab4: $O,
+      __wbg_new_from_slice_41e2764a343e3cb1: WO,
+      __wbg_new_with_length_95ba657dfb7d3dfb: QO,
+      __wbg_call_3020136f7a2d6e44: YO,
+      __wbg_new_from_slice_f9c22b9153b26992: ZO,
+      __wbg___wbindgen_throw_dd24417ed36fc46e: XO,
+      __wbindgen_init_externref_table: e9
     }
-  }, zO), n9 = bt.memory, r9 = bt.__wbg_audio_free, s9 = bt.audio_new, a9 = bt.audio_decode, o9 = bt.audio_decode_to_pcm_f32, i9 = bt.audio_process_pcm_f32, l9 = bt.audio_set_nr, c9 = bt.audio_set_nb, u9 = bt.audio_set_an, f9 = bt.audio_set_decoded_callback, d9 = bt.__wbg_zstdstreamdecoder_free, h9 = bt.zstdstreamdecoder_new, m9 = bt.zstdstreamdecoder_clear, p9 = bt.zstdstreamdecoder_decode, g9 = bt.main, y9 = bt.firdes_kaiser_lowpass, v9 = bt.rust_zstd_wasm_shim_qsort, x9 = bt.rust_zstd_wasm_shim_malloc, b9 = bt.rust_zstd_wasm_shim_memcmp, w9 = bt.rust_zstd_wasm_shim_calloc, S9 = bt.rust_zstd_wasm_shim_free, M9 = bt.rust_zstd_wasm_shim_memcpy, C9 = bt.rust_zstd_wasm_shim_memmove, A9 = bt.rust_zstd_wasm_shim_memset, _9 = bt.greet, T9 = bt.__wbindgen_exn_store, E9 = bt.__externref_table_alloc, R9 = bt.__wbindgen_externrefs, N9 = bt.__wbindgen_free, j9 = bt.__wbindgen_malloc, D9 = bt.__wbindgen_realloc, k9 = bt.__externref_drop_slice, RA = bt.__wbindgen_start, z9 = Object.freeze(Object.defineProperty({
+  }, kO), t9 = bt.memory, n9 = bt.__wbg_audio_free, r9 = bt.audio_new, s9 = bt.audio_decode, a9 = bt.audio_decode_to_pcm_f32, o9 = bt.audio_process_pcm_f32, i9 = bt.audio_set_nr, l9 = bt.audio_set_nb, c9 = bt.audio_set_an, u9 = bt.audio_set_decoded_callback, f9 = bt.__wbg_zstdstreamdecoder_free, d9 = bt.zstdstreamdecoder_new, h9 = bt.zstdstreamdecoder_clear, m9 = bt.zstdstreamdecoder_decode, p9 = bt.main, g9 = bt.firdes_kaiser_lowpass, y9 = bt.rust_zstd_wasm_shim_qsort, v9 = bt.rust_zstd_wasm_shim_malloc, x9 = bt.rust_zstd_wasm_shim_memcmp, b9 = bt.rust_zstd_wasm_shim_calloc, w9 = bt.rust_zstd_wasm_shim_free, S9 = bt.rust_zstd_wasm_shim_memcpy, M9 = bt.rust_zstd_wasm_shim_memmove, C9 = bt.rust_zstd_wasm_shim_memset, A9 = bt.greet, _9 = bt.__wbindgen_exn_store, T9 = bt.__externref_table_alloc, E9 = bt.__wbindgen_externrefs, R9 = bt.__wbindgen_free, N9 = bt.__wbindgen_malloc, j9 = bt.__wbindgen_realloc, D9 = bt.__externref_drop_slice, RA = bt.__wbindgen_start, k9 = Object.freeze(Object.defineProperty({
     __proto__: null,
-    __externref_drop_slice: k9,
-    __externref_table_alloc: E9,
-    __wbg_audio_free: r9,
-    __wbg_zstdstreamdecoder_free: d9,
-    __wbindgen_exn_store: T9,
-    __wbindgen_externrefs: R9,
-    __wbindgen_free: N9,
-    __wbindgen_malloc: j9,
-    __wbindgen_realloc: D9,
+    __externref_drop_slice: D9,
+    __externref_table_alloc: T9,
+    __wbg_audio_free: n9,
+    __wbg_zstdstreamdecoder_free: f9,
+    __wbindgen_exn_store: _9,
+    __wbindgen_externrefs: E9,
+    __wbindgen_free: R9,
+    __wbindgen_malloc: N9,
+    __wbindgen_realloc: j9,
     __wbindgen_start: RA,
-    audio_decode: a9,
-    audio_decode_to_pcm_f32: o9,
-    audio_new: s9,
-    audio_process_pcm_f32: i9,
-    audio_set_an: u9,
-    audio_set_decoded_callback: f9,
-    audio_set_nb: c9,
-    audio_set_nr: l9,
-    firdes_kaiser_lowpass: y9,
-    greet: _9,
-    main: g9,
-    memory: n9,
-    rust_zstd_wasm_shim_calloc: w9,
-    rust_zstd_wasm_shim_free: S9,
-    rust_zstd_wasm_shim_malloc: x9,
-    rust_zstd_wasm_shim_memcmp: b9,
-    rust_zstd_wasm_shim_memcpy: M9,
-    rust_zstd_wasm_shim_memmove: C9,
-    rust_zstd_wasm_shim_memset: A9,
-    rust_zstd_wasm_shim_qsort: v9,
-    zstdstreamdecoder_clear: m9,
-    zstdstreamdecoder_decode: p9,
-    zstdstreamdecoder_new: h9
+    audio_decode: s9,
+    audio_decode_to_pcm_f32: a9,
+    audio_new: r9,
+    audio_process_pcm_f32: o9,
+    audio_set_an: c9,
+    audio_set_decoded_callback: u9,
+    audio_set_nb: l9,
+    audio_set_nr: i9,
+    firdes_kaiser_lowpass: g9,
+    greet: A9,
+    main: p9,
+    memory: t9,
+    rust_zstd_wasm_shim_calloc: b9,
+    rust_zstd_wasm_shim_free: w9,
+    rust_zstd_wasm_shim_malloc: v9,
+    rust_zstd_wasm_shim_memcmp: x9,
+    rust_zstd_wasm_shim_memcpy: S9,
+    rust_zstd_wasm_shim_memmove: M9,
+    rust_zstd_wasm_shim_memset: C9,
+    rust_zstd_wasm_shim_qsort: y9,
+    zstdstreamdecoder_clear: h9,
+    zstdstreamdecoder_decode: m9,
+    zstdstreamdecoder_new: d9
   }, Symbol.toStringTag, {
     value: "Module"
   }));
-  LO(z9);
+  OO(k9);
   RA();
-  const O9 = new Int8Array([
+  const z9 = new Int8Array([
     -1,
     -1,
     -1,
@@ -24312,7 +24354,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     4,
     6,
     8
-  ]), L9 = new Int16Array([
+  ]), O9 = new Int16Array([
     7,
     8,
     9,
@@ -24403,13 +24445,13 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     29794,
     32767
   ]);
-  function H9(e) {
+  function L9(e) {
     return e > 32767 ? 32767 : e < -32768 ? -32768 : e | 0;
   }
   function fw(e) {
     return e < 0 ? 0 : e > 88 ? 88 : e | 0;
   }
-  function B9(e) {
+  function H9(e) {
     if (e.length < 6) return new Float32Array(0);
     const n = new DataView(e.buffer, e.byteOffset, e.byteLength);
     let s = n.getInt16(0, true), o = fw(e[2] ?? 0);
@@ -24421,13 +24463,13 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     for (; u < i && h < e.length; ) {
       const y = e[h] ?? 0, v = p ? y >> 4 & 15 : y & 15;
       p && (h += 1), p = !p;
-      const x = L9[o] ?? 7;
+      const x = O9[o] ?? 7;
       let b = x >> 3;
-      v & 4 && (b += x), v & 2 && (b += x >> 1), v & 1 && (b += x >> 2), s = H9((v & 8) !== 0 ? s - b : s + b), o = fw(o + (O9[v] ?? 0)), c[u] = s / 32768, u += 1;
+      v & 4 && (b += x), v & 2 && (b += x >> 1), v & 1 && (b += x >> 2), s = L9((v & 8) !== 0 ? s - b : s + b), o = fw(o + (z9[v] ?? 0)), c[u] = s / 32768, u += 1;
     }
     return c;
   }
-  function U9(e) {
+  function B9(e) {
     const n = Math.min(8, Math.max(0, e)), s = Math.min(3e4, 800 * 2 ** n), o = s * 0.25 * (Math.random() * 2 - 1);
     return Math.max(800, Math.round(s + o));
   }
@@ -24482,8 +24524,8 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         x.current != null && (window.clearTimeout(x.current), x.current = null), y.current = 0, C.current = true, M.current = null, R("connected"), h(e, {
           state: "connected"
         }), i == null ? void 0 : i(L);
-      }, L.onmessage = (te) => {
-        u == null ? void 0 : u(te);
+      }, L.onmessage = (ee) => {
+        u == null ? void 0 : u(ee);
       }, L.onerror = () => {
         if (!J() && !(L.readyState === WebSocket.CLOSED || L.readyState === WebSocket.CLOSING)) {
           M.current = "socket error";
@@ -24492,18 +24534,18 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
           } catch {
           }
         }
-      }, L.onclose = (te) => {
+      }, L.onclose = (ee) => {
         if (J()) return;
         x.current != null && (window.clearTimeout(x.current), x.current = null);
         const ye = y.current + 1;
         y.current = ye;
-        const H = U9(ye);
+        const H = B9(ye);
         R("reconnecting");
-        const oe = M.current ?? `closed (${te.code})`;
+        const oe = M.current ?? `closed (${ee.code})`;
         M.current = null, h(e, {
           state: "reconnecting",
           message: `${oe}, retrying in ${H}ms (attempt ${ye})`
-        }), c == null ? void 0 : c(te), v.current = window.setTimeout(() => k(), H);
+        }), c == null ? void 0 : c(ee), v.current = window.setTimeout(() => k(), H);
       };
     }, [
       s,
@@ -24539,7 +24581,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     ]);
   }
   let Jo = null, _p = false;
-  function P9(e) {
+  function U9(e) {
     if (Jo = e, _p) {
       _p = false;
       try {
@@ -24551,14 +24593,14 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       Jo === e && (Jo = null);
     };
   }
-  function V9() {
+  function P9() {
     if (Jo) {
       Jo();
       return;
     }
     _p = true;
   }
-  function F9() {
+  function V9() {
     const e = navigator.userAgent || "";
     return /iPad|iPhone|iPod/i.test(e);
   }
@@ -24575,7 +24617,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         return 200;
     }
   }
-  function q9(e) {
+  function F9(e) {
     if (e.byteLength < 36) return null;
     const n = new Uint8Array(e);
     if (n[0] !== 78 || n[1] !== 83 || n[2] !== 68 || n[3] !== 65 || (n[4] ?? 0) !== 1) return null;
@@ -24590,12 +24632,12 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       payload: v
     };
   }
-  function I9({ receiverId: e, receiverSessionNonce: n, mode: s, centerHz: o, settings: i, audioWindow: c, onPcm: u }) {
+  function q9({ receiverId: e, receiverSessionNonce: n, mode: s, centerHz: o, settings: i, audioWindow: c, onPcm: u }) {
     const h = m.useRef(i), p = m.useRef(u), y = m.useRef(null), v = m.useRef(null), x = m.useRef({
       nr: false,
       nb: false,
       an: false
-    }), b = m.useRef(false), S = m.useRef(null), C = m.useRef(null), M = m.useRef(null), _ = m.useRef(null), R = m.useRef(null), z = m.useRef(dw(s)), N = m.useRef(s), k = m.useRef(s === "FMC"), O = m.useRef(null), G = m.useRef(null), V = m.useRef(F9()), L = m.useRef(0), J = m.useRef([]), ie = m.useRef(0), te = m.useRef(false), ye = m.useRef(dl(i.bufferMode) / 1e3), H = m.useRef(Date.now()), oe = m.useRef(""), K = m.useRef(""), T = m.useRef(null), j = m.useRef(null), E = m.useRef(null), I = m.useRef(e), ne = m.useRef(0);
+    }), b = m.useRef(false), S = m.useRef(null), C = m.useRef(null), M = m.useRef(null), _ = m.useRef(null), R = m.useRef(null), z = m.useRef(dw(s)), N = m.useRef(s), k = m.useRef(s === "FMC"), O = m.useRef(null), G = m.useRef(null), V = m.useRef(V9()), L = m.useRef(0), J = m.useRef([]), ie = m.useRef(0), ee = m.useRef(false), ye = m.useRef(dl(i.bufferMode) / 1e3), H = m.useRef(Date.now()), oe = m.useRef(""), K = m.useRef(""), T = m.useRef(null), j = m.useRef(null), E = m.useRef(null), I = m.useRef(e), ne = m.useRef(0);
     I.current = e, m.useEffect(() => {
       K.current = "", oe.current = "", T.current = null, j.current = null, E.current = null;
     }, [
@@ -24630,7 +24672,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     }), X = m.useRef(0), re = m.useRef(0), [pe, Ce] = m.useState("connecting"), [Ae, Je] = m.useState(null), [Ie, wt] = m.useState(null), [fn, qt] = m.useState(null), [Nt, Tt] = m.useState(false), [Sn, Fn] = m.useState(0), fr = m.useRef(null), tn = m.useRef(() => {
     }), [Lt, Mn] = m.useState(null), [dn, Wt] = m.useState(null), St = m.useRef([]);
     m.useEffect(() => {
-      n <= 0 || (K.current = "", oe.current = "", T.current = null, j.current = null, E.current = null, J.current = [], ie.current = 0, te.current = false, wt(null), qt(null), Ce("connecting"), Je(null));
+      n <= 0 || (K.current = "", oe.current = "", T.current = null, j.current = null, E.current = null, J.current = [], ie.current = 0, ee.current = false, wt(null), qt(null), Ce("connecting"), Je(null));
     }, [
       n
     ]);
@@ -24691,7 +24733,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       const tt = Ye.createBiquadFilter();
       tt.type = "lowshelf", N.current === "FM" || N.current === "FMC" ? (tt.frequency.value = 120, tt.gain.value = 6) : (tt.frequency.value = 140, tt.gain.value = 12);
       const ln = Ye.createMediaStreamDestination();
-      if (V.current || nt.connect(Ye.destination), nt.connect(ln), tt.connect(nt), Ge.connect(tt), C.current = Ye, M.current = nt, _.current = Ge, R.current = tt, O.current = ln, L.current = Ye.currentTime + 0.06, J.current = [], ie.current = 0, te.current = false, V.current) {
+      if (V.current || nt.connect(Ye.destination), nt.connect(ln), tt.connect(nt), Ge.connect(tt), C.current = Ye, M.current = nt, _.current = Ge, R.current = tt, O.current = ln, L.current = Ye.currentTime + 0.06, J.current = [], ie.current = 0, ee.current = false, V.current) {
         if (!G.current) {
           const ce = document.createElement("audio");
           ce.preload = "none", ce.autoplay = false, ce.setAttribute("playsinline", ""), ce.setAttribute("webkit-playsinline", ""), G.current = ce;
@@ -24710,7 +24752,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         ie.current -= Re.length, re.current += 1;
       }
       const ce = be.currentTime;
-      L.current + 0.01 < ce && (te.current && (ye.current = Math.min(0.28, Math.max(0.06, ye.current + 0.04)), H.current = Date.now(), re.current += 1), L.current = ce + 0.03, te.current = false);
+      L.current + 0.01 < ce && (ee.current && (ye.current = Math.min(0.28, Math.max(0.06, ye.current + 0.04)), H.current = Date.now(), re.current += 1), L.current = ce + 0.03, ee.current = false);
       const _e = Math.max(0.06, Math.min(0.28, ye.current));
       for (Date.now() - H.current > 5e3 && ye.current > 0.06 && (ye.current = Math.max(0.06, ye.current - 5e-3), H.current = Date.now()); L.current - ce < _e && ie.current > 0; ) {
         const Re = Math.min(tt, ie.current), st = Re < Ge && L.current - ce > 0.02 ? Re : Math.max(Ge, Re), P = new Float32Array(Math.min(st, ie.current));
@@ -24726,7 +24768,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         const fe = be.createBufferSource();
         fe.buffer = ve;
         const xe = _.current, Te = R.current;
-        xe && k.current ? fe.connect(xe) : Te && z.current ? fe.connect(Te) : fe.connect(Ee), fe.start(L.current), L.current += ve.duration, te.current = true;
+        xe && k.current ? fe.connect(xe) : Te && z.current ? fe.connect(Te) : fe.connect(Ee), fe.start(L.current), L.current += ve.duration, ee.current = true;
       }
     }, []), hn = m.useCallback(async () => {
       It();
@@ -24749,7 +24791,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     }, [
       It
     ]);
-    m.useEffect(() => P9(() => {
+    m.useEffect(() => U9(() => {
       hn();
     }), [
       hn
@@ -24857,8 +24899,8 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
             It(ve);
             const fe = C.current;
             if (!fe) return;
-            J.current = [], ie.current = 0, L.current = fe.currentTime + 0.06, te.current = false, ye.current = dl(h.current.bufferMode) / 1e3, H.current = Date.now(), X.current = 0, re.current = 0;
-            const xe = XO.Flac, Te = P.fft_result_size * (P.total_bandwidth === P.sps / 2 ? 2 : 1), Se = Math.max(1, Math.round(P.audio_max_fft / Te * P.sps));
+            J.current = [], ie.current = 0, L.current = fe.currentTime + 0.06, ee.current = false, ye.current = dl(h.current.bufferMode) / 1e3, H.current = Date.now(), X.current = 0, re.current = 0;
+            const xe = GO.Flac, Te = P.fft_result_size * (P.total_bandwidth === P.sps / 2 ? 2 : 1), Se = Math.max(1, Math.round(P.audio_max_fft / Te * P.sps));
             try {
               (_a = y.current) == null ? void 0 : _a.free();
             } catch {
@@ -24884,7 +24926,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         let et = y.current;
         const Ye = C.current, nt = M.current;
         if (!et) return;
-        const Ge = q9(Ee.data);
+        const Ge = F9(Ee.data);
         if (!Ge) return;
         const tt = {
           frame_num: Ge.frameNum,
@@ -24925,7 +24967,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         let Re = null;
         try {
           if (Ge.codec !== 1) return;
-          const P = B9(tt.data);
+          const P = H9(tt.data);
           Re = P.length > 0 ? et.process_pcm_f32(P) : null;
         } catch {
           b.current = true, Re = null, re.current += 1;
@@ -25009,7 +25051,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       mt
     ]), m.useEffect(() => {
       if (!Ie || !c) return;
-      const be = G9(Ie, c), Ee = `${be.l}:${be.m}:${be.r}`;
+      const be = I9(Ie, c), Ee = `${be.l}:${be.m}:${be.r}`;
       Ee !== oe.current && mt({
         cmd: "window",
         l: be.l,
@@ -25132,7 +25174,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
   function Wn(e, n, s) {
     return Math.max(n, Math.min(s, e));
   }
-  function G9(e, n) {
+  function I9(e, n) {
     const s = Math.max(0, e.fft_result_size - 1), o = e.audio_max_fft;
     let i = Wn(Math.floor(n.l), 0, s), c = Wn(Math.ceil(n.r), 0, s);
     const u = Wn(Math.round(n.m), 0, s);
@@ -25328,51 +25370,51 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       "ArrowUp",
       "ArrowLeft"
     ]
-  }, bi = "Slider", [Tp, X9, Y9] = R0(bi), [zA] = Zr(bi, [
-    Y9
-  ]), [$9, Lf] = zA(bi), OA = m.forwardRef((e, n) => {
+  }, bi = "Slider", [Tp, G9, X9] = R0(bi), [zA] = Zr(bi, [
+    X9
+  ]), [Y9, Lf] = zA(bi), OA = m.forwardRef((e, n) => {
     const { name: s, min: o = 0, max: i = 100, step: c = 1, orientation: u = "horizontal", disabled: h = false, minStepsBetweenThumbs: p = 0, defaultValue: y = [
       o
     ], value: v, onValueChange: x = () => {
     }, onValueCommit: b = () => {
-    }, inverted: S = false, form: C, ...M } = e, _ = m.useRef(/* @__PURE__ */ new Set()), R = m.useRef(0), N = u === "horizontal" ? K9 : W9, [k = [], O] = Ca({
+    }, inverted: S = false, form: C, ...M } = e, _ = m.useRef(/* @__PURE__ */ new Set()), R = m.useRef(0), N = u === "horizontal" ? $9 : K9, [k = [], O] = Ca({
       prop: v,
       defaultProp: y,
-      onChange: (te) => {
+      onChange: (ee) => {
         var _a;
         (_a = [
           ..._.current
-        ][R.current]) == null ? void 0 : _a.focus(), x(te);
+        ][R.current]) == null ? void 0 : _a.focus(), x(ee);
       }
     }), G = m.useRef(k);
-    function V(te) {
-      const ye = t7(k, te);
-      ie(te, ye);
+    function V(ee) {
+      const ye = e7(k, ee);
+      ie(ee, ye);
     }
-    function L(te) {
-      ie(te, R.current);
+    function L(ee) {
+      ie(ee, R.current);
     }
     function J() {
-      const te = G.current[R.current];
-      k[R.current] !== te && b(k);
+      const ee = G.current[R.current];
+      k[R.current] !== ee && b(k);
     }
-    function ie(te, ye, { commit: H } = {
+    function ie(ee, ye, { commit: H } = {
       commit: false
     }) {
-      const oe = a7(c), K = o7(Math.round((te - o) / c) * c + o, oe), T = Z0(K, [
+      const oe = s7(c), K = a7(Math.round((ee - o) / c) * c + o, oe), T = Z0(K, [
         o,
         i
       ]);
       O((j = []) => {
-        const E = J9(j, T, ye);
-        if (s7(E, p * c)) {
+        const E = Q9(j, T, ye);
+        if (r7(E, p * c)) {
           R.current = E.indexOf(T);
           const I = String(E) !== String(j);
           return I && H && b(E), I ? E : j;
         } else return j;
       });
     }
-    return d.jsx($9, {
+    return d.jsx(Y9, {
       scope: e.__scopeSlider,
       name: s,
       disabled: h,
@@ -25407,9 +25449,9 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
             onEndKeyDown: () => !h && ie(i, k.length - 1, {
               commit: true
             }),
-            onStepKeyDown: ({ event: te, direction: ye }) => {
+            onStepKeyDown: ({ event: ee, direction: ye }) => {
               if (!h) {
-                const K = jA.includes(te.key) || te.shiftKey && DA.includes(te.key) ? 10 : 1, T = R.current, j = k[T], E = c * K * ye;
+                const K = jA.includes(ee.key) || ee.shiftKey && DA.includes(ee.key) ? 10 : 1, T = R.current, j = k[T], E = c * K * ye;
                 ie(j + E, T, {
                   commit: true
                 });
@@ -25426,7 +25468,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     endEdge: "right",
     size: "width",
     direction: 1
-  }), K9 = m.forwardRef((e, n) => {
+  }), $9 = m.forwardRef((e, n) => {
     const { min: s, max: o, dir: i, inverted: c, onSlideStart: u, onSlideMove: h, onSlideEnd: p, onStepKeyDown: y, ...v } = e, [x, b] = m.useState(null), S = xt(n, (N) => b(N)), C = m.useRef(void 0), M = Yl(i), _ = M === "ltr", R = _ && !c || !_ && c;
     function z(N) {
       const k = C.current || x.getBoundingClientRect(), O = [
@@ -25476,7 +25518,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         }
       })
     });
-  }), W9 = m.forwardRef((e, n) => {
+  }), K9 = m.forwardRef((e, n) => {
     const { min: s, max: o, inverted: i, onSlideStart: c, onSlideMove: u, onSlideEnd: h, onStepKeyDown: p, ...y } = e, v = m.useRef(null), x = xt(n, v), b = m.useRef(void 0), S = !i;
     function C(M) {
       const _ = b.current || v.current.getBoundingClientRect(), R = [
@@ -25571,17 +25613,17 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
   });
   VA.displayName = Ep;
   var Rp = "SliderThumb", FA = m.forwardRef((e, n) => {
-    const s = X9(e.__scopeSlider), [o, i] = m.useState(null), c = xt(n, (h) => i(h)), u = m.useMemo(() => o ? s().findIndex((h) => h.ref.current === o) : -1, [
+    const s = G9(e.__scopeSlider), [o, i] = m.useState(null), c = xt(n, (h) => i(h)), u = m.useMemo(() => o ? s().findIndex((h) => h.ref.current === o) : -1, [
       s,
       o
     ]);
-    return d.jsx(Z9, {
+    return d.jsx(W9, {
       ...e,
       ref: c,
       index: u
     });
-  }), Z9 = m.forwardRef((e, n) => {
-    const { __scopeSlider: s, index: o, name: i, ...c } = e, u = Lf(Rp, s), h = HA(Rp, s), [p, y] = m.useState(null), v = xt(n, (z) => y(z)), x = p ? u.form || !!p.closest("form") : true, b = L0(p), S = u.values[o], C = S === void 0 ? 0 : IA(S, u.min, u.max), M = e7(o, u.values.length), _ = b == null ? void 0 : b[h.size], R = _ ? n7(_, C, h.direction) : 0;
+  }), W9 = m.forwardRef((e, n) => {
+    const { __scopeSlider: s, index: o, name: i, ...c } = e, u = Lf(Rp, s), h = HA(Rp, s), [p, y] = m.useState(null), v = xt(n, (z) => y(z)), x = p ? u.form || !!p.closest("form") : true, b = L0(p), S = u.values[o], C = S === void 0 ? 0 : IA(S, u.min, u.max), M = J9(o, u.values.length), _ = b == null ? void 0 : b[h.size], R = _ ? t7(_, C, h.direction) : 0;
     return m.useEffect(() => {
       if (p) return u.thumbs.add(p), () => {
         u.thumbs.delete(p);
@@ -25627,7 +25669,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     });
   });
   FA.displayName = Rp;
-  var Q9 = "RadioBubbleInput", qA = m.forwardRef(({ __scopeSlider: e, value: n, ...s }, o) => {
+  var Z9 = "RadioBubbleInput", qA = m.forwardRef(({ __scopeSlider: e, value: n, ...s }, o) => {
     const i = m.useRef(null), c = xt(i, o), u = tA(n);
     return m.useEffect(() => {
       const h = i.current;
@@ -25651,8 +25693,8 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       defaultValue: n
     });
   });
-  qA.displayName = Q9;
-  function J9(e = [], n, s) {
+  qA.displayName = Z9;
+  function Q9(e = [], n, s) {
     const o = [
       ...e
     ];
@@ -25665,18 +25707,18 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       100
     ]);
   }
-  function e7(e, n) {
+  function J9(e, n) {
     return n > 2 ? `Value ${e + 1} of ${n}` : n === 2 ? [
       "Minimum",
       "Maximum"
     ][e] : void 0;
   }
-  function t7(e, n) {
+  function e7(e, n) {
     if (e.length === 1) return 0;
     const s = e.map((i) => Math.abs(i - n)), o = Math.min(...s);
     return s.indexOf(o);
   }
-  function n7(e, n, s) {
+  function t7(e, n, s) {
     const o = e / 2, c = Q0([
       0,
       50
@@ -25686,12 +25728,12 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     ]);
     return (o - c(n) * s) * s;
   }
-  function r7(e) {
+  function n7(e) {
     return e.slice(0, -1).map((n, s) => e[s + 1] - n);
   }
-  function s7(e, n) {
+  function r7(e, n) {
     if (n > 0) {
-      const s = r7(e);
+      const s = n7(e);
       return Math.min(...s) >= n;
     }
     return true;
@@ -25703,32 +25745,32 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       return n[0] + o * (s - e[0]);
     };
   }
-  function a7(e) {
+  function s7(e) {
     return (String(e).split(".")[1] || "").length;
   }
-  function o7(e, n) {
+  function a7(e, n) {
     const s = Math.pow(10, n);
     return Math.round(e * s) / s;
   }
-  var GA = OA, i7 = PA, l7 = VA, c7 = FA;
+  var GA = OA, o7 = PA, i7 = VA, l7 = FA;
   const Bl = m.forwardRef(({ className: e, ...n }, s) => d.jsxs(GA, {
     ref: s,
     className: Bt("relative flex w-full touch-none select-none items-center", e),
     ...n,
     children: [
-      d.jsx(i7, {
+      d.jsx(o7, {
         className: "relative h-1.5 w-full grow overflow-hidden rounded-full bg-secondary",
-        children: d.jsx(l7, {
+        children: d.jsx(i7, {
           className: "absolute h-full bg-primary"
         })
       }),
-      d.jsx(c7, {
+      d.jsx(l7, {
         className: "block h-4 w-4 rounded-full border border-primary/50 bg-background shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
       })
     ]
   }));
   Bl.displayName = GA.displayName;
-  var u7 = Object.freeze({
+  var c7 = Object.freeze({
     position: "absolute",
     border: 0,
     width: 1,
@@ -25739,23 +25781,23 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     clip: "rect(0, 0, 0, 0)",
     whiteSpace: "nowrap",
     wordWrap: "normal"
-  }), f7 = "VisuallyHidden", XA = m.forwardRef((e, n) => d.jsx(lt.span, {
+  }), u7 = "VisuallyHidden", XA = m.forwardRef((e, n) => d.jsx(lt.span, {
     ...e,
     ref: n,
     style: {
-      ...u7,
+      ...c7,
       ...e.style
     }
   }));
-  XA.displayName = f7;
-  var d7 = XA, [Hf] = Zr("Tooltip", [
+  XA.displayName = u7;
+  var f7 = XA, [Hf] = Zr("Tooltip", [
     Ef
-  ]), Bf = Ef(), YA = "TooltipProvider", h7 = 700, Np = "tooltip.open", [m7, J0] = Hf(YA), $A = (e) => {
-    const { __scopeTooltip: n, delayDuration: s = h7, skipDelayDuration: o = 300, disableHoverableContent: i = false, children: c } = e, u = m.useRef(true), h = m.useRef(false), p = m.useRef(0);
+  ]), Bf = Ef(), YA = "TooltipProvider", d7 = 700, Np = "tooltip.open", [h7, J0] = Hf(YA), $A = (e) => {
+    const { __scopeTooltip: n, delayDuration: s = d7, skipDelayDuration: o = 300, disableHoverableContent: i = false, children: c } = e, u = m.useRef(true), h = m.useRef(false), p = m.useRef(0);
     return m.useEffect(() => {
       const y = p.current;
       return () => window.clearTimeout(y);
-    }, []), d.jsx(m7, {
+    }, []), d.jsx(h7, {
       scope: n,
       isOpenDelayedRef: u,
       delayDuration: s,
@@ -25776,7 +25818,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     });
   };
   $A.displayName = YA;
-  var Ul = "Tooltip", [p7, Uf] = Hf(Ul), KA = (e) => {
+  var Ul = "Tooltip", [m7, Uf] = Hf(Ul), KA = (e) => {
     const { __scopeTooltip: n, children: s, open: o, defaultOpen: i, onOpenChange: c, disableHoverableContent: u, delayDuration: h } = e, p = J0(Ul, e.__scopeTooltip), y = Bf(n), [v, x] = m.useState(null), b = us(), S = m.useRef(0), C = u ?? p.disableHoverableContent, M = h ?? p.delayDuration, _ = m.useRef(false), [R, z] = Ca({
       prop: o,
       defaultProp: i ?? false,
@@ -25806,7 +25848,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       S.current && (window.clearTimeout(S.current), S.current = 0);
     }, []), d.jsx(U0, {
       ...y,
-      children: d.jsx(p7, {
+      children: d.jsx(m7, {
         scope: n,
         contentId: b,
         open: R,
@@ -25866,23 +25908,23 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     });
   });
   WA.displayName = jp;
-  var g7 = "TooltipPortal", [zH, y7] = Hf(g7, {
+  var p7 = "TooltipPortal", [kH, g7] = Hf(p7, {
     forceMount: void 0
   }), fi = "TooltipContent", ZA = m.forwardRef((e, n) => {
-    const s = y7(fi, e.__scopeTooltip), { forceMount: o = s.forceMount, side: i = "top", ...c } = e, u = Uf(fi, e.__scopeTooltip);
+    const s = g7(fi, e.__scopeTooltip), { forceMount: o = s.forceMount, side: i = "top", ...c } = e, u = Uf(fi, e.__scopeTooltip);
     return d.jsx(ur, {
       present: o || u.open,
       children: u.disableHoverableContent ? d.jsx(QA, {
         side: i,
         ...c,
         ref: n
-      }) : d.jsx(v7, {
+      }) : d.jsx(y7, {
         side: i,
         ...c,
         ref: n
       })
     });
-  }), v7 = m.forwardRef((e, n) => {
+  }), y7 = m.forwardRef((e, n) => {
     const s = Uf(fi, e.__scopeTooltip), o = J0(fi, e.__scopeTooltip), i = m.useRef(null), c = xt(n, i), [u, h] = m.useState(null), { trigger: p, onClose: y } = s, v = i.current, { onPointerInTransitChange: x } = o, b = m.useCallback(() => {
       h(null), x(false);
     }, [
@@ -25891,7 +25933,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       const _ = C.currentTarget, R = {
         x: C.clientX,
         y: C.clientY
-      }, z = M7(R, _.getBoundingClientRect()), N = C7(R, z), k = A7(M.getBoundingClientRect()), O = T7([
+      }, z = S7(R, _.getBoundingClientRect()), N = M7(R, z), k = C7(M.getBoundingClientRect()), O = _7([
         ...N,
         ...k
       ]);
@@ -25919,7 +25961,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
           const _ = M.target, R = {
             x: M.clientX,
             y: M.clientY
-          }, z = (p == null ? void 0 : p.contains(_)) || (v == null ? void 0 : v.contains(_)), N = !_7(R, u);
+          }, z = (p == null ? void 0 : p.contains(_)) || (v == null ? void 0 : v.contains(_)), N = !A7(R, u);
           z ? b() : N && (b(), y());
         };
         return document.addEventListener("pointermove", C), () => document.removeEventListener("pointermove", C);
@@ -25934,9 +25976,9 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       ...e,
       ref: c
     });
-  }), [x7, b7] = Hf(Ul, {
+  }), [v7, x7] = Hf(Ul, {
     isInside: false
-  }), w7 = gD("TooltipContent"), QA = m.forwardRef((e, n) => {
+  }), b7 = gD("TooltipContent"), QA = m.forwardRef((e, n) => {
     const { __scopeTooltip: s, children: o, "aria-label": i, onEscapeKeyDown: c, onPointerDownOutside: u, ...h } = e, p = Uf(fi, s), y = Bf(s), { onClose: v } = p;
     return m.useEffect(() => (document.addEventListener(Np, v), () => document.removeEventListener(Np, v)), [
       v
@@ -25976,13 +26018,13 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
           "--radix-tooltip-trigger-height": "var(--radix-popper-anchor-height)"
         },
         children: [
-          d.jsx(w7, {
+          d.jsx(b7, {
             children: o
           }),
-          d.jsx(x7, {
+          d.jsx(v7, {
             scope: s,
             isInside: true,
-            children: d.jsx(d7, {
+            children: d.jsx(f7, {
               id: p.contentId,
               role: "tooltip",
               children: i || o
@@ -25993,16 +26035,16 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     });
   });
   ZA.displayName = fi;
-  var JA = "TooltipArrow", S7 = m.forwardRef((e, n) => {
+  var JA = "TooltipArrow", w7 = m.forwardRef((e, n) => {
     const { __scopeTooltip: s, ...o } = e, i = Bf(s);
-    return b7(JA, s).isInside ? null : d.jsx(sC, {
+    return x7(JA, s).isInside ? null : d.jsx(sC, {
       ...i,
       ...o,
       ref: n
     });
   });
-  S7.displayName = JA;
-  function M7(e, n) {
+  w7.displayName = JA;
+  function S7(e, n) {
     const s = Math.abs(n.top - e.y), o = Math.abs(n.bottom - e.y), i = Math.abs(n.right - e.x), c = Math.abs(n.left - e.x);
     switch (Math.min(s, o, i, c)) {
       case c:
@@ -26017,7 +26059,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         throw new Error("unreachable");
     }
   }
-  function C7(e, n, s = 5) {
+  function M7(e, n, s = 5) {
     const o = [];
     switch (n) {
       case "top":
@@ -26059,7 +26101,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     }
     return o;
   }
-  function A7(e) {
+  function C7(e) {
     const { top: n, right: s, bottom: o, left: i } = e;
     return [
       {
@@ -26080,7 +26122,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       }
     ];
   }
-  function _7(e, n) {
+  function A7(e, n) {
     const { x: s, y: o } = e;
     let i = false;
     for (let c = 0, u = n.length - 1; c < n.length; u = c++) {
@@ -26089,11 +26131,11 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     }
     return i;
   }
-  function T7(e) {
+  function _7(e) {
     const n = e.slice();
-    return n.sort((s, o) => s.x < o.x ? -1 : s.x > o.x ? 1 : s.y < o.y ? -1 : s.y > o.y ? 1 : 0), E7(n);
+    return n.sort((s, o) => s.x < o.x ? -1 : s.x > o.x ? 1 : s.y < o.y ? -1 : s.y > o.y ? 1 : 0), T7(n);
   }
-  function E7(e) {
+  function T7(e) {
     if (e.length <= 1) return e.slice();
     const n = [];
     for (let o = 0; o < e.length; o++) {
@@ -26118,16 +26160,16 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     }
     return s.pop(), n.length === 1 && s.length === 1 && n[0].x === s[0].x && n[0].y === s[0].y ? n : n.concat(s);
   }
-  var R7 = $A, N7 = KA, j7 = WA, e_ = ZA;
-  const D7 = R7, k7 = N7, z7 = j7, t_ = m.forwardRef(({ className: e, sideOffset: n = 6, ...s }, o) => d.jsx(e_, {
+  var E7 = $A, R7 = KA, N7 = WA, e_ = ZA;
+  const j7 = E7, D7 = R7, k7 = N7, t_ = m.forwardRef(({ className: e, sideOffset: n = 6, ...s }, o) => d.jsx(e_, {
     ref: o,
     sideOffset: n,
     className: Bt("z-50 overflow-hidden rounded-md border bg-background px-3 py-1.5 text-xs text-muted-foreground shadow-md", e),
     ...s
   }));
   t_.displayName = e_.displayName;
-  function O7({ receiverId: e, receiverSessionNonce: n, mode: s, centerHz: o, audioWindow: i, settings: c, onChange: u, onDebugStatsChange: h, onGridLocatorChange: p, onAudioMaxSpsChange: y, onPcm: v }) {
-    const x = I9({
+  function z7({ receiverId: e, receiverSessionNonce: n, mode: s, centerHz: o, audioWindow: i, settings: c, onChange: u, onDebugStatsChange: h, onGridLocatorChange: p, onAudioMaxSpsChange: y, onPcm: v }) {
+    const x = q9({
       receiverId: e,
       receiverSessionNonce: n,
       mode: s,
@@ -26313,7 +26355,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
                   children: d.jsx("div", {
                     className: "h-full bg-primary",
                     style: {
-                      width: `${x.pwrDb == null ? 0 : Math.round(L7((x.pwrDb + 120) / 120) * 100)}%`
+                      width: `${x.pwrDb == null ? 0 : Math.round(O7((x.pwrDb + 120) / 120) * 100)}%`
                     }
                   })
                 })
@@ -26397,9 +26439,9 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
   }
   function n_({ title: e, text: n }) {
     const [s, o] = m.useState(false);
-    return m.useMemo(() => typeof window > "u" ? true : window.matchMedia("(hover: hover) and (pointer: fine)").matches, []) ? d.jsxs(k7, {
+    return m.useMemo(() => typeof window > "u" ? true : window.matchMedia("(hover: hover) and (pointer: fine)").matches, []) ? d.jsxs(D7, {
       children: [
-        d.jsx(z7, {
+        d.jsx(k7, {
           asChild: true,
           children: d.jsx("span", {
             role: "button",
@@ -26459,15 +26501,15 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       ]
     });
   }
-  function L7(e) {
+  function O7(e) {
     return Math.min(1, Math.max(0, e));
   }
-  function H7(e, n) {
+  function L7(e, n) {
     return m.useReducer((s, o) => n[s][o] ?? s, e);
   }
-  var eg = "ScrollArea", [r_] = Zr(eg), [B7, qr] = r_(eg), s_ = m.forwardRef((e, n) => {
-    const { __scopeScrollArea: s, type: o = "hover", dir: i, scrollHideDelay: c = 600, ...u } = e, [h, p] = m.useState(null), [y, v] = m.useState(null), [x, b] = m.useState(null), [S, C] = m.useState(null), [M, _] = m.useState(null), [R, z] = m.useState(0), [N, k] = m.useState(0), [O, G] = m.useState(false), [V, L] = m.useState(false), J = xt(n, (te) => p(te)), ie = Yl(i);
-    return d.jsx(B7, {
+  var eg = "ScrollArea", [r_] = Zr(eg), [H7, qr] = r_(eg), s_ = m.forwardRef((e, n) => {
+    const { __scopeScrollArea: s, type: o = "hover", dir: i, scrollHideDelay: c = 600, ...u } = e, [h, p] = m.useState(null), [y, v] = m.useState(null), [x, b] = m.useState(null), [S, C] = m.useState(null), [M, _] = m.useState(null), [R, z] = m.useState(0), [N, k] = m.useState(0), [O, G] = m.useState(false), [V, L] = m.useState(false), J = xt(n, (ee) => p(ee)), ie = Yl(i);
+    return d.jsx(H7, {
       scope: s,
       type: o,
       dir: ie,
@@ -26541,11 +26583,11 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       h,
       c,
       u
-    ]), i.type === "hover" ? d.jsx(U7, {
+    ]), i.type === "hover" ? d.jsx(B7, {
       ...o,
       ref: n,
       forceMount: s
-    }) : i.type === "scroll" ? d.jsx(P7, {
+    }) : i.type === "scroll" ? d.jsx(U7, {
       ...o,
       ref: n,
       forceMount: s
@@ -26559,7 +26601,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     }) : null;
   });
   i_.displayName = ms;
-  var U7 = m.forwardRef((e, n) => {
+  var B7 = m.forwardRef((e, n) => {
     const { forceMount: s, ...o } = e, i = qr(ms, e.__scopeScrollArea), [c, u] = m.useState(false);
     return m.useEffect(() => {
       const h = i.scrollArea;
@@ -26585,8 +26627,8 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         ref: n
       })
     });
-  }), P7 = m.forwardRef((e, n) => {
-    const { forceMount: s, ...o } = e, i = qr(ms, e.__scopeScrollArea), c = e.orientation === "horizontal", u = Vf(() => p("SCROLL_END"), 100), [h, p] = H7("hidden", {
+  }), U7 = m.forwardRef((e, n) => {
+    const { forceMount: s, ...o } = e, i = qr(ms, e.__scopeScrollArea), c = e.orientation === "horizontal", u = Vf(() => p("SCROLL_END"), 100), [h, p] = L7("hidden", {
       hidden: {
         SCROLL: "scrolling"
       },
@@ -26672,9 +26714,9 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       onThumbPointerDown: (b) => u.current = b
     };
     function x(b, S) {
-      return X7(b, u.current, h, S);
+      return G7(b, u.current, h, S);
     }
-    return s === "horizontal" ? d.jsx(V7, {
+    return s === "horizontal" ? d.jsx(P7, {
       ...v,
       ref: n,
       onThumbPositionChange: () => {
@@ -26689,7 +26731,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       onDragScroll: (b) => {
         i.viewport && (i.viewport.scrollLeft = x(b, i.dir));
       }
-    }) : s === "vertical" ? d.jsx(F7, {
+    }) : s === "vertical" ? d.jsx(V7, {
       ...v,
       ref: n,
       onThumbPositionChange: () => {
@@ -26705,7 +26747,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         i.viewport && (i.viewport.scrollTop = x(b));
       }
     }) : null;
-  }), V7 = m.forwardRef((e, n) => {
+  }), P7 = m.forwardRef((e, n) => {
     const { sizes: s, onSizesChange: o, ...i } = e, c = qr(ms, e.__scopeScrollArea), [u, h] = m.useState(), p = m.useRef(null), y = xt(n, p, c.onScrollbarXChange);
     return m.useEffect(() => {
       p.current && h(getComputedStyle(p.current));
@@ -26743,7 +26785,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         });
       }
     });
-  }), F7 = m.forwardRef((e, n) => {
+  }), V7 = m.forwardRef((e, n) => {
     const { sizes: s, onSizesChange: o, ...i } = e, c = qr(ms, e.__scopeScrollArea), [u, h] = m.useState(), p = m.useRef(null), y = xt(n, p, c.onScrollbarYChange);
     return m.useEffect(() => {
       p.current && h(getComputedStyle(p.current));
@@ -26782,21 +26824,21 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         });
       }
     });
-  }), [q7, c_] = r_(ms), u_ = m.forwardRef((e, n) => {
+  }), [F7, c_] = r_(ms), u_ = m.forwardRef((e, n) => {
     const { __scopeScrollArea: s, sizes: o, hasThumb: i, onThumbChange: c, onThumbPointerUp: u, onThumbPointerDown: h, onThumbPositionChange: p, onDragScroll: y, onWheelScroll: v, onResize: x, ...b } = e, S = qr(ms, s), [C, M] = m.useState(null), _ = xt(n, (J) => M(J)), R = m.useRef(null), z = m.useRef(""), N = S.viewport, k = o.content - o.viewport, O = Vn(v), G = Vn(p), V = Vf(x, 10);
     function L(J) {
       if (R.current) {
-        const ie = J.clientX - R.current.left, te = J.clientY - R.current.top;
+        const ie = J.clientX - R.current.left, ee = J.clientY - R.current.top;
         y({
           x: ie,
-          y: te
+          y: ee
         });
       }
     }
     return m.useEffect(() => {
       const J = (ie) => {
-        const te = ie.target;
-        (C == null ? void 0 : C.contains(te)) && O(ie, k);
+        const ee = ie.target;
+        (C == null ? void 0 : C.contains(ee)) && O(ie, k);
       };
       return document.addEventListener("wheel", J, {
         passive: false
@@ -26811,7 +26853,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     ]), m.useEffect(G, [
       o,
       G
-    ]), di(C, V), di(S.content, V), d.jsx(q7, {
+    ]), di(C, V), di(S.content, V), d.jsx(F7, {
       scope: s,
       scrollbar: C,
       hasThumb: i,
@@ -26840,12 +26882,12 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     const { forceMount: s, ...o } = e, i = c_(of, e.__scopeScrollArea);
     return d.jsx(ur, {
       present: s || i.hasThumb,
-      children: d.jsx(I7, {
+      children: d.jsx(q7, {
         ref: n,
         ...o
       })
     });
-  }), I7 = m.forwardRef((e, n) => {
+  }), q7 = m.forwardRef((e, n) => {
     const { __scopeScrollArea: s, style: o, ...i } = e, c = qr(of, s), u = c_(of, s), { onThumbPositionChange: h } = u, p = xt(n, (x) => u.onThumbChange(x)), y = m.useRef(void 0), v = Vf(() => {
       y.current && (y.current(), y.current = void 0);
     }, 100);
@@ -26854,7 +26896,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       if (x) {
         const b = () => {
           if (v(), !y.current) {
-            const S = Y7(x, h);
+            const S = X7(x, h);
             y.current = S, h();
           }
         };
@@ -26886,13 +26928,13 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
   f_.displayName = of;
   var ng = "ScrollAreaCorner", d_ = m.forwardRef((e, n) => {
     const s = qr(ng, e.__scopeScrollArea), o = !!(s.scrollbarX && s.scrollbarY);
-    return s.type !== "scroll" && o ? d.jsx(G7, {
+    return s.type !== "scroll" && o ? d.jsx(I7, {
       ...e,
       ref: n
     }) : null;
   });
   d_.displayName = ng;
-  var G7 = m.forwardRef((e, n) => {
+  var I7 = m.forwardRef((e, n) => {
     const { __scopeScrollArea: s, ...o } = e, i = qr(ng, s), [c, u] = m.useState(0), [h, p] = m.useState(0), y = !!(c && h);
     return di(i.scrollbarX, () => {
       var _a;
@@ -26927,7 +26969,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     const n = h_(e.viewport, e.content), s = e.scrollbar.paddingStart + e.scrollbar.paddingEnd, o = (e.scrollbar.size - s) * n;
     return Math.max(o, 18);
   }
-  function X7(e, n, s, o = "ltr") {
+  function G7(e, n, s, o = "ltr") {
     const i = Pf(s), c = i / 2, u = n || c, h = i - u, p = s.scrollbar.paddingStart + u, y = s.scrollbar.size - s.scrollbar.paddingEnd - h, v = s.content - s.viewport, x = o === "ltr" ? [
       0,
       v
@@ -26966,7 +27008,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
   function p_(e, n) {
     return e > 0 && e < n;
   }
-  var Y7 = (e, n = () => {
+  var X7 = (e, n = () => {
   }) => {
     let s = {
       left: e.scrollLeft,
@@ -27006,28 +27048,28 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       s
     ]);
   }
-  var g_ = s_, $7 = o_, K7 = i_, W7 = f_, Z7 = d_;
+  var g_ = s_, Y7 = o_, $7 = i_, K7 = f_, W7 = d_;
   const ei = m.forwardRef(({ className: e, children: n, ...s }, o) => d.jsxs(g_, {
     ref: o,
     className: Bt("relative overflow-hidden", e),
     ...s,
     children: [
-      d.jsx($7, {
+      d.jsx(Y7, {
         className: "h-full w-full rounded-[inherit]",
         children: n
       }),
-      d.jsx(K7, {
+      d.jsx($7, {
         orientation: "vertical",
         className: "flex h-full touch-none select-none border-l bg-transparent p-0.5 transition-colors hover:bg-muted/50",
-        children: d.jsx(W7, {
+        children: d.jsx(K7, {
           className: "relative flex-1 rounded-full bg-border hover:bg-border/80"
         })
       }),
-      d.jsx(Z7, {})
+      d.jsx(W7, {})
     ]
   }));
   ei.displayName = g_.displayName;
-  function Q7(e, n) {
+  function Z7(e, n) {
     const s = n.trim();
     if (!s) return false;
     const o = s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -27038,23 +27080,23 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     const n = e;
     return typeof n.id == "string" && typeof n.username == "string" && typeof n.message == "string" && typeof n.timestamp == "string" && typeof n.user_id == "string";
   }
-  function J7(e) {
+  function Q7(e) {
     if (!e || typeof e != "object") return false;
     const n = e;
     return n.type !== "history" || !Array.isArray(n.messages) ? false : n.messages.every(y_);
   }
-  function eL() {
+  function J7() {
     const n = (window.localStorage.getItem("chatusername") ?? "").trim();
     return n ? n.slice(0, 14) : `user${Math.floor(Math.random() * 1e4)}`;
   }
-  function tL() {
+  function eL() {
     const e = "chatuserid", n = window.sessionStorage.getItem(e);
     if (n) return n;
     const s = `user_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
     return window.sessionStorage.setItem(e, s), s;
   }
-  function nL() {
-    const [e, n] = m.useState(eL), s = m.useRef(e), o = m.useRef(tL()), [i, c] = m.useState([]), [u, h] = m.useState(null), [p, y] = m.useState(null), v = m.useRef(null), x = m.useRef(false), b = m.useRef(/* @__PURE__ */ new Set());
+  function tL() {
+    const [e, n] = m.useState(J7), s = m.useRef(e), o = m.useRef(eL()), [i, c] = m.useState([]), [u, h] = m.useState(null), [p, y] = m.useState(null), v = m.useRef(null), x = m.useRef(false), b = m.useRef(/* @__PURE__ */ new Set());
     m.useEffect(() => {
       s.current = e;
     }, [
@@ -27064,7 +27106,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     }, []);
     const S = m.useCallback((k) => {
       const O = s.current.trim();
-      O && k.username !== O && Q7(k.message, O) && (y({
+      O && k.username !== O && Z7(k.message, O) && (y({
         id: k.id,
         from: k.username,
         text: k.message
@@ -27079,7 +27121,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       } catch {
         return;
       }
-      if (J7(O)) {
+      if (Q7(O)) {
         x.current = true;
         const G = b.current;
         for (const V of O.messages) G.add(V.id);
@@ -27137,7 +27179,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       pingToast: p
     };
   }
-  const rL = [
+  const nL = [
     "USB",
     "LSB",
     "CW",
@@ -27148,9 +27190,9 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     "WBFM"
   ];
   function v_(e) {
-    return rL.includes(e);
+    return nL.includes(e);
   }
-  function sL(e, n = "USB") {
+  function rL(e, n = "USB") {
     const s = e.toUpperCase();
     return v_(s) ? s : n;
   }
@@ -27158,12 +27200,12 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     const n = String(e ?? "").trim();
     return n ? /\s/.test(n) ? `@[${n}] ` : `@${n} ` : "";
   }
-  function aL(e) {
+  function sL(e) {
     const n = e / 1e3;
     return Math.abs(n) < 1e3 ? `${n.toFixed(3)} kHz` : `${(e / 1e6).toFixed(6)} MHz`;
   }
-  function oL({ centerHz: e, mode: n, receiverId: s, onTune: o }) {
-    const i = nL(), [c, u] = m.useState(null), [h, p] = m.useState(""), [y, v] = m.useState(false), [x, b] = m.useState(""), [S, C] = m.useState(null), M = m.useRef(null), _ = m.useRef(null), [R, z] = m.useState(false), [N, k] = m.useState(""), [O, G] = m.useState(null), [V, L] = m.useState(0), J = m.useRef(0), ie = m.useRef(true), te = m.useRef(false), ye = m.useCallback(() => {
+  function aL({ centerHz: e, mode: n, receiverId: s, onTune: o }) {
+    const i = tL(), [c, u] = m.useState(null), [h, p] = m.useState(""), [y, v] = m.useState(false), [x, b] = m.useState(""), [S, C] = m.useState(null), M = m.useRef(null), _ = m.useRef(null), [R, z] = m.useState(false), [N, k] = m.useState(""), [O, G] = m.useState(null), [V, L] = m.useState(0), J = m.useRef(0), ie = m.useRef(true), ee = m.useRef(false), ye = m.useCallback(() => {
       var _a;
       const X = (_a = M.current) == null ? void 0 : _a.querySelector("[data-radix-scroll-area-viewport]");
       X && (X.scrollTop = X.scrollHeight);
@@ -27197,8 +27239,8 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       const X = i.messages.length, re = J.current;
       if (J.current = X, X === 0) return;
       const pe = Math.max(0, X - re);
-      if (!te.current) {
-        te.current = true;
+      if (!ee.current) {
+        ee.current = true;
         const Ce = window.requestAnimationFrame(() => ye());
         return () => window.cancelAnimationFrame(Ce);
       }
@@ -27254,10 +27296,10 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       i.messages
     ]), B = i.messages.map((X) => {
       var _a;
-      return d.jsx(iL, {
+      return d.jsx(oL, {
         msg: X,
         replyPreview: X.reply_to_id ? ((_a = D.get(X.reply_to_id)) == null ? void 0 : _a.message) ?? null : null,
-        isPinged: lL(X.message, i.username),
+        isPinged: iL(X.message, i.username),
         onReply: () => {
           C({
             id: X.id,
@@ -27575,8 +27617,8 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       ]
     });
   }
-  function iL({ msg: e, replyPreview: n, isPinged: s, onReply: o, onTune: i }) {
-    const c = m.useMemo(() => uL(e.message), [
+  function oL({ msg: e, replyPreview: n, isPinged: s, onReply: o, onTune: i }) {
+    const c = m.useMemo(() => cL(e.message), [
       e.message
     ]);
     return d.jsx("div", {
@@ -27612,7 +27654,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
                     className: "ml-2 text-muted-foreground",
                     children: [
                       '"',
-                      cL(n),
+                      lL(n),
                       '"'
                     ]
                   }) : null
@@ -27636,7 +27678,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
                   className: "mx-1 inline-flex items-center rounded-md border bg-muted/20 px-2 py-0.5 text-xs font-medium hover:bg-muted/30",
                   onClick: () => i(u.hz, u.mode, u.receiverId),
                   children: [
-                    aL(u.hz),
+                    sL(u.hz),
                     " / ",
                     u.mode
                   ]
@@ -27659,24 +27701,24 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       })
     });
   }
-  function lL(e, n) {
+  function iL(e, n) {
     const s = n.trim();
     if (!s) return false;
     const o = s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     return new RegExp(`(^|\\s)@\\[${o}\\](\\s|$)`, "i").test(e) ? true : new RegExp(`(^|\\s)@${o}(\\b|$)`, "i").test(e);
   }
-  function cL(e) {
+  function lL(e) {
     const n = String(e ?? "").replace(/\s+/g, " ").trim();
     return n.length <= 80 ? n : `${n.slice(0, 77)}\xE2\u20AC\xA6`;
   }
-  function uL(e) {
+  function cL(e) {
     const n = [], s = /\[FREQ:(\d+):([\w-]+)(?::([\w-]+))?\]/g;
     let o = 0;
     for (; ; ) {
       const i = s.exec(e);
       if (!i) break;
       i.index > o && n.push(...gw(e.slice(o, i.index)));
-      const c = Number.parseInt(i[1] ?? "", 10), u = sL(i[2] ?? ""), h = (i[3] ?? "").trim();
+      const c = Number.parseInt(i[1] ?? "", 10), u = rL(i[2] ?? ""), h = (i[3] ?? "").trim();
       Number.isFinite(c) && c > 0 && n.push({
         kind: "freq",
         hz: c,
@@ -27723,12 +27765,12 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       text: e.slice(o)
     }), n;
   }
-  const fL = [
+  const uL = [
     -1e3,
     -100,
     100,
     1e3
-  ], dL = [
+  ], fL = [
     -10,
     -1,
     -0.1,
@@ -27737,7 +27779,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     1,
     10
   ];
-  function hL({ mode: e, canWbfm: n, centerHz: s, bandwidthHz: o, onModeChange: i, onSetFrequencyKhz: c, onFrequencyAdjustKhz: u, onBandwidthAdjustHz: h }) {
+  function dL({ mode: e, canWbfm: n, centerHz: s, bandwidthHz: o, onModeChange: i, onSetFrequencyKhz: c, onFrequencyAdjustKhz: u, onBandwidthAdjustHz: h }) {
     const p = m.useMemo(() => s === null ? null : s / 1e3, [
       s
     ]), [y, v] = m.useState(""), [x, b] = m.useState(false), S = m.useMemo(() => s == null ? false : Math.round(s / 1e3) * 1e3 === s, [
@@ -27866,7 +27908,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
                 }),
                 d.jsx("div", {
                   className: "grid grid-cols-2 gap-2 sm:grid-cols-4",
-                  children: fL.map((M) => d.jsxs(Ue, {
+                  children: uL.map((M) => d.jsxs(Ue, {
                     type: "button",
                     variant: "secondary",
                     className: "h-9 gap-1.5 whitespace-nowrap",
@@ -27902,7 +27944,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
                 }),
                 d.jsx("div", {
                   className: "grid grid-cols-4 gap-2 sm:grid-cols-7",
-                  children: dL.map((M) => d.jsx(Ue, {
+                  children: fL.map((M) => d.jsx(Ue, {
                     type: "button",
                     variant: "secondary",
                     className: M === 0 && S ? "h-9 bg-muted/40 text-muted-foreground hover:bg-muted/50" : "h-9",
@@ -27917,7 +27959,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       ]
     });
   }
-  function mL(e) {
+  function hL(e) {
     if (!e || typeof e != "object") return false;
     const n = e;
     return typeof n.waterfall_clients == "number" && typeof n.signal_clients == "number" && typeof n.waterfall_kbits == "number" && typeof n.audio_kbits == "number";
@@ -27935,7 +27977,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       } catch {
         return;
       }
-      mL(h) && n({
+      hL(h) && n({
         kind: "ready",
         value: h
       });
@@ -27951,7 +27993,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       kind: "error"
     } : e;
   }
-  function pL() {
+  function mL() {
     const [e, n] = m.useState({
       kind: "loading"
     }), s = x_();
@@ -28077,7 +28119,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       ]
     });
   }
-  function gL({ settings: e, onChange: n }) {
+  function pL({ settings: e, onChange: n }) {
     const s = e.autoAdjust ? e.minDb : e.manualMinDb ?? e.minDb, o = e.autoAdjust ? e.maxDb : e.manualMaxDb ?? e.maxDb;
     return d.jsxs(to, {
       className: "flex h-full min-h-0 flex-col shadow-none",
@@ -28322,7 +28364,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     const n = e;
     return typeof n.id == "string" && typeof n.name == "string" && typeof n.frequencyHz == "number" && typeof n.mode == "string" && typeof n.createdAtMs == "number";
   }
-  function yL() {
+  function gL() {
     const e = window.localStorage.getItem(b_);
     if (!e) return [];
     try {
@@ -28335,14 +28377,14 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
   function Om(e) {
     window.localStorage.setItem(b_, JSON.stringify(e));
   }
-  function vL(e) {
+  function yL(e) {
     return JSON.stringify(e, null, 2);
   }
-  function xL(e) {
+  function vL(e) {
     const n = JSON.parse(e);
     return Array.isArray(n) ? n.filter(w_) : [];
   }
-  function bL() {
+  function xL() {
     return `bm_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
   }
   async function xw(e) {
@@ -28519,7 +28561,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
   } catch {
   }
   let Be, Wa, de = 0;
-  const wL = 105, SL = 57342, ML = 57343, bw = 57337, ww = 6, Go = {};
+  const bL = 105, wL = 57342, SL = 57343, bw = 57337, ww = 6, Go = {};
   let hl = 11281e4, zs = 1681e4, ht = {}, on, uf, ff = 0, Pl = 0, En, Br, wn = [], zp = [], lr, Zn, vl, Sw = {
     useRecords: false,
     mapsAsObjects: true
@@ -28625,7 +28667,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         e = Be[de++];
         break;
       case 25:
-        if (n == 7) return TL();
+        if (n == 7) return _L();
         e = Zn.getUint16(de), de += 2;
         break;
       case 26:
@@ -28707,14 +28749,14 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       case 1:
         return ~e;
       case 2:
-        return _L(e);
+        return AL(e);
       case 3:
         if (Pl >= de) return uf.slice(de - ff, (de += e) - ff);
         if (Pl == 0 && Wa < 140 && e < 32) {
-          let i = e < 16 ? M_(e) : AL(e);
+          let i = e < 16 ? M_(e) : CL(e);
           if (i != null) return i;
         }
-        return CL(e);
+        return ML(e);
       case 4:
         if (e >= hl) throw new Error(`Array length exceeds ${hl}`);
         let s = new Array(e);
@@ -28739,7 +28781,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
           let i = on[e & 8191];
           if (i) return i.read || (i.read = Op(i)), i.read();
           if (e < 65536) {
-            if (e == ML) {
+            if (e == SL) {
               let c = ti(), u = yt(), h = yt();
               Hp(u, h);
               let p = {};
@@ -28752,11 +28794,11 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
                 p[Ur(v)] = yt();
               }
               return p;
-            } else if (e == SL) {
+            } else if (e == wL) {
               let c = ti(), u = yt();
               for (let h = 2; h < c; h++) Hp(u++, yt());
               return yt();
-            } else if (e == bw) return kL();
+            } else if (e == bw) return DL();
             if (ht.getShared && (rg(), i = on[e & 8191], i)) return i.read || (i.read = Op(i)), i.read();
           }
         }
@@ -28833,7 +28875,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     if (e == null) return e + "";
     throw new Error("Invalid property name type " + typeof e);
   }
-  let CL = Lp;
+  let ML = Lp;
   function Lp(e) {
     let n;
     if (e < 16 && (n = M_(e))) return n;
@@ -28858,7 +28900,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     return o.length > 0 && (n += kn.apply(String, o)), n;
   }
   let kn = String.fromCharCode;
-  function AL(e) {
+  function CL(e) {
     let n = de, s = new Array(e);
     for (let o = 0; o < e; o++) {
       const i = Be[de++];
@@ -28987,11 +29029,11 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       }
     }
   }
-  function _L(e) {
+  function AL(e) {
     return ht.copyBuffers ? Uint8Array.prototype.slice.call(Be, de, de += e) : Be.subarray(de, de += e);
   }
   let C_ = new Float32Array(1), _u = new Uint8Array(C_.buffer, 0, 4);
-  function TL() {
+  function _L() {
     let e = Be[de++], n = Be[de++], s = (e & 127) >> 2;
     if (s === 31) return n || e & 3 ? NaN : e & 128 ? -1 / 0 : 1 / 0;
     if (s === 0) {
@@ -29021,7 +29063,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     let s = on[e];
     s && s.isShared && ((on.restoreStructures || (on.restoreStructures = []))[e] = s), on[e] = n, n.read = Op(n);
   };
-  wn[wL] = (e) => {
+  wn[bL] = (e) => {
     let n = e.length, s = e[1];
     Hp(e[0], s);
     let o = {};
@@ -29033,11 +29075,11 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
   };
   wn[14] = (e) => En ? En[0].slice(En.position0, En.position0 += e) : new Ja(e, 14);
   wn[15] = (e) => En ? En[1].slice(En.position1, En.position1 += e) : new Ja(e, 15);
-  let EL = {
+  let TL = {
     Error,
     RegExp
   };
-  wn[27] = (e) => (EL[e[0]] || Error)(e[1], e[2]);
+  wn[27] = (e) => (TL[e[0]] || Error)(e[1], e[2]);
   const A_ = (e) => {
     if (Be[de++] != 132) {
       let s = new Error("Packed values structure must be followed by a 4 element array");
@@ -29087,7 +29129,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     else throw new Error("No packed values available");
     return lr;
   }
-  const RL = 1399353956;
+  const EL = 1399353956;
   zp.push((e, n) => {
     if (e >= 225 && e <= 255) return Xo(Ga().prefixes[e - 224], n);
     if (e >= 28704 && e <= 32767) return Xo(Ga().prefixes[e - 28672], n);
@@ -29095,14 +29137,14 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     if (e >= 216 && e <= 223) return Xo(n, Ga().suffixes[e - 216]);
     if (e >= 27647 && e <= 28671) return Xo(n, Ga().suffixes[e - 27639]);
     if (e >= 1811940352 && e <= 1879048191) return Xo(n, Ga().suffixes[e - 1811939328]);
-    if (e == RL) return {
+    if (e == EL) return {
       packedValues: lr,
       structures: on.slice(0),
       version: n
     };
     if (e == 55799) return n;
   });
-  const NL = new Uint8Array(new Uint16Array([
+  const RL = new Uint8Array(new Uint16Array([
     1
   ]).buffer)[0] == 1, Cw = [
     Uint8Array,
@@ -29120,7 +29162,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     } : BigInt64Array,
     Float32Array,
     Float64Array
-  ], jL = [
+  ], NL = [
     64,
     68,
     69,
@@ -29133,14 +29175,14 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     85,
     86
   ];
-  for (let e = 0; e < Cw.length; e++) DL(Cw[e], jL[e]);
-  function DL(e, n) {
+  for (let e = 0; e < Cw.length; e++) jL(Cw[e], NL[e]);
+  function jL(e, n) {
     let s = "get" + e.name.slice(0, -5), o;
     typeof e == "function" ? o = e.BYTES_PER_ELEMENT : e = null;
     for (let i = 0; i < 2; i++) {
       if (!i && o == 1) continue;
       let c = o == 2 ? 1 : o == 4 ? 2 : o == 8 ? 3 : 0;
-      wn[i ? n : n - 4] = o == 1 || i == NL ? (u) => {
+      wn[i ? n : n - 4] = o == 1 || i == RL ? (u) => {
         if (!e) throw new Error("Could not find typed array for code " + n);
         return !ht.copyBuffers && (o === 1 || o === 2 && !(u.byteOffset & 1) || o === 4 && !(u.byteOffset & 3) || o === 8 && !(u.byteOffset & 7)) ? new e(u.buffer, u.byteOffset, u.byteLength >> c) : new e(Uint8Array.prototype.slice.call(u, 0).buffer);
       } : (u) => {
@@ -29151,7 +29193,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       };
     }
   }
-  function kL() {
+  function DL() {
     let e = ti(), n = de + yt();
     for (let o = 2; o < e; o++) {
       let i = ti();
@@ -29199,7 +29241,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
   let ag = new Fl({
     useRecords: false
   });
-  const zL = ag.decode;
+  const kL = ag.decode;
   ag.decodeMultiple;
   let Pu;
   try {
@@ -29209,8 +29251,8 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
   let Up, T_;
   const Ff = typeof globalThis == "object" && globalThis.Buffer, ec = typeof Ff < "u", Lm = ec ? Ff.allocUnsafeSlow : Uint8Array, Aw = ec ? Ff : Uint8Array, _w = 256, Tw = ec ? 4294967296 : 2144337920;
   let Hm, Z, Ft, F = 0, ha, _n = null;
-  const OL = 61440, LL = /[\u0080-\uFFFF]/, Mr = /* @__PURE__ */ Symbol("record-id");
-  class HL extends Fl {
+  const zL = 61440, OL = /[\u0080-\uFFFF]/, Mr = /* @__PURE__ */ Symbol("record-id");
+  class LL extends Fl {
     constructor(n) {
       super(n), this.offset = 0;
       let s, o, i, c, u;
@@ -29273,7 +29315,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
           if (Hm) return;
           if (N(H), _n && Rw(s, N), p.offset = F, u && u.idsToInsert) {
             F += u.idsToInsert.length * 2, F > ha && O(F), p.offset = F;
-            let K = PL(Z.subarray(s, F), u.idsToInsert);
+            let K = UL(Z.subarray(s, F), u.idsToInsert);
             return u = null, K;
           }
           return oe & Nw ? (Z.start = s, Z.end = F, Z) : Z.subarray(s, F);
@@ -29290,7 +29332,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
             let K = Z.subarray(s, F);
             return p.updateSharedData() === false ? p.encode(H) : K;
           }
-          oe & VL && (F = s);
+          oe & PL && (F = s);
         }
       }, this.findCommonStringsToPack = () => (b = /* @__PURE__ */ new Map(), M || (M = /* @__PURE__ */ Object.create(null)), (H) => {
         let oe = H && H.threshold || 4, K = this.pack ? H.maxPrivatePackedValues || 16 : 0;
@@ -29317,14 +29359,14 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
           }
           let T = H.length;
           if (_n && T >= 4 && T < 1024) {
-            if ((_n.size += T) > OL) {
+            if ((_n.size += T) > zL) {
               let ne, D = (_n[0] ? _n[0].length * 3 + _n[1].length : 0) + 10;
               F + D > ha && (Z = O(F + D)), Z[F++] = 217, Z[F++] = 223, Z[F++] = 249, Z[F++] = _n.position ? 132 : 130, Z[F++] = 26, ne = F - s, F += 4, _n.position && Rw(s, N), _n = [
                 "",
                 ""
               ], _n.size = 0, _n.position = ne;
             }
-            let I = LL.test(H);
+            let I = OL.test(H);
             _n[I ? 0 : 1] += H, Z[F++] = I ? 206 : 207, N(T);
             return;
           }
@@ -29462,9 +29504,9 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       };
       let G = 100, V = 1e3;
       this.encodeAsIterable = function(H, oe) {
-        return te(H, oe, L);
+        return ee(H, oe, L);
       }, this.encodeAsAsyncIterable = function(H, oe) {
-        return te(H, oe, ye);
+        return ee(H, oe, ye);
       };
       function* L(H, oe, K) {
         let T = H.constructor;
@@ -29501,7 +29543,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       function ie() {
         G = V, p.encode(null, Um);
       }
-      function te(H, oe, K) {
+      function ee(H, oe, K) {
         return oe && oe.chunkThreshold ? G = V = oe.chunkThreshold : G = 100, H && typeof H == "object" ? (p.encode(null, Um), K(H, p.iterateProperties || (p.iterateProperties = {}), true)) : [
           p.encode(H)
         ];
@@ -29542,10 +29584,10 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
   function as(e) {
     e < 24 ? Z[F++] = 128 | e : e < 256 ? (Z[F++] = 152, Z[F++] = e) : e < 65536 ? (Z[F++] = 153, Z[F++] = e >> 8, Z[F++] = e & 255) : (Z[F++] = 154, Ft.setUint32(F, e), F += 4);
   }
-  const BL = typeof Blob > "u" ? function() {
+  const HL = typeof Blob > "u" ? function() {
   } : Blob;
   function Bm(e) {
-    if (e instanceof BL) return true;
+    if (e instanceof HL) return true;
     let n = e[Symbol.toStringTag];
     return n === "Blob" || n === "File";
   }
@@ -29577,7 +29619,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         console.log(e);
     }
   }
-  const UL = new Uint8Array(new Uint16Array([
+  const BL = new Uint8Array(new Uint16Array([
     1
   ]).buffer)[0] == 1;
   T_ = [
@@ -29685,7 +29727,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     }
   ];
   function rs(e, n) {
-    return !UL && n > 1 && (e -= 4), {
+    return !BL && n > 1 && (e -= 4), {
       tag: e,
       encode: function(o, i) {
         let c = o.byteLength, u = o.byteOffset || 0, h = o.buffer || o;
@@ -29697,7 +29739,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     let s = e.byteLength;
     s < 24 ? Z[F++] = 64 + s : s < 256 ? (Z[F++] = 88, Z[F++] = s) : s < 65536 ? (Z[F++] = 89, Z[F++] = s >> 8, Z[F++] = s & 255) : (Z[F++] = 90, Ft.setUint32(F, s), F += 4), F + s >= Z.length && n(F + s), Z.set(e.buffer ? e : new Uint8Array(e), F), F += s;
   }
-  function PL(e, n) {
+  function UL(e, n) {
     let s, o = n.length * 2, i = e.length - o;
     n.sort((c, u) => c.offset > u.offset ? 1 : -1);
     for (let c = 0; c < n.length; c++) {
@@ -29718,22 +29760,22 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     let s = _n;
     _n = null, n(s[0]), n(s[1]);
   }
-  let og = new HL({
+  let og = new LL({
     useRecords: false
   });
   og.encode;
   og.encodeAsIterable;
   og.encodeAsAsyncIterable;
-  const Nw = 512, VL = 1024, Um = 2048;
-  function FL(e) {
+  const Nw = 512, PL = 1024, Um = 2048;
+  function VL(e) {
     const n = new Uint32Array(256);
     for (let s = 0; s < 256; s++) {
-      const o = s / 255, i = e === "gqrx" ? qL(s) : e === "rainbow" ? IL(o) : e === "viridis" ? GL(o) : YL(s);
+      const o = s / 255, i = e === "gqrx" ? FL(s) : e === "rainbow" ? qL(o) : e === "viridis" ? IL(o) : XL(s);
       n[s] = i.r << 24 | i.g << 16 | i.b << 8 | 255;
     }
     return n;
   }
-  function qL(e) {
+  function FL(e) {
     if (e < 20) return {
       r: 0,
       g: 0,
@@ -29778,11 +29820,11 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       b: Math.round(255 * n)
     };
   }
-  function IL(e) {
+  function qL(e) {
     const s = (1 - Math.min(1, Math.max(0, e))) * 240;
-    return XL(s, 100, 50);
+    return GL(s, 100, 50);
   }
-  function GL(e) {
+  function IL(e) {
     const n = [
       {
         t: 0,
@@ -29851,7 +29893,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       b: Math.round(o.b + (i.b - o.b) * u)
     };
   }
-  function XL(e, n, s) {
+  function GL(e, n, s) {
     const o = (e % 360 + 360) % 360, i = Math.min(1, Math.max(0, n / 100)), c = Math.min(1, Math.max(0, s / 100)), u = (1 - Math.abs(2 * c - 1)) * i, h = u * (1 - Math.abs(o / 60 % 2 - 1)), p = c - u / 2;
     let y = 0, v = 0, x = 0;
     return o < 60 ? (y = u, v = h) : o < 120 ? (y = h, v = u) : o < 180 ? (v = u, x = h) : o < 240 ? (v = h, x = u) : o < 300 ? (y = h, x = u) : (y = u, x = h), {
@@ -29860,8 +29902,8 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       b: Math.round((x + p) * 255)
     };
   }
-  function YL(e) {
-    const n = Math.max(0, Math.min(255, e | 0)), s = $L[n] ?? [
+  function XL(e) {
+    const n = Math.max(0, Math.min(255, e | 0)), s = YL[n] ?? [
       0,
       0,
       0
@@ -29872,7 +29914,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       b: Math.round(s[2] * 255)
     };
   }
-  const $L = [
+  const YL = [
     [
       0,
       0,
@@ -31153,9 +31195,9 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       1,
       0.996078
     ]
-  ], KL = 0.85, WL = 256, Pm = 54, jw = 308, Dw = 468, kw = 140, Cl = 2, ZL = 14, QL = 1024, zw = 20, Ow = 0.18, JL = 120;
-  function eH({ receiverId: e, bands: n, onConnected: s, onConnecting: o, onError: i, onSetFrequencyHz: c, onSetMode: u, activeVfo: h = "A", display: p, onDisplayChange: y, onPassbandChange: v, onViewportChange: x, mode: b = "USB", frequencyAdjust: S, frequencySet: C, bandwidthAdjust: M, resetTune: _, passbandSet: R, viewportSet: z, tuningStepHz: N, onTuningChange: k }) {
-    const O = x_(), G = O.kind === "ready" ? O.value : null, V = m.useRef(null), L = m.useRef(null), J = m.useRef(null), ie = m.useRef(null), te = m.useRef(null), ye = m.useRef(null), H = m.useRef(null), oe = m.useRef(() => {
+  ], $L = 0.85, KL = 256, Pm = 54, jw = 308, Dw = 468, kw = 140, Cl = 2, WL = 14, ZL = 1024, zw = 20, Ow = 0.18, QL = 120;
+  function JL({ receiverId: e, bands: n, onConnected: s, onConnecting: o, onError: i, onSetFrequencyHz: c, onSetMode: u, activeVfo: h = "A", display: p, onDisplayChange: y, onPassbandChange: v, onViewportChange: x, mode: b = "USB", frequencyAdjust: S, frequencySet: C, bandwidthAdjust: M, resetTune: _, passbandSet: R, viewportSet: z, tuningStepHz: N, onTuningChange: k }) {
+    const O = x_(), G = O.kind === "ready" ? O.value : null, V = m.useRef(null), L = m.useRef(null), J = m.useRef(null), ie = m.useRef(null), ee = m.useRef(null), ye = m.useRef(null), H = m.useRef(null), oe = m.useRef(() => {
     }), K = m.useRef(e);
     m.useEffect(() => {
       K.current = e;
@@ -31253,7 +31295,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       G,
       j,
       Mt
-    ]), Rn = m.useMemo(() => FL(p.colormap), [
+    ]), Rn = m.useMemo(() => VL(p.colormap), [
       p.colormap
     ]), On = m.useRef(Rn), Nn = m.useRef(p), dr = m.useRef(new Uint8Array(256)), Zt = m.useRef({
       minDb: p.minDb,
@@ -31480,14 +31522,14 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       const De = Kn(P, se.l), ke = Kn(P, se.r), Y = ke - De;
       if (Y <= 0) return;
       const ue = Al("--border", "214.3 31.8% 91.4%"), ge = Al("--muted-foreground", "215.4 16.3% 46.9%");
-      we.strokeStyle = `hsl(${ue} / 0.55)`, we.fillStyle = `hsl(${ge} / 0.9)`, we.lineWidth = Math.max(1, Math.floor(xe)), we.font = `${Math.max(10, Math.floor(11 * xe))}px ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif`, we.textBaseline = "top", oH(we, {
+      we.strokeStyle = `hsl(${ue} / 0.55)`, we.fillStyle = `hsl(${ge} / 0.9)`, we.lineWidth = Math.max(1, Math.floor(xe)), we.font = `${Math.max(10, Math.floor(11 * xe))}px ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif`, we.textBaseline = "top", aH(we, {
         bands: I.current,
         settings: P,
         vp: se,
         widthPx: Te,
         dpr: xe
       });
-      const Me = Math.max(90, Math.floor(120 * xe)), Ne = Math.max(2, Math.floor(Te / Me)), ze = iH(Y / Ne), Xe = ze / 5, Ke = Math.floor(2 * xe), Ve = Math.floor(16 * xe), pt = Ve + Math.floor(12 * xe), Ze = Ve + Math.floor(7 * xe);
+      const Me = Math.max(90, Math.floor(120 * xe)), Ne = Math.max(2, Math.floor(Te / Me)), ze = oH(Y / Ne), Xe = ze / 5, Ke = Math.floor(2 * xe), Ve = Math.floor(16 * xe), pt = Ve + Math.floor(12 * xe), Ze = Ve + Math.floor(7 * xe);
       if (Xe > 0) {
         const nn = Math.ceil(De / Xe) * Xe;
         for (let Ht = nn; Ht <= ke + Xe * 0.25; Ht += Xe) {
@@ -31515,9 +31557,9 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         const De = ve.getContext("2d");
         De && (De.imageSmoothingEnabled = false);
       }
-      if (te.current || (te.current = document.createElement("canvas")), te.current.width !== xe || te.current.height !== Se) {
-        te.current.width = xe, te.current.height = Se;
-        const De = te.current.getContext("2d");
+      if (ee.current || (ee.current = document.createElement("canvas")), ee.current.width !== xe || ee.current.height !== Se) {
+        ee.current.width = xe, ee.current.height = Se;
+        const De = ee.current.getContext("2d");
         De && (De.imageSmoothingEnabled = false);
       }
       const we = ie.current;
@@ -31564,10 +31606,10 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         De.imageSmoothingEnabled = false;
         const ke = Ae.current || getComputedStyle(document.body).backgroundColor;
         Ae.current = ke;
-        const Y = te.current, ue = (Y == null ? void 0 : Y.getContext("2d")) ?? null;
+        const Y = ee.current, ue = (Y == null ? void 0 : Y.getContext("2d")) ?? null;
         Y && ue && (ue.imageSmoothingEnabled = false, ue.clearRect(0, 0, Y.width, Y.height), ue.drawImage(fe, 0, 0));
         const ge = B.current.r - B.current.l, Me = hf(Se.l, B.current, fe.width), Ne = hf(Se.r, B.current, fe.width), ze = Ne - Me;
-        if (De.fillStyle = ke, De.fillRect(0, 0, fe.width, fe.height), ze > 1 && te.current && De.drawImage(te.current, 0, 0, fe.width, fe.height, Me, 0, ze, fe.height), Se.r - Se.l <= ge + 1) {
+        if (De.fillStyle = ke, De.fillRect(0, 0, fe.width, fe.height), ze > 1 && ee.current && De.drawImage(ee.current, 0, 0, fe.width, fe.height, Me, 0, ze, fe.height), Se.r - Se.l <= ge + 1) {
           const Ke = bn(Me, 0, fe.width), Ve = bn(Ne, 0, fe.width);
           De.fillRect(0, 0, Ke, fe.height), De.fillRect(Ve, 0, fe.width - Ve, fe.height);
         }
@@ -31596,8 +31638,8 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       const fe = T.current, xe = J.current;
       if (!fe || !xe) return;
       const Te = xe.getBoundingClientRect();
-      if (B.current.r - B.current.l <= WL && se < 0) return;
-      const we = ve ?? KL, De = bn(P, 0, Te.width), ke = B.current.l, Y = B.current.r, ue = ke + De / Te.width * (Y - ke);
+      if (B.current.r - B.current.l <= KL && se < 0) return;
+      const we = ve ?? $L, De = bn(P, 0, Te.width), ke = B.current.l, Y = B.current.r, ue = ke + De / Te.width * (Y - ke);
       let ge = ue - ke, Me = Y - ue;
       se < 0 ? (ge *= we, Me *= we) : se > 0 && (ge *= 1 / we, Me *= 1 / we);
       const Ne = ue - ge, ze = ue + Me;
@@ -31614,7 +31656,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
           const nn = ke[Ze];
           ue.min = Math.min(ue.min, nn), ue.max = Math.max(ue.max, nn), ue.count++;
         }
-        if (ue.count < QL) return;
+        if (ue.count < ZL) return;
         ue.count = 0;
         const Me = ue.min - zw, Ne = ue.max + zw;
         ue.min = 1 / 0, ue.max = -1 / 0;
@@ -31624,7 +31666,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
           maxDb: Ve
         }, mn(Xe, Ve);
         const pt = performance.now();
-        pt - ue.lastEmitMs < JL || (ue.lastEmitMs = pt, y((Ze) => Ze.autoAdjust ? {
+        pt - ue.lastEmitMs < QL || (ue.lastEmitMs = pt, y((Ze) => Ze.autoAdjust ? {
           ...Ze,
           minDb: Zt.current.minDb,
           maxDb: Zt.current.maxDb
@@ -31662,7 +31704,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         if (!ke || !Y) return;
         const ue = Y.getContext("2d");
         if (!ue || ((!se || se.width !== Y.width) && (se = ue.createImageData(Y.width, 1), ve = se.data), !ve)) return;
-        const ge = te.current, Me = (ge == null ? void 0 : ge.getContext("2d")) ?? null;
+        const ge = ee.current, Me = (ge == null ? void 0 : ge.getContext("2d")) ?? null;
         ge && Me && (ge.width !== Y.width || ge.height !== Y.height) && (ge.width = Y.width, ge.height = Y.height);
         for (const Ne of fe) {
           ge && Me ? (Me.clearRect(0, 0, ge.width, ge.height), Me.drawImage(Y, 0, 0), ue.drawImage(ge, 0, 1, Y.width, Y.height - 1, 0, 0, Y.width, Y.height - 1)) : ue.drawImage(Y, 0, 1, Y.width, Y.height - 1, 0, 0, Y.width, Y.height - 1);
@@ -31683,7 +31725,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         if (typeof ke.data == "string") {
           try {
             const ge = JSON.parse(ke.data);
-            sH(ge);
+            rH(ge);
             const Me = K.current;
             if (Me && ge.receiver_id && ge.receiver_id !== Me) return;
             T.current = ge, E(ge);
@@ -31701,7 +31743,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
               else {
                 const Xe = [];
                 for (const Ke of ze.markers) {
-                  const Ve = Ke, pt = Ve.frequency ?? Ve.f, Ze = Ve.name ?? Ve.d ?? Ve.description, nn = Ve.mode ?? Ve.m ?? Ve.modulation, Ht = Ve.bandwidthHz ?? Ve.bwHz ?? Ve.bw, zt = typeof pt == "number" ? pt : Number(pt), Ut = typeof Ze == "string" ? Ze : String(Ze ?? "").trim(), Xt = typeof nn == "string" ? nn : String(nn ?? "").trim(), Jt = Xt ? Xt.toUpperCase() : "", _r = Jt === "USB" || Jt === "LSB" || Jt === "CW" || Jt === "AM" || Jt === "SAM" || Jt === "FM" || Jt === "FMC" || Jt === "WBFM" ? Jt : void 0, ps = tH(Ht);
+                  const Ve = Ke, pt = Ve.frequency ?? Ve.f, Ze = Ve.name ?? Ve.d ?? Ve.description, nn = Ve.mode ?? Ve.m ?? Ve.modulation, Ht = Ve.bandwidthHz ?? Ve.bwHz ?? Ve.bw, zt = typeof pt == "number" ? pt : Number(pt), Ut = typeof Ze == "string" ? Ze : String(Ze ?? "").trim(), Xt = typeof nn == "string" ? nn : String(nn ?? "").trim(), Jt = Xt ? Xt.toUpperCase() : "", _r = Jt === "USB" || Jt === "LSB" || Jt === "CW" || Jt === "AM" || Jt === "SAM" || Jt === "FM" || Jt === "FMC" || Jt === "WBFM" ? Jt : void 0, ps = eH(Ht);
                   !Number.isFinite(zt) || zt <= 0 || Ut && Xe.push({
                     frequencyHz: Math.round(zt),
                     name: Ut,
@@ -31746,7 +31788,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         for (const ge of ue) {
           let Me;
           try {
-            Me = zL(ge);
+            Me = kL(ge);
           } catch {
             continue;
           }
@@ -31969,7 +32011,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         d.jsxs("div", {
           className: "relative border-t bg-background",
           children: [
-            Wt ? d.jsx(aH, {
+            Wt ? d.jsx(sH, {
               viewport: Mt,
               settingsRef: T,
               passband: Wt,
@@ -32013,7 +32055,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
                             const ve = T.current;
                             if (ve) {
                               const fe = P.mode ?? X.current ?? "USB";
-                              St(In(nH(ve, P.frequencyHz, fe, P.bandwidthHz), ve));
+                              St(In(tH(ve, P.frequencyHz, fe, P.bandwidthHz), ve));
                             }
                           }
                         },
@@ -32086,7 +32128,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     const s = e.basefreq + e.total_bandwidth / 2;
     return Vp(e, s, n ?? "USB");
   }
-  function tH(e) {
+  function eH(e) {
     if (e == null) return null;
     if (typeof e == "number") {
       if (!Number.isFinite(e) || e < 0) return null;
@@ -32132,7 +32174,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       r: ir(e, u)
     };
   }
-  function nH(e, n, s, o) {
+  function tH(e, n, s, o) {
     const i = ig(e), c = df(o) ?? R_(e, s);
     let u, h, p = n;
     if (s === "USB") u = n + i.lowCutHz, h = u + c;
@@ -32147,7 +32189,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       r: ir(e, h)
     };
   }
-  function rH(e, n, s) {
+  function nH(e, n, s) {
     const o = n.l - n.m, i = n.r - n.m;
     return In({
       l: s + o,
@@ -32156,12 +32198,12 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     }, e);
   }
   function Os(e, n, s, o) {
-    return rH(e, n, o);
+    return nH(e, n, o);
   }
   function ir(e, n) {
     return bn((n - e.basefreq) / e.total_bandwidth, 0, 1) * e.fft_result_size;
   }
-  function sH(e) {
+  function rH(e) {
     if (typeof e.sps != "number" || e.sps <= 0) throw new Error("invalid settings.sps");
     if (typeof e.fft_result_size != "number" || e.fft_result_size <= 0) throw new Error("invalid settings.fft_result_size");
     if (typeof e.basefreq != "number") throw new Error("invalid settings.basefreq");
@@ -32214,7 +32256,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       r: o.l + Cl
     }, e);
   }
-  function aH({ viewport: e, settingsRef: n, passband: s, setPassband: o, mode: i, tuningStepHz: c }) {
+  function sH({ viewport: e, settingsRef: n, passband: s, setPassband: o, mode: i, tuningStepHz: c }) {
     const u = m.useRef(null), [h, p] = m.useState(0), y = m.useRef(null), v = e.r - e.l, x = v > 0, b = (j) => !x || h <= 0 ? 0 : (j - e.l) / v * h, S = (j) => {
       const E = n.current, I = u.current;
       if (!E || !I || !x) return;
@@ -32297,7 +32339,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       if (!E || E.pointerId !== j.pointerId) return;
       const I = E.movedPx, ne = E.kind;
       y.current = null, I < 4 && (ne === "click" || ne === "move") && S(j.clientX);
-    }, R = b(s.l), z = b(s.m), N = b(s.r), k = i === "CW" ? b((s.l + s.r) / 2) : null, O = Math.max(0, N - R), G = N >= 0 && R <= h, V = O >= 22 ? 1 : 0.45, L = 4, J = Math.max(O, ZL), ie = i === "USB" || i === "CW" ? R : i === "LSB" ? N - J : z - J / 2, te = i === "USB" || i === "CW" || i === "LSB" ? L : 0, ye = Math.max(0, J - te), H = bn(ie + (i === "USB" || i === "CW" ? te : 0), 0, Math.max(0, h - ye)), K = R - 16, T = N;
+    }, R = b(s.l), z = b(s.m), N = b(s.r), k = i === "CW" ? b((s.l + s.r) / 2) : null, O = Math.max(0, N - R), G = N >= 0 && R <= h, V = O >= 22 ? 1 : 0.45, L = 4, J = Math.max(O, WL), ie = i === "USB" || i === "CW" ? R : i === "LSB" ? N - J : z - J / 2, ee = i === "USB" || i === "CW" || i === "LSB" ? L : 0, ye = Math.max(0, J - ee), H = bn(ie + (i === "USB" || i === "CW" ? ee : 0), 0, Math.max(0, h - ye)), K = R - 16, T = N;
     return d.jsx("div", {
       ref: u,
       className: "relative h-[22px] w-full touch-none bg-background",
@@ -32440,7 +32482,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
   function Hw(e) {
     return e >= 1e6 ? `${(e / 1e6).toFixed(3)} MHz` : e >= 1e3 ? `${(e / 1e3).toFixed(3)} kHz` : `${Math.round(e)} Hz`;
   }
-  function oH(e, { bands: n, settings: s, vp: o, widthPx: i, dpr: c }) {
+  function aH(e, { bands: n, settings: s, vp: o, widthPx: i, dpr: c }) {
     e.save();
     const u = Kn(s, o.l), h = Kn(s, o.r);
     if (h <= u) {
@@ -32458,28 +32500,28 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       e.strokeStyle = k, e.lineWidth = v, e.lineCap = "round", e.shadowColor = k, e.shadowBlur = Math.floor(2 * c), e.beginPath(), e.moveTo(R + 0.5, p + 0.5), e.lineTo(z + 0.5, p + 0.5), e.stroke(), e.restore();
       const O = (M + _) / 2;
       if (O < 0 || O > i) continue;
-      const G = Math.abs(_ - M), L = e.measureText(b.name).width <= G - Math.floor(6 * c) ? b.name : lH(e, b.name, G - Math.floor(6 * c));
+      const G = Math.abs(_ - M), L = e.measureText(b.name).width <= G - Math.floor(6 * c) ? b.name : iH(e, b.name, G - Math.floor(6 * c));
       if (!L) continue;
       e.save();
       const J = Al("--foreground", "222.2 84% 4.9%"), ie = Al("--background", "0 0% 100%");
       e.lineWidth = Math.max(2, Math.floor(3 * c)), e.strokeStyle = `hsl(${ie} / 0.75)`, e.fillStyle = `hsl(${J} / 0.9)`;
-      const te = O;
-      e.strokeText(L, te, y), e.fillText(L, te, y), e.restore();
+      const ee = O;
+      e.strokeText(L, ee, y), e.fillText(L, ee, y), e.restore();
     }
     e.restore();
   }
-  function iH(e) {
+  function oH(e) {
     if (!Number.isFinite(e) || e <= 0) return 1;
     const n = Math.floor(Math.log10(e)), s = Math.pow(10, n), o = e / s;
     return (o <= 1 ? 1 : o <= 2 ? 2 : o <= 5 ? 5 : 10) * s;
   }
-  function lH(e, n, s) {
+  function iH(e, n, s) {
     const o = n.split(/\s+/).filter(Boolean);
     if (o.length <= 1) return null;
     const i = o.map((c) => c[0]).join("");
     return e.measureText(i).width <= s ? i : null;
   }
-  function cH({ onOpenBands: e, onOpenBookmarks: n, onOpenMore: s, zoomOpen: o, onToggleZoom: i, zoomValue: c, zoomDisabled: u, onZoomChange: h, mute: p, onToggleMute: y }) {
+  function lH({ onOpenBands: e, onOpenBookmarks: n, onOpenMore: s, zoomOpen: o, onToggleZoom: i, zoomValue: c, zoomDisabled: u, onZoomChange: h, mute: p, onToggleMute: y }) {
     return d.jsxs("div", {
       className: "fixed inset-x-0 bottom-0 z-40 border-t bg-background/92 backdrop-blur supports-[backdrop-filter]:bg-background/75",
       children: [
@@ -32582,7 +32624,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       ]
     });
   }
-  function uH(e) {
+  function cH(e) {
     if (typeof e != "string" || !e.trim()) return null;
     let n;
     try {
@@ -32631,11 +32673,11 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     }
     return o.length > 0 ? o : null;
   }
-  function fH({ receiverId: e, mode: n, centerHz: s, onSetMode: o, frequencyAdjust: i, frequencySet: c, bandwidthAdjust: u, resetTune: h, display: p, onDisplayChange: y, tuningStepHz: v, decoders: x, currentVfo: b, onToggleVfo: S, gridLocator: C, passbandSet: M, viewportSet: _, viewport: R, passbandCenterIdx: z, onViewportSet: N, audioMute: k, onToggleAudioMute: O, onViewportChange: G, onTuningChange: V, onSetFrequencyHz: L, onPassbandChange: J, onServerDefaults: ie, onServerSettings: te, onBandsChange: ye }) {
+  function uH({ receiverId: e, mode: n, centerHz: s, onSetMode: o, frequencyAdjust: i, frequencySet: c, bandwidthAdjust: u, resetTune: h, display: p, onDisplayChange: y, tuningStepHz: v, decoders: x, currentVfo: b, onToggleVfo: S, gridLocator: C, passbandSet: M, viewportSet: _, viewport: R, passbandCenterIdx: z, onViewportSet: N, audioMute: k, onToggleAudioMute: O, onViewportChange: G, onTuningChange: V, onSetFrequencyHz: L, onPassbandChange: J, onServerDefaults: ie, onServerSettings: ee, onBandsChange: ye }) {
     var _a;
     const [H, oe] = m.useState("connecting"), [K, T] = m.useState(null), [j, E] = m.useState(cf), [I, ne] = m.useState(null), [D, B] = m.useState(false), [X, re] = m.useState(false), [pe, Ce] = m.useState(false), [Ae, Je] = m.useState(false), [Ie, wt] = m.useState(false), [fn, qt] = m.useState(false), [Nt, Tt] = m.useState(false), [Sn, Fn] = m.useState(false), [fr, tn] = m.useState(false), [Lt, Mn] = m.useState(false), [dn, Wt] = m.useState(false), [St, Mt] = m.useState(() => {
       try {
-        return yL();
+        return gL();
       } catch {
         return [];
       }
@@ -32645,11 +32687,11 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     }, [
       ie
     ]);
-    const Gt = m.useRef(te);
+    const Gt = m.useRef(ee);
     m.useEffect(() => {
-      Gt.current = te;
+      Gt.current = ee;
     }, [
-      te
+      ee
     ]);
     const mt = m.useRef(ye);
     m.useEffect(() => {
@@ -32660,7 +32702,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     const mn = m.useCallback((Y) => {
       var _a2, _b2, _c;
       T(Y), oe("ready"), ne(null), (_a2 = Zt.current) == null ? void 0 : _a2.call(Zt, Y.defaults);
-      const ge = uH(Y.bands) ?? cf;
+      const ge = cH(Y.bands) ?? cf;
       E(ge), (_b2 = mt.current) == null ? void 0 : _b2.call(mt, ge), (_c = Gt.current) == null ? void 0 : _c.call(Gt, Y);
     }, []), Qt = m.useCallback((Y) => {
       oe("error"), ne(Y);
@@ -32672,8 +32714,8 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     ]), be = H === "connecting" ? "Connecting\u2026" : jn, Ee = m.useMemo(() => {
       const Y = (C ?? "").trim();
       if (!/^[A-R]{2}[0-9]{2}([A-X]{2})?$/i.test(Y)) return 1;
-      const ue = hH(Y);
-      return ue ? mH(ue.lat, ue.lon) : 1;
+      const ue = dH(Y);
+      return ue ? hH(ue.lat, ue.lon) : 1;
     }, [
       C
     ]), et = m.useMemo(() => {
@@ -32682,7 +32724,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         if (!ze) return true;
         const Xe = ze.basefreq, Ke = ze.basefreq + ze.total_bandwidth;
         return !Number.isFinite(Xe) || !Number.isFinite(Ke) ? true : Ne.endHz >= Xe && Ne.startHz <= Ke;
-      }, ue = pH(Ee), ge = [], Me = [];
+      }, ue = mH(Ee), ge = [], Me = [];
       for (const Ne of j) Y(Ne) && (/\bHAM\b/i.test(Ne.name) || (/\bAM\b/i.test(Ne.name) ? ge.push(Ne) : Me.push(Ne)));
       return {
         ham: ue.filter(Y),
@@ -32722,7 +32764,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       const Y = It.trim();
       if (!Y) return;
       const ue = {
-        id: bL(),
+        id: xL(),
         name: Y,
         frequencyHz: Math.round(s),
         mode: n,
@@ -32752,7 +32794,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       L,
       o
     ]), ln = m.useCallback(() => {
-      const Y = vL(St), ue = new Blob([
+      const Y = yL(St), ue = new Blob([
         Y
       ], {
         type: "application/json"
@@ -32770,7 +32812,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         if (!ge) return;
         let Me;
         try {
-          Me = xL(ge);
+          Me = vL(ge);
         } catch {
           return;
         }
@@ -32829,7 +32871,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       R
     ]), ve = x.unread.ft8 ?? 0, fe = !!x.enabled.ft8, xe = ((_a = x.errors) == null ? void 0 : _a.ft8) ?? null, Te = m.useMemo(() => x.lines.filter((Y) => Y.decoder === "ft8"), [
       x.lines
-    ]), Se = (C ?? "").trim().toUpperCase(), we = dH(Se), De = m.useMemo(() => we ? Eu(Se) : null, [
+    ]), Se = (C ?? "").trim().toUpperCase(), we = fH(Se), De = m.useMemo(() => we ? Eu(Se) : null, [
       we,
       Se
     ]), ke = m.useMemo(() => {
@@ -33535,7 +33577,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
           className: "px-4 pb-4 pt-0",
           children: d.jsx("div", {
             className: "overflow-hidden rounded-md border bg-muted/20",
-            children: d.jsx(eH, {
+            children: d.jsx(JL, {
               receiverId: e,
               bands: j,
               onConnected: mn,
@@ -33562,7 +33604,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         }),
         d.jsx("div", {
           className: "sm:hidden",
-          children: d.jsx(cH, {
+          children: d.jsx(lH, {
             onOpenBands: () => Tt(true),
             onOpenBookmarks: () => Mn(true),
             onOpenMore: () => Fn(true),
@@ -33948,7 +33990,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     const n = /[A-R]{2}[0-9]{2}([A-X]{2})?/gi, s = e.match(n);
     return s ? Array.from(new Set(s.map((o) => o.toUpperCase()))) : [];
   }
-  function dH(e) {
+  function fH(e) {
     return /^[A-R]{2}[0-9]{2}([A-X]{2})?$/i.test(e);
   }
   function Eu(e) {
@@ -33963,7 +34005,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     const i = (v) => v * Math.PI / 180, u = i(s - e), h = i(o - n), p = Math.sin(u / 2) * Math.sin(u / 2) + Math.cos(i(e)) * Math.cos(i(s)) * Math.sin(h / 2) * Math.sin(h / 2);
     return 6371 * (2 * Math.atan2(Math.sqrt(p), Math.sqrt(1 - p)));
   }
-  function hH(e) {
+  function dH(e) {
     const n = e.toUpperCase();
     if (n.length < 2) return null;
     const s = n.split("");
@@ -33973,10 +34015,10 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       lon: o
     };
   }
-  function mH(e, n) {
+  function hH(e, n) {
     return n >= -170 && n <= -30 ? 2 : n >= 60 && n <= 170 ? e > 30 && n < 75 ? 1 : 3 : 1;
   }
-  function pH(e) {
+  function mH(e) {
     const n = "rgba(50, 168, 72, 0.6)";
     return e === 2 ? [
       {
@@ -34265,11 +34307,11 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       }
     ];
   }
-  function gH() {
+  function pH() {
     return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
   }
-  const yH = /[A-R]{2}[0-9]{2}([A-X]{2})?/i;
-  function vH() {
+  const gH = /[A-R]{2}[0-9]{2}([A-X]{2})?/i;
+  function yH() {
     const [e, n] = m.useState({
       ft8: false
     }), [s, o] = m.useState([]), [i, c] = m.useState({
@@ -34310,18 +34352,18 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         }
         if (J.type === "log") {
           const ie = String(J.text ?? "").trim();
-          if (!ie || !yH.test(ie) || /^ft8_lib\b/i.test(ie)) return;
-          o((te) => [
+          if (!ie || !gH.test(ie) || /^ft8_lib\b/i.test(ie)) return;
+          o((ee) => [
             {
-              id: gH(),
+              id: pH(),
               ts: Date.now() + x.current,
               decoder: "ft8",
               text: ie
             },
-            ...te
-          ].slice(0, 500)), c((te) => ({
-            ...te,
-            ft8: te.ft8 + 1
+            ...ee
+          ].slice(0, 500)), c((ee) => ({
+            ...ee,
+            ft8: ee.ft8 + 1
           }));
         }
       }, V.postMessage({
@@ -34344,7 +34386,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         }
         const ie = S.current;
         if (ie <= 0) return;
-        const te = b.current.subarray(0, ie), ye = new Float32Array(te);
+        const ee = b.current.subarray(0, ie), ye = new Float32Array(ee);
         S.current = 0, L.postMessage({
           type: "pcm",
           pcm: ye
@@ -34420,7 +34462,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       feedAudio: R
     };
   }
-  function xH({ receiverId: e, onReceiverChange: n, audioSettings: s, onAudioSettingsChange: o, tuningStepHz: i, onDebugStatsChange: c, onCenterHzChange: u, autoBandMode: h, onPreferReceiverForFrequencyHz: p, initialUrlTune: y, onInitialUrlTuneApplied: v }) {
+  function vH({ receiverId: e, onReceiverChange: n, audioSettings: s, onAudioSettingsChange: o, tuningStepHz: i, onDebugStatsChange: c, onCenterHzChange: u, autoBandMode: h, onPreferReceiverForFrequencyHz: p, initialUrlTune: y, onInitialUrlTuneApplied: v }) {
     const [x, b] = m.useState("USB"), [S, C] = m.useState(null), [M, _] = m.useState(null);
     m.useEffect(() => {
       u == null ? void 0 : u(S);
@@ -34428,7 +34470,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       S,
       u
     ]);
-    const [R, z] = m.useState(null), [N, k] = m.useState(null), [O, G] = m.useState(null), [V, L] = m.useState(null), [J, ie] = m.useState(null), [te, ye] = m.useState(null), [H, oe] = m.useState(null), [K, T] = m.useState(null), [j, E] = m.useState({
+    const [R, z] = m.useState(null), [N, k] = m.useState(null), [O, G] = m.useState(null), [V, L] = m.useState(null), [J, ie] = m.useState(null), [ee, ye] = m.useState(null), [H, oe] = m.useState(null), [K, T] = m.useState(null), [j, E] = m.useState({
       minDb: -30,
       maxDb: 110,
       colormap: "gqrx",
@@ -34437,7 +34479,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       biggerWaterfall: false,
       manualMinDb: -30,
       manualMaxDb: 110
-    }), [I, ne] = m.useState(true), D = vH(), [B, X] = m.useState("A"), re = m.useRef("A"), pe = m.useRef({
+    }), [I, ne] = m.useState(true), D = yH(), [B, X] = m.useState("A"), re = m.useRef("A"), pe = m.useRef({
       mode: x,
       centerHz: S,
       bandwidthHz: M,
@@ -34661,7 +34703,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       tt
     ]);
     const ln = () => {
-      ne(false), V9();
+      ne(false), P9();
     };
     return d.jsxs("div", {
       className: "mx-auto flex h-full w-full max-w-[1320px] flex-col px-3 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-3 sm:px-4 sm:pb-4 sm:pt-4 lg:min-h-0 lg:overflow-hidden",
@@ -34692,13 +34734,13 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         d.jsxs("div", {
           className: "flex min-h-0 flex-1 flex-col gap-3 lg:overflow-hidden",
           children: [
-            d.jsx(fH, {
+            d.jsx(uH, {
               receiverId: e,
               mode: x,
               centerHz: S,
               onSetMode: jn,
               frequencyAdjust: V,
-              frequencySet: te,
+              frequencySet: ee,
               bandwidthAdjust: J,
               resetTune: H,
               display: j,
@@ -34782,7 +34824,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
                 children: [
                   d.jsx("div", {
                     className: "lg:col-span-4 lg:row-span-1 lg:min-h-0",
-                    children: d.jsx(hL, {
+                    children: d.jsx(dL, {
                       mode: x,
                       canWbfm: dn,
                       centerHz: S,
@@ -34810,7 +34852,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
                   }),
                   d.jsx("div", {
                     className: "lg:col-span-4 lg:row-span-1 lg:min-h-0",
-                    children: d.jsx(O7, {
+                    children: d.jsx(z7, {
                       receiverId: e,
                       receiverSessionNonce: Wt,
                       mode: x,
@@ -34831,14 +34873,14 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
                   }),
                   d.jsx("div", {
                     className: "lg:col-span-4 lg:row-span-1 lg:min-h-0",
-                    children: d.jsx(gL, {
+                    children: d.jsx(pL, {
                       settings: j,
                       onChange: E
                     })
                   }),
                   d.jsx("div", {
                     className: "lg:col-span-8 lg:row-span-1 lg:min-h-0",
-                    children: d.jsx(oL, {
+                    children: d.jsx(aL, {
                       centerHz: S,
                       mode: x,
                       receiverId: e,
@@ -34849,7 +34891,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
                   }),
                   d.jsx("div", {
                     className: "lg:col-span-4 lg:row-span-1 lg:min-h-0",
-                    children: d.jsx(pL, {})
+                    children: d.jsx(mL, {})
                   })
                 ]
               })
@@ -34859,14 +34901,14 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       ]
     });
   }
-  async function bH(e) {
+  async function xH(e) {
     const n = await fetch("/receivers.json", {
       signal: e
     });
     if (!n.ok) throw new Error(`receivers.json returned HTTP ${n.status}`);
     return await n.json();
   }
-  function wH(e) {
+  function bH(e) {
     const n = String(e ?? "").trim();
     if (!n) return null;
     if (/^\d+$/.test(n)) {
@@ -34878,7 +34920,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     const o = s < 1e3 ? s * 1e6 : s < 1e6 ? s * 1e3 : s, i = Math.round(o);
     return !Number.isFinite(i) || i <= 0 ? null : i;
   }
-  function SH(e) {
+  function wH(e) {
     const n = e.min_hz, s = e.max_hz;
     return typeof n != "number" || typeof s != "number" || !Number.isFinite(n) || !Number.isFinite(s) || s <= n ? null : s - n;
   }
@@ -34886,19 +34928,19 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     const s = e.min_hz, o = e.max_hz;
     return typeof s != "number" || typeof o != "number" || !Number.isFinite(s) || !Number.isFinite(o) || o <= s ? false : n >= s && n <= o;
   }
-  function MH(e, n) {
+  function SH(e, n) {
     let s = Number.POSITIVE_INFINITY;
     for (const o of e) {
       if (!j_(o, n)) continue;
-      const i = SH(o);
+      const i = wH(o);
       i != null && (s = Math.min(s, i));
     }
     return s;
   }
-  function CH(e, n) {
+  function MH(e, n) {
     const s = String(e ?? "").trim();
     if (!s) return null;
-    if (!/^\d+$/.test(s)) return wH(s);
+    if (!/^\d+$/.test(s)) return bH(s);
     const o = Number.parseInt(s, 10);
     if (!Number.isFinite(o) || o <= 0) return null;
     const i = [], c = (v) => {
@@ -34918,13 +34960,13 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     }
     let p = i[0] ?? null, y = Number.POSITIVE_INFINITY;
     for (const v of i) {
-      const x = MH(u, v);
+      const x = SH(u, v);
       x < y && (y = x, p = v);
     }
     return p;
   }
   const Vw = "novasdr.persist_settings", D_ = "novasdr.audio_settings", Fw = "novasdr.tuning_step_hz", qw = "novasdr.auto_band_mode";
-  function AH(e) {
+  function CH(e) {
     var _a;
     const n = ((_a = e.searchParams.get("modulation") ?? e.searchParams.get("mode")) == null ? void 0 : _a.trim()) ?? "";
     if (!n) return null;
@@ -34944,8 +34986,8 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     }
     return (i == null ? void 0 : i.id) ?? null;
   }
-  function _H(e) {
-    const n = EH(D_, null);
+  function AH(e) {
+    const n = TH(D_, null);
     if (!n) return e;
     const s = {
       ...e
@@ -34960,7 +35002,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       return n;
     }
   }
-  function TH(e, n) {
+  function _H(e, n) {
     try {
       const s = window.localStorage.getItem(e);
       if (s == null) return n;
@@ -34970,7 +35012,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       return n;
     }
   }
-  function EH(e, n) {
+  function TH(e, n) {
     try {
       const s = window.localStorage.getItem(e);
       return s ? JSON.parse(s) : n;
@@ -34978,7 +35020,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       return n;
     }
   }
-  function RH() {
+  function EH() {
     const [e, n] = m.useState(() => Gw(Vw, true)), [s, o] = m.useState(() => e ? Gw(qw, true) : true), [i, c] = m.useState({
       kind: "loading"
     }), [u, h] = m.useState(null), [p, y] = m.useState(null), v = m.useRef(false), [x, b] = m.useState(() => {
@@ -34995,7 +35037,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         bufferMode: "medium"
       };
       if (!e) return k;
-      const O = _H({
+      const O = AH({
         agcSpeed: k.agcSpeed,
         agcAttackMs: k.agcAttackMs,
         agcReleaseMs: k.agcReleaseMs,
@@ -35005,10 +35047,10 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         ...k,
         ...O
       };
-    }), [S, C] = m.useState(() => e ? TH(Fw, 100) : 100), [M, _] = m.useState(null), [R, z] = m.useState(null);
+    }), [S, C] = m.useState(() => e ? _H(Fw, 100) : 100), [M, _] = m.useState(null), [R, z] = m.useState(null);
     m.useEffect(() => {
       const k = new AbortController();
-      return bH(k.signal).then((O) => {
+      return xH(k.signal).then((O) => {
         c({
           kind: "ready",
           value: O
@@ -35020,20 +35062,20 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       }), () => k.abort();
     }, []), m.useEffect(() => {
       if (v.current || i.kind !== "ready") return;
-      const k = new URL(window.location.href), O = k.searchParams.get("frequency"), G = k.searchParams.get("rx"), V = AH(k);
+      const k = new URL(window.location.href), O = k.searchParams.get("frequency"), G = k.searchParams.get("rx"), V = CH(k);
       if (!O && !G && !V) {
         v.current = true;
         return;
       }
       v.current = true;
-      const L = G && i.value.receivers.some((ye) => ye.id === G) ? G : null, J = O ? CH(O, {
+      const L = G && i.value.receivers.some((ye) => ye.id === G) ? G : null, J = O ? MH(O, {
         receivers: i.value.receivers,
         rxId: L
       }) : null, ie = L ?? (J != null ? Iw(i.value, J, u) : null);
       if (ie && ie !== u && h(ie), J == null && V == null) return;
-      const te = ie ?? u ?? i.value.active_receiver_id;
-      te && y({
-        receiverId: te,
+      const ee = ie ?? u ?? i.value.active_receiver_id;
+      ee && y({
+        receiverId: ee,
         frequencyHz: J,
         mode: V
       });
@@ -35077,12 +35119,12 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     return d.jsxs("div", {
       className: "relative min-h-dvh bg-background text-foreground",
       children: [
-        d.jsx(kO, {}),
+        d.jsx(DO, {}),
         d.jsxs("div", {
           className: "relative z-20 flex min-h-dvh flex-col",
           children: [
-            d.jsx(EO, {}),
-            d.jsx(jO, {}),
+            d.jsx(TO, {}),
+            d.jsx(NO, {}),
             d.jsx(SO, {
               receivers: i.kind === "ready" ? i.value.receivers : null,
               receiverId: u,
@@ -35100,7 +35142,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
             }),
             d.jsx("main", {
               className: "flex-1 bg-muted/20 lg:min-h-0 lg:overflow-hidden",
-              children: d.jsx(xH, {
+              children: d.jsx(vH, {
                 receiverId: u,
                 onReceiverChange: h,
                 onCenterHzChange: z,
@@ -35119,12 +35161,12 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
       ]
     });
   }
-  const NH = {
+  const RH = {
     snapshot: {},
     everConnected: false
   };
-  function jH({ children: e }) {
-    const [n, s] = m.useState(NH), o = m.useCallback((c, u) => {
+  function NH({ children: e }) {
+    const [n, s] = m.useState(RH), o = m.useCallback((c, u) => {
       s((h) => {
         const p = h.snapshot[c];
         return p && p.state === u.state && p.message === u.message ? h : {
@@ -35153,7 +35195,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
     });
   }
   KE.createRoot(document.getElementById("root")).render(d.jsx(m.StrictMode, {
-    children: d.jsx(tN, {
+    children: d.jsx(t3, {
       transition: {
         duration: 0.22,
         ease: [
@@ -35164,11 +35206,11 @@ For more information, see https://radix-ui.com/primitives/docs/components/${n.do
         ]
       },
       reducedMotion: "user",
-      children: d.jsx(D7, {
+      children: d.jsx(j7, {
         delayDuration: 0,
         skipDelayDuration: 0,
-        children: d.jsx(jH, {
-          children: d.jsx(RH, {})
+        children: d.jsx(NH, {
+          children: d.jsx(EH, {})
         })
       })
     })

@@ -285,150 +285,179 @@ export function WebSdrHeader({
           >
             <div className="mx-auto w-full max-w-[1320px] space-y-3 px-3 py-3 sm:px-4">
               <div className="grid gap-3 lg:grid-cols-12">
-                <div className="space-y-2 lg:col-span-5">
-                  <div className="text-sm font-semibold tracking-tight">{headerPanel.title || 'Receiver'}</div>
-                  {headerPanel.about ? (
-                    <div className="whitespace-pre-line text-xs leading-relaxed text-muted-foreground">{headerPanel.about}</div>
-                  ) : null}
-
-                  {headerPanel.donationEnabled && headerPanel.donationUrl ? (
-                    <a href={headerPanel.donationUrl} target="_blank" rel="noreferrer">
-                      <Button type="button" variant="secondary" size="sm">
-                        {headerPanel.donationLabel || 'Donate'}
-                      </Button>
-                    </a>
-                  ) : null}
-
-                  {headerPanel.items
-                    .filter((i) => (i.label ?? '').trim() && (i.value ?? '').trim())
-                    .slice(0, 10)
-                    .map((i) => (
-                      <HeaderInfoRow key={`${i.label}:${i.value}`} label={i.label} value={i.value} />
-                    ))}
-                </div>
-
-                <div className="space-y-2 lg:col-span-7">
-                  {headerPanel.lookups.callsign ? (
-                    <div className="flex items-center justify-between gap-3 rounded-md border bg-muted/10 px-3 py-2">
-                      <div className="text-xs font-medium text-muted-foreground">Callsign</div>
-                      <div className="flex w-[min(320px,60vw)] items-center gap-2">
-                        <Input
-                          value={callsignQuery}
-                          onChange={(e) => setCallsignQuery(e.target.value)}
-                          placeholder="e.g. DL1ABC"
-                          className="h-8 text-xs"
-                          onKeyDown={(e) => {
-                            if (e.key !== 'Enter') return;
-                            const raw = callsignQuery.trim();
-                            if (!raw) return;
-                            const callsign = raw.replace(/[^A-Za-z0-9/]/g, '').toUpperCase();
-                            if (!callsign) return;
-                            window.open(`https://www.qrz.com/db/${callsign}`, '_blank', 'noreferrer');
-                          }}
-                        />
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="icon"
-            className="h-7 w-7 rounded-md bg-muted/10 hover:bg-muted/20"
-                          aria-label="Look up callsign"
-                          onClick={() => {
-                            const raw = callsignQuery.trim();
-                            if (!raw) return;
-                            const callsign = raw.replace(/[^A-Za-z0-9/]/g, '').toUpperCase();
-                            if (!callsign) return;
-                            window.open(`https://www.qrz.com/db/${callsign}`, '_blank', 'noreferrer');
-                          }}
-                        >
-                          <Search className="h-4 w-4" />
-                        </Button>
+                <div className="space-y-3 lg:col-span-5">
+                  <div className="rounded-lg border bg-muted/10 px-3 py-2.5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-semibold tracking-tight">
+                          {headerPanel.title || 'Receiver'}
+                        </div>
+                        {headerPanel.about ? (
+                          <div className="mt-1 whitespace-pre-line text-xs leading-relaxed text-muted-foreground">
+                            {headerPanel.about}
+                          </div>
+                        ) : null}
                       </div>
+                      {headerPanel.donationEnabled && headerPanel.donationUrl ? (
+                        <a href={headerPanel.donationUrl} target="_blank" rel="noreferrer" className="shrink-0">
+                          <Button type="button" variant="secondary" size="sm" className="h-8 px-3">
+                            {headerPanel.donationLabel || 'Donate'}
+                          </Button>
+                        </a>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  {headerPanel.items.some((i) => (i.label ?? '').trim() && (i.value ?? '').trim()) ? (
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {headerPanel.items
+                        .filter((i) => (i.label ?? '').trim() && (i.value ?? '').trim())
+                        .slice(0, 10)
+                        .map((i) => (
+                          <div key={`${i.label}:${i.value}`} className="rounded-lg border bg-muted/10 px-3 py-2">
+                            <div className="text-[11px] font-medium text-muted-foreground">{i.label}</div>
+                            <div className="mt-0.5 break-words text-xs">{i.value}</div>
+                          </div>
+                        ))}
                     </div>
                   ) : null}
 
-                  {headerPanel.lookups.mwlist || headerPanel.lookups.shortwaveInfo ? (
-                    <div className="flex items-center justify-between gap-3 rounded-md border bg-muted/10 px-3 py-2">
-                      <div className="text-xs font-medium text-muted-foreground">Frequency</div>
-                      <div className="flex items-center gap-2">
-                        {headerPanel.lookups.mwlist ? (
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            size="sm"
-                            disabled={tunedHz == null}
-                            onClick={() => {
-                              if (tunedHz == null) return;
-                              const khz = Math.round(tunedHz / 1_000);
-                              const url = `https://www.mwlist.org/mwlist_quick_and_easy.php?area=1&kHz=${khz}`;
-                              window.open(url, '_blank', 'noreferrer');
-                            }}
-                            className="gap-2"
-                          >
-                            MWList
-                            <ExternalLink className="h-3.5 w-3.5" />
-                          </Button>
+                  {headerPanel.images.length ? (
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {headerPanel.images.slice(0, 3).map((src) => (
+                        <img
+                          key={src}
+                          src={src}
+                          alt=""
+                          loading="lazy"
+                          className="h-28 w-full rounded-lg border bg-muted/10 object-cover"
+                        />
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="space-y-3 lg:col-span-7">
+                  {(headerPanel.lookups.callsign || headerPanel.lookups.mwlist || headerPanel.lookups.shortwaveInfo) ? (
+                    <div className="rounded-lg border bg-muted/10 px-3 py-2.5">
+                      <div className="text-[11px] font-medium text-muted-foreground">Lookups</div>
+                      <div className="mt-2 space-y-2">
+                        {headerPanel.lookups.callsign ? (
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="text-xs">Callsign</div>
+                            <div className="flex min-w-0 items-center gap-2 sm:w-[min(360px,60vw)]">
+                              <Input
+                                value={callsignQuery}
+                                onChange={(e) => setCallsignQuery(e.target.value)}
+                                placeholder="e.g. DL1ABC"
+                                className="h-8 min-w-0 text-xs"
+                                onKeyDown={(e) => {
+                                  if (e.key !== 'Enter') return;
+                                  const raw = callsignQuery.trim();
+                                  if (!raw) return;
+                                  const callsign = raw.replace(/[^A-Za-z0-9/]/g, '').toUpperCase();
+                                  if (!callsign) return;
+                                  window.open(`https://www.qrz.com/db/${callsign}`, '_blank', 'noreferrer');
+                                }}
+                              />
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                size="icon"
+                                className="h-8 w-8"
+                                aria-label="Look up callsign"
+                                onClick={() => {
+                                  const raw = callsignQuery.trim();
+                                  if (!raw) return;
+                                  const callsign = raw.replace(/[^A-Za-z0-9/]/g, '').toUpperCase();
+                                  if (!callsign) return;
+                                  window.open(`https://www.qrz.com/db/${callsign}`, '_blank', 'noreferrer');
+                                }}
+                              >
+                                <Search className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
                         ) : null}
-                        {headerPanel.lookups.shortwaveInfo ? (
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            size="sm"
-                            disabled={tunedHz == null}
-                            onClick={() => {
-                              if (tunedHz == null) return;
-                              const khz = Math.round(tunedHz / 1_000);
-                              const url = `https://www.short-wave.info/index.php?timbus=NOW&ip=179&porm=4&freq=${khz}`;
-                              window.open(url, '_blank', 'noreferrer');
-                            }}
-                            className="gap-2"
-                          >
-                            short-wave.info
-                            <ExternalLink className="h-3.5 w-3.5" />
-                          </Button>
+
+                        {headerPanel.lookups.mwlist || headerPanel.lookups.shortwaveInfo ? (
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="text-xs">Frequency</div>
+                            <div className="flex flex-wrap gap-2 sm:justify-end">
+                              {headerPanel.lookups.mwlist ? (
+                                <Button
+                                  type="button"
+                                  variant="secondary"
+                                  size="sm"
+                                  disabled={tunedHz == null}
+                                  onClick={() => {
+                                    if (tunedHz == null) return;
+                                    const khz = Math.round(tunedHz / 1_000);
+                                    const url = `https://www.mwlist.org/mwlist_quick_and_easy.php?area=1&kHz=${khz}`;
+                                    window.open(url, '_blank', 'noreferrer');
+                                  }}
+                                  className="h-8 gap-2"
+                                >
+                                  MWList
+                                  <ExternalLink className="h-3.5 w-3.5" />
+                                </Button>
+                              ) : null}
+                              {headerPanel.lookups.shortwaveInfo ? (
+                                <Button
+                                  type="button"
+                                  variant="secondary"
+                                  size="sm"
+                                  disabled={tunedHz == null}
+                                  onClick={() => {
+                                    if (tunedHz == null) return;
+                                    const khz = Math.round(tunedHz / 1_000);
+                                    const url = `https://www.short-wave.info/index.php?timbus=NOW&ip=179&porm=4&freq=${khz}`;
+                                    window.open(url, '_blank', 'noreferrer');
+                                  }}
+                                  className="h-8 gap-2"
+                                >
+                                  short-wave.info
+                                  <ExternalLink className="h-3.5 w-3.5" />
+                                </Button>
+                              ) : null}
+                            </div>
+                          </div>
                         ) : null}
                       </div>
                     </div>
                   ) : null}
 
                   {headerPanel.widgets.blitzortung && blitzortungSrc ? (
-                    <div className="overflow-hidden rounded-md border bg-muted/10">
+                    <div className="overflow-hidden rounded-lg border bg-muted/10">
+                      <div className="px-3 py-2.5">
+                        <div className="text-[11px] font-medium text-muted-foreground">Blitzortung</div>
+                      </div>
                       <iframe
                         title="Blitzortung lightning map"
                         src={blitzortungSrc}
-                        className="h-[260px] w-full"
+                        className="h-[240px] w-full sm:h-[280px]"
                         loading="lazy"
                       />
                     </div>
                   ) : null}
 
                   {headerPanel.widgets.hamqsl ? (
-                    <a href="https://www.hamqsl.com/solar.html" target="_blank" rel="noreferrer" className="block">
-                      <div className="rounded-md border bg-muted/10 px-3 py-2">
+                    <div className="overflow-hidden rounded-lg border bg-muted/10">
+                      <div className="px-3 py-2.5">
+                        <div className="text-[11px] font-medium text-muted-foreground">Solar-terrestrial</div>
+                      </div>
+                      <a href="https://www.hamqsl.com/solar.html" target="_blank" rel="noreferrer" className="block px-3 pb-3">
                         <img
                           src="https://www.hamqsl.com/solar101vhf.php"
                           alt="Solar-terrestrial data (HAMQSL)"
                           loading="lazy"
-                          className="block w-full max-h-[96px] object-contain"
+                          className="block w-full max-h-[110px] object-contain"
                         />
-                      </div>
-                    </a>
+                      </a>
+                    </div>
                   ) : null}
                 </div>
               </div>
-
-              {headerPanel.images.length ? (
-                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                  {headerPanel.images.slice(0, 3).map((src) => (
-                    <img
-                      key={src}
-                      src={src}
-                      alt=""
-                      loading="lazy"
-                      className="h-40 w-full rounded-md border bg-muted/10 object-cover"
-                    />
-                  ))}
-                </div>
-              ) : null}
             </div>
           </motion.div>
         ) : null}
@@ -449,15 +478,6 @@ export function WebSdrHeader({
         onPersistSettingsChange={onPersistSettingsChange}
       />
     </header>
-  );
-}
-
-function HeaderInfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between rounded-md border bg-muted/10 px-3 py-2">
-      <div className="text-xs font-medium text-muted-foreground">{label}</div>
-      <div className="truncate text-xs">{value}</div>
-    </div>
   );
 }
 
