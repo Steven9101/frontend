@@ -20,6 +20,7 @@ export type WaterfallSettings = {
     ssb_highcut_hz?: number;
     squelch_enabled?: boolean;
     squelch?: boolean;
+    colormap?: string;
   };
 };
 

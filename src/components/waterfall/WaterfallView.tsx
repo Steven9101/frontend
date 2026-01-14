@@ -435,9 +435,9 @@ export function WaterfallView({
         m: prev.m,
         r: freqHzToIdx(settings, rightHz),
       };
-      return clampPassband(next, settings, maxPassbandSpanIdx);
+      return clampPassband(next, settings, maxDragSpanIdx);
     });
-  }, [bandwidthAdjust, maxPassbandSpanIdx, settingsState]);
+  }, [bandwidthAdjust, maxDragSpanIdx, settingsState]);
 
   const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
   const wsUrl = useMemo(() => `${proto}://${window.location.host}/waterfall`, [proto]);

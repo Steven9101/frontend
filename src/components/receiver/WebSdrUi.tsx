@@ -6,6 +6,7 @@ import { DemodBandwidthPanel } from './panels/DemodBandwidthPanel';
 import { ServerInfoPanel } from './panels/ServerInfoPanel';
 import { WaterfallControlsPanel } from './panels/WaterfallControlsPanel';
 import { WaterfallCard } from '../waterfall/WaterfallCard';
+import type { ColormapName } from '../waterfall/colormaps';
 import type { WaterfallDisplaySettings } from '../waterfall/viewSettings';
 import type { AudioDebugStats, AudioUiSettings } from '../audio/types';
 import { triggerAudioResume } from '../audio/audioGate';
@@ -113,6 +114,7 @@ export function WebSdrUi({
   const pendingExplicitTuneRef = useRef<null | { hz: number; mode: typeof mode; receiverId: string }>(null);
   const waterfallSettingsRef = useRef<WaterfallSettings | null>(null);
   const initialUrlTuneAppliedRef = useRef(false);
+  const allowedColormapsRef = useRef<ColormapName[]>(['gqrx', 'rainbow', 'viridis', 'twentev2']);
 
   useEffect(() => {
     preferReceiverRef.current = onPreferReceiverForFrequencyHz;
@@ -674,6 +676,15 @@ export function WebSdrUi({
                   : null;
             if (defaultSquelch != null && !squelchTouchedRef.current) {
               onAudioSettingsChange((prev) => ({ ...prev, squelch: defaultSquelch }));
+            }
+            if (typeof d?.colormap === 'string' && d.colormap.trim().length > 0) {
+              const colormap = d.colormap.trim() as ColormapName;
+              if (allowedColormapsRef.current.includes(colormap)) {
+                setWaterfallDisplay((prev) => ({
+                  ...prev,
+                  colormap,
+                }));
+              }
             }
             const raw = (d?.modulation ?? 'USB').toUpperCase();
             const normalized =
