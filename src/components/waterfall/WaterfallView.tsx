@@ -27,6 +27,7 @@ type Props = {
   onPassbandChange?: (p: { l: number; m: number; r: number }) => void;
   onViewportChange?: (vp: { l: number; r: number }) => void;
   mode?: ReceiverMode;
+  audioMaxSps?: number | null;
   frequencyAdjust?: { nonce: number; deltaHz: number } | null;
   frequencySet?: { nonce: number; centerHz: number } | null;
   bandwidthAdjust?: { nonce: number; deltaHz: number } | null;
@@ -66,6 +67,7 @@ export function WaterfallView({
   onPassbandChange,
   onViewportChange,
   mode = 'USB',
+  audioMaxSps,
   frequencyAdjust,
   frequencySet,
   bandwidthAdjust,
@@ -120,6 +122,12 @@ export function WaterfallView({
   const [hover, setHover] = useState<{ x: number; freqHz: number } | null>(null);
   const [passband, setPassband] = useState<Passband | null>(null);
   const [viewportState, setViewportState] = useState<Viewport>({ l: 0, r: 0 });
+
+  const maxPassbandSpanIdx = null;
+  const maxDragSpanIdx = useMemo(
+    () => computeMaxPassbandSpanIdx(settingsState, audioMaxSps ?? null),
+    [audioMaxSps, settingsState],
+  );
 
   useEffect(() => {
     bandsRef.current = bands;
@@ -219,6 +227,7 @@ export function WaterfallView({
     modeRef.current = mode;
   }, [mode]);
 
+
   const lastModeForPassbandRef = useRef<Props['mode']>('USB');
 
   useEffect(() => {
@@ -284,10 +293,14 @@ export function WaterfallView({
     if (passbandSet.nonce === lastPassbandSetNonceRef.current) return;
     lastPassbandSetNonceRef.current = passbandSet.nonce;
     setPassband(() => {
-      const next = clampPassband({ l: passbandSet.l, m: passbandSet.m, r: passbandSet.r }, settings);
-      return normalizePassbandForMode(settings, next);
+      const next = clampPassband(
+        { l: passbandSet.l, m: passbandSet.m, r: passbandSet.r },
+        settings,
+        maxPassbandSpanIdx,
+      );
+      return normalizePassbandForMode(settings, next, maxPassbandSpanIdx);
     });
-  }, [passbandSet, settingsState]);
+  }, [maxPassbandSpanIdx, passbandSet, settingsState]);
 
   useEffect(() => {
     const settings = settingsRef.current;
@@ -295,9 +308,9 @@ export function WaterfallView({
     if (resetTune.vfo !== activeVfo) return;
     if (resetTune.nonce === lastResetNonceByVfoRef.current[resetTune.vfo]) return;
     lastResetNonceByVfoRef.current[resetTune.vfo] = resetTune.nonce;
-    setPassband(defaultPassband(settings, modeRef.current ?? 'USB'));
+    setPassband(defaultPassband(settings, modeRef.current ?? 'USB', maxPassbandSpanIdx));
     setWaterfallRangeRef.current(0, settings.fft_result_size);
-  }, [activeVfo, resetTune, settingsState]);
+  }, [activeVfo, maxPassbandSpanIdx, resetTune, settingsState]);
 
   useEffect(() => {
     const settings = settingsRef.current;
@@ -313,9 +326,13 @@ export function WaterfallView({
       if (span > 0) {
         setWaterfallRangeRef.current(centerIdx - span / 2, centerIdx + span / 2);
       }
-      return movePassbandToTuningCenterIdx(settings, prev, mode, centerIdx);
+      return clampPassband(
+        movePassbandToTuningCenterIdx(settings, prev, mode, centerIdx, maxPassbandSpanIdx),
+        settings,
+        maxPassbandSpanIdx,
+      );
     });
-  }, [frequencyAdjust, settingsState]);
+  }, [frequencyAdjust, maxPassbandSpanIdx, settingsState]);
 
   useEffect(() => {
     const settings = settingsRef.current;
@@ -331,6 +348,7 @@ export function WaterfallView({
         return clampPassband(
           passbandFromCenter(settings, frequencySet.centerHz, mode),
           settings,
+          maxPassbandSpanIdx,
         );
       }
       const isFullyZoomedOut = span >= Math.floor(settings.fft_result_size * 0.9);
@@ -345,13 +363,21 @@ export function WaterfallView({
           const targetL = freqHzToIdx(settings, band.startHz - padHz);
           const targetR = freqHzToIdx(settings, band.endHz + padHz);
           setWaterfallRangeRef.current(targetL, targetR);
-          return movePassbandToTuningCenterIdx(settings, prev, mode, centerIdx);
+          return clampPassband(
+            movePassbandToTuningCenterIdx(settings, prev, mode, centerIdx, maxPassbandSpanIdx),
+            settings,
+            maxPassbandSpanIdx,
+          );
         }
       }
       if (span > 0) setWaterfallRangeRef.current(centerIdx - span / 2, centerIdx + span / 2);
-      return movePassbandToTuningCenterIdx(settings, prev, mode, centerIdx);
+      return clampPassband(
+        movePassbandToTuningCenterIdx(settings, prev, mode, centerIdx, maxPassbandSpanIdx),
+        settings,
+        maxPassbandSpanIdx,
+      );
     });
-  }, [frequencySet, settingsState]);
+  }, [frequencySet, maxPassbandSpanIdx, settingsState]);
 
   useEffect(() => {
     const settings = settingsRef.current;
@@ -409,9 +435,9 @@ export function WaterfallView({
         m: prev.m,
         r: freqHzToIdx(settings, rightHz),
       };
-      return clampPassband(next, settings);
+      return clampPassband(next, settings, maxPassbandSpanIdx);
     });
-  }, [bandwidthAdjust, settingsState]);
+  }, [bandwidthAdjust, maxPassbandSpanIdx, settingsState]);
 
   const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
   const wsUrl = useMemo(() => `${proto}://${window.location.host}/waterfall`, [proto]);
@@ -972,6 +998,7 @@ export function WaterfallView({
           setIsReady(true);
           onConnected(raw);
 
+          const maxSpanIdx = null;
           setPassband((prev) => {
             if (prev) return prev;
             const d = raw.defaults;
@@ -984,9 +1011,9 @@ export function WaterfallView({
               d.r >= d.l &&
               d.r <= raw.fft_result_size
             ) {
-              return clampPassband({ l: d.l, m: d.m, r: d.r }, raw);
+              return clampPassband({ l: d.l, m: d.m, r: d.r }, raw, maxSpanIdx);
             }
-            return defaultPassband(raw, modeRef.current ?? 'USB');
+            return defaultPassband(raw, modeRef.current ?? 'USB', maxSpanIdx);
           });
         } catch (err: unknown) {
           const msg = err instanceof Error ? err.message : 'invalid settings payload';
@@ -1048,11 +1075,15 @@ export function WaterfallView({
     if (!settings) return;
     lastModeForPassbandRef.current = mode;
     setPassband((prev) => {
-      if (!prev) return defaultPassband(settings, mode);
+      if (!prev) return defaultPassband(settings, mode, maxPassbandSpanIdx);
       const centerHz = idxToFreqHz(settings, prev.m);
-      return clampPassband(passbandFromCenter(settings, centerHz, mode), settings);
+      return clampPassband(
+        passbandFromCenter(settings, centerHz, mode),
+        settings,
+        maxPassbandSpanIdx,
+      );
     });
-  }, [mode]);
+  }, [maxPassbandSpanIdx, mode]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -1188,7 +1219,13 @@ export function WaterfallView({
           if (!prev) return prev;
           const centerIdx = canvasXToIdx(x, rect.width, viewportRef.current);
           const activeMode = modeRef.current ?? mode;
-          return movePassbandToTuningCenterIdx(settings, prev, activeMode, centerIdx);
+          return movePassbandToTuningCenterIdx(
+            settings,
+            prev,
+            activeMode,
+            centerIdx,
+            maxPassbandSpanIdx,
+          );
         });
       }
     }
@@ -1211,7 +1248,7 @@ export function WaterfallView({
       ps.dragLastClientX = null;
       ps.pinchLastDistance = distance(pts[0], pts[1]);
     }
-  }, []);
+  }, [maxPassbandSpanIdx, mode]);
 
   const handleScalePointerDown = useCallback(
     (e: ReactPointerEvent<HTMLCanvasElement>) => {
@@ -1225,11 +1262,17 @@ export function WaterfallView({
         const rect = canvas.getBoundingClientRect();
         const x = clamp(e.clientX - rect.left, 0, rect.width);
         const centerIdx = canvasXToIdx(x, rect.width, viewportRef.current);
-        return movePassbandToTuningCenterIdx(settings, prev, modeRef.current ?? mode, centerIdx);
+        return movePassbandToTuningCenterIdx(
+          settings,
+          prev,
+          modeRef.current ?? mode,
+          centerIdx,
+          maxPassbandSpanIdx,
+        );
       });
       e.preventDefault();
     },
-    [isReady],
+    [isReady, maxPassbandSpanIdx, mode],
   );
 
   const handleScalePointerMove = useCallback((e: ReactPointerEvent<HTMLCanvasElement>) => {
@@ -1246,9 +1289,15 @@ export function WaterfallView({
       if (!prev) return prev;
       const x = clamp(e.clientX - rect.left, 0, rect.width);
       const centerIdx = canvasXToIdx(x, rect.width, viewportRef.current);
-      return movePassbandToTuningCenterIdx(settings, prev, modeRef.current ?? 'USB', centerIdx);
+      return movePassbandToTuningCenterIdx(
+        settings,
+        prev,
+        modeRef.current ?? 'USB',
+        centerIdx,
+        maxPassbandSpanIdx,
+      );
     });
-  }, []);
+  }, [maxPassbandSpanIdx]);
 
   const handleScalePointerUp = useCallback((e: ReactPointerEvent<HTMLCanvasElement>) => {
     const drag = scaleDragRef.current;
@@ -1290,6 +1339,7 @@ export function WaterfallView({
             passband={passband}
             setPassband={setPassband}
             mode={mode}
+            maxSpanIdx={maxDragSpanIdx}
             tuningStepHz={tuningStepHz}
           />
         ) : null}
@@ -1328,7 +1378,18 @@ export function WaterfallView({
                             const settings = settingsRef.current;
                             if (settings) {
                               const modeForWindow = m.mode ?? (modeRef.current ?? 'USB');
-                              setPassband(clampPassband(passbandFromCenterWithSpan(settings, m.frequencyHz, modeForWindow, m.bandwidthHz), settings));
+                              setPassband(
+                                clampPassband(
+                                  passbandFromCenterWithSpan(
+                                    settings,
+                                    m.frequencyHz,
+                                    modeForWindow,
+                                    m.bandwidthHz,
+                                  ),
+                                  settings,
+                                  maxPassbandSpanIdx,
+                                ),
+                              );
                             }
                           }
                         }}
@@ -1400,9 +1461,31 @@ type Passband = {
   r: number;
 };
 
-function defaultPassband(settings: WaterfallSettings, mode: Props['mode']): Passband {
+function computeMaxPassbandSpanIdx(
+  settings: WaterfallSettings | null,
+  audioMaxSps: number | null,
+): number | null {
+  if (!settings) return null;
+  if (audioMaxSps == null || !Number.isFinite(audioMaxSps) || audioMaxSps <= 0) {
+    return null;
+  }
+  const spanHz = Math.min(audioMaxSps, settings.total_bandwidth);
+  const spanIdx = (spanHz / settings.total_bandwidth) * settings.fft_result_size;
+  if (!Number.isFinite(spanIdx) || spanIdx <= 0) return null;
+  return Math.max(MIN_PASSBAND_SPAN_IDX, Math.floor(spanIdx));
+}
+
+function defaultPassband(
+  settings: WaterfallSettings,
+  mode: Props['mode'],
+  maxSpanIdx?: number | null,
+): Passband {
   const centerHz = settings.basefreq + settings.total_bandwidth / 2;
-  return passbandFromCenter(settings, centerHz, mode ?? 'USB');
+  return clampPassband(
+    passbandFromCenter(settings, centerHz, mode ?? 'USB'),
+    settings,
+    maxSpanIdx,
+  );
 }
 
 function parseBandwidthHz(raw: unknown): number | null {
@@ -1530,10 +1613,19 @@ function passbandFromCenterWithSpan(settings: WaterfallSettings, centerHz: numbe
   };
 }
 
-function movePassbandToCenterIdx(settings: WaterfallSettings, prev: Passband, centerIdx: number): Passband {
+function movePassbandToCenterIdx(
+  settings: WaterfallSettings,
+  prev: Passband,
+  centerIdx: number,
+  maxSpanIdx?: number | null,
+): Passband {
   const leftOffset = prev.l - prev.m;
   const rightOffset = prev.r - prev.m;
-  return clampPassband({ l: centerIdx + leftOffset, m: centerIdx, r: centerIdx + rightOffset }, settings);
+  return clampPassband(
+    { l: centerIdx + leftOffset, m: centerIdx, r: centerIdx + rightOffset },
+    settings,
+    maxSpanIdx,
+  );
 }
 
 function movePassbandToTuningCenterIdx(
@@ -1541,9 +1633,10 @@ function movePassbandToTuningCenterIdx(
   prev: Passband,
   mode: Props['mode'],
   centerIdx: number,
+  maxSpanIdx?: number | null,
 ): Passband {
   void mode;
-  return movePassbandToCenterIdx(settings, prev, centerIdx);
+  return movePassbandToCenterIdx(settings, prev, centerIdx, maxSpanIdx);
 }
 
 function freqHzToIdx(settings: WaterfallSettings, hz: number): number {
@@ -1580,36 +1673,95 @@ function idxToFreqHz(settings: WaterfallSettings, idx: number): number {
   return settings.basefreq + t * settings.total_bandwidth;
 }
 
-function clampPassband(p: Passband, settings: WaterfallSettings): Passband {
+function clampPassband(
+  p: Passband,
+  settings: WaterfallSettings,
+  maxSpanIdx?: number | null,
+): Passband {
   const max = settings.fft_result_size;
   let l = clamp(p.l, 0, max);
   let r = clamp(p.r, 0, max);
   if (r < l) [l, r] = [r, l];
   const m = clamp(p.m, 0, max);
+  if (maxSpanIdx != null && Number.isFinite(maxSpanIdx) && maxSpanIdx > 0) {
+    const maxSpan = Math.max(
+      MIN_PASSBAND_SPAN_IDX,
+      Math.min(max, Math.floor(maxSpanIdx)),
+    );
+    const span = r - l;
+    if (span > maxSpan) {
+      const half = maxSpan / 2;
+      let nextL = m - half;
+      let nextR = nextL + maxSpan;
+      if (nextL < 0) {
+        nextR -= nextL;
+        nextL = 0;
+      }
+      if (nextR > max) {
+        nextL -= nextR - max;
+        nextR = max;
+      }
+      l = clamp(nextL, 0, max);
+      r = clamp(nextR, 0, max);
+    }
+  }
   return { l, m, r };
 }
 
-function normalizePassbandForMode(settings: WaterfallSettings, p: Passband): Passband {
-  const clamped = clampPassband(p, settings);
+function normalizePassbandForMode(
+  settings: WaterfallSettings,
+  p: Passband,
+  maxSpanIdx?: number | null,
+): Passband {
+  const clamped = clampPassband(p, settings, maxSpanIdx);
   const span = clamped.r - clamped.l;
   if (span >= MIN_PASSBAND_SPAN_IDX) return clamped;
 
   const max = settings.fft_result_size;
   const half = MIN_PASSBAND_SPAN_IDX / 2;
   const m = clamp(clamped.m, half, max - half);
-  return clampPassband({ l: m - half, m, r: m + half }, settings);
+  return clampPassband({ l: m - half, m, r: m + half }, settings, maxSpanIdx);
 }
 
 function enforceMinSpanForEdgeDrag(
   settings: WaterfallSettings,
   p: Passband,
   kind: 'l' | 'r',
+  maxSpanIdx?: number | null,
 ): Passband {
-  const clamped = clampPassband(p, settings);
-  const span = clamped.r - clamped.l;
-  if (span >= MIN_PASSBAND_SPAN_IDX) return clamped;
-  if (kind === 'l') return clampPassband({ ...clamped, l: clamped.r - MIN_PASSBAND_SPAN_IDX }, settings);
-  return clampPassband({ ...clamped, r: clamped.l + MIN_PASSBAND_SPAN_IDX }, settings);
+  const max = settings.fft_result_size;
+  let l = clamp(p.l, 0, max);
+  let r = clamp(p.r, 0, max);
+  let m = clamp(p.m, 0, max);
+  if (r < l) [l, r] = [r, l];
+
+  let span = r - l;
+  if (maxSpanIdx != null && Number.isFinite(maxSpanIdx) && maxSpanIdx > 0) {
+    const maxSpan = Math.max(
+      MIN_PASSBAND_SPAN_IDX,
+      Math.min(max, Math.floor(maxSpanIdx)),
+    );
+    if (span > maxSpan) {
+      if (kind === 'l') {
+        l = r - maxSpan;
+      } else {
+        r = l + maxSpan;
+      }
+      l = clamp(l, 0, max);
+      r = clamp(r, 0, max);
+      span = r - l;
+    }
+  }
+
+  if (span >= MIN_PASSBAND_SPAN_IDX) return { l, m, r };
+  if (kind === 'l') {
+    l = r - MIN_PASSBAND_SPAN_IDX;
+  } else {
+    r = l + MIN_PASSBAND_SPAN_IDX;
+  }
+  l = clamp(l, 0, max);
+  r = clamp(r, 0, max);
+  return { l, m: clamp(m, 0, max), r };
 }
 
 function PassbandTunerBar({
@@ -1618,6 +1770,7 @@ function PassbandTunerBar({
   passband,
   setPassband,
   mode,
+  maxSpanIdx,
   tuningStepHz,
 }: {
   viewport: Viewport;
@@ -1625,6 +1778,7 @@ function PassbandTunerBar({
   passband: Passband;
   setPassband: React.Dispatch<React.SetStateAction<Passband | null>>;
   mode: Props['mode'];
+  maxSpanIdx?: number | null;
   tuningStepHz: number;
 }) {
   const barRef = useRef<HTMLDivElement | null>(null);
@@ -1659,7 +1813,11 @@ function PassbandTunerBar({
     const centerIdx = viewport.l + (x / rect.width) * span;
     setPassband((prev) => {
       if (!prev) return prev;
-      return clampPassband(movePassbandToTuningCenterIdx(settings, prev, mode, centerIdx), settings);
+      return clampPassband(
+        movePassbandToTuningCenterIdx(settings, prev, mode, centerIdx, maxSpanIdx),
+        settings,
+        maxSpanIdx,
+      );
     });
   };
 
@@ -1690,13 +1848,13 @@ function PassbandTunerBar({
       setPassband((prev) => {
         if (!prev) return prev;
         const shifted = { l: prev.l + stepIdx, m: prev.m + stepIdx, r: prev.r + stepIdx };
-        return clampPassband(shifted, settings);
+        return clampPassband(shifted, settings, maxSpanIdx);
       });
     };
 
     bar.addEventListener('wheel', handleWheel, { passive: false });
     return () => bar.removeEventListener('wheel', handleWheel);
-  }, [setPassband, settingsRef, tuningStepHz]);
+  }, [maxSpanIdx, setPassband, settingsRef, tuningStepHz]);
 
   const startDrag = (kind: 'move' | 'l' | 'r' | 'click') => (e: ReactPointerEvent<HTMLElement>) => {
     const settings = settingsRef.current;
@@ -1707,7 +1865,7 @@ function PassbandTunerBar({
       pointerId: e.pointerId,
       startClientX: e.clientX,
       movedPx: 0,
-      start: normalizePassbandForMode(settings, passband),
+      start: normalizePassbandForMode(settings, passband, maxSpanIdx),
     };
     e.currentTarget.setPointerCapture(e.pointerId);
     e.stopPropagation();
@@ -1729,24 +1887,50 @@ function PassbandTunerBar({
 
     if (drag.kind === 'move') {
       const startCenter = mode === 'CW' ? (drag.start.l + drag.start.r) / 2 : drag.start.m;
-      setPassband(clampPassband(movePassbandToTuningCenterIdx(settings, drag.start, mode, startCenter + dxIdx), settings));
+      setPassband(
+        clampPassband(
+          movePassbandToTuningCenterIdx(settings, drag.start, mode, startCenter + dxIdx, maxSpanIdx),
+          settings,
+          maxSpanIdx,
+        ),
+      );
       return;
     }
 
     if (drag.kind === 'click') {
       const x = clamp(e.clientX - rect.left, 0, rect.width);
       const centerIdx = viewport.l + (x / rect.width) * span;
-      setPassband(clampPassband(movePassbandToTuningCenterIdx(settings, drag.start, mode, centerIdx), settings));
+      setPassband(
+        clampPassband(
+          movePassbandToTuningCenterIdx(settings, drag.start, mode, centerIdx, maxSpanIdx),
+          settings,
+          maxSpanIdx,
+        ),
+      );
       return;
     }
 
     const start = drag.start;
     if (drag.kind === 'l') {
-      setPassband(enforceMinSpanForEdgeDrag(settings, { l: start.l + dxIdx, m: start.m, r: start.r }, 'l'));
+      setPassband(
+        enforceMinSpanForEdgeDrag(
+          settings,
+          { l: start.l + dxIdx, m: start.m, r: start.r },
+          'l',
+          maxSpanIdx,
+        ),
+      );
       return;
     }
     if (drag.kind === 'r') {
-      setPassband(enforceMinSpanForEdgeDrag(settings, { l: start.l, m: start.m, r: start.r + dxIdx }, 'r'));
+      setPassband(
+        enforceMinSpanForEdgeDrag(
+          settings,
+          { l: start.l, m: start.m, r: start.r + dxIdx },
+          'r',
+          maxSpanIdx,
+        ),
+      );
       return;
     }
   };

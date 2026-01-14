@@ -614,6 +614,7 @@ export function WebSdrUi({
           receiverId={receiverId}
           mode={mode}
           centerHz={centerHz}
+          audioMaxSps={audioMaxSps}
           onSetMode={setModeForActiveVfo}
           frequencyAdjust={frequencyAdjust}
           frequencySet={frequencySet}

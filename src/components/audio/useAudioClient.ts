@@ -525,7 +525,8 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
         // Convert Hz edges to bins conservatively:
         // - low-cut uses floor so we don't accidentally shift the edge upward
         // - high-cut uses ceil so we don't accidentally shrink the requested bandwidth
-        const lowCutBins = Math.max(0, Math.floor(ssbLowCutHz / hzPerBin));
+        const lowCutBinsRaw = Math.floor(ssbLowCutHz / hzPerBin);
+        const lowCutBins = ssbLowCutHz > 0 ? Math.max(1, lowCutBinsRaw) : Math.max(0, lowCutBinsRaw);
         const highCutBins = Math.max(lowCutBins + 1, Math.ceil(ssbHighCutHz / hzPerBin));
 
         if (demod === 'USB') {
@@ -575,7 +576,7 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
           setBasicInfo(raw);
           smeterOffsetDbRef.current = typeof raw.smeter_offset === 'number' ? raw.smeter_offset : 0;
 
-          const outputSps = Math.min(raw.audio_max_sps, 48_000);
+          const outputSps = Math.max(1, Math.round(raw.audio_max_sps));
           ensureAudioGraph(outputSps);
           const ctx = audioCtxRef.current;
           if (!ctx) return;

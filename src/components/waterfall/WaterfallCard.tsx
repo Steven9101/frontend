@@ -35,6 +35,7 @@ type Props = {
   receiverId: string | null;
   mode: ReceiverMode;
   centerHz: number | null;
+  audioMaxSps?: number | null;
   onSetMode?: (mode: Props['mode']) => void;
   frequencyAdjust: { nonce: number; deltaHz: number } | null;
   frequencySet: { nonce: number; centerHz: number } | null;
@@ -138,6 +139,7 @@ export function WaterfallCard({
   receiverId,
   mode,
   centerHz,
+  audioMaxSps,
   onSetMode,
   frequencyAdjust,
   frequencySet,
@@ -939,6 +941,7 @@ export function WaterfallCard({
             onSetMode={onSetMode}
             activeVfo={currentVfo}
             mode={mode}
+            audioMaxSps={audioMaxSps}
             frequencyAdjust={frequencyAdjust}
             frequencySet={frequencySet}
             bandwidthAdjust={bandwidthAdjust}
