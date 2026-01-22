@@ -1,7 +1,7 @@
-import { decode as cborDecode } from 'cbor-x';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { Audio, AudioCodec } from '../../modules/phantomsdrdsp.js';
+import { Audio, AudioCodec } from '../../modules/novasdrdsp.js';
+import { decodeImaAdpcmMono } from '../../lib/imaAdpcm';
 import { useReconnectingWebSocket } from '../../lib/useReconnectingWebSocket';
 import { registerAudioResumer } from './audioGate';
 import type { AudioPacket, BasicInfo } from './protocol';
@@ -36,6 +36,35 @@ function getBufferMsForMode(mode: 'low' | 'medium' | 'high'): number {
     case 'high':
       return 200; // High stability, more latency
   }
+}
+
+type AudioWireFrame = {
+  codec: number;
+  frameNum: number;
+  l: number;
+  m: number;
+  r: number;
+  pwr: number;
+  payload: Uint8Array;
+};
+
+function parseAudioWireFrame(buf: ArrayBuffer): AudioWireFrame | null {
+  if (buf.byteLength < 36) return null;
+  const bytes = new Uint8Array(buf);
+  if (bytes[0] !== 0x4e || bytes[1] !== 0x53 || bytes[2] !== 0x44 || bytes[3] !== 0x41) return null; // "NSDA"
+
+  const version = bytes[4] ?? 0;
+  if (version !== 1) return null;
+
+  const codec = bytes[5] ?? 0;
+  const view = new DataView(buf);
+  const frameNum = Number(view.getBigUint64(8, true));
+  const l = view.getInt32(16, true);
+  const m = view.getFloat64(20, true);
+  const r = view.getInt32(28, true);
+  const pwr = view.getFloat32(32, true);
+  const payload = bytes.subarray(36);
+  return { codec, frameNum, l, m, r, pwr, payload };
 }
 
 
@@ -91,6 +120,7 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
     bassModeRef.current = mode;
     ctcssEnabledRef.current = mode === 'FMC';
 
+    // Tone settings changed Bas ON5HB
     const ctcss = ctcssFilterRef.current;
     if (ctcss) {
       ctcss.frequency.value = mode === 'FMC' ? 300 : 10;
@@ -104,11 +134,18 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
       bass.gain.value = 12;
       return;
     }
-    if (mode === 'FM' || mode === 'FMC') {
+    if (mode === 'FM' ) {
       bass.frequency.value = 120;
       bass.gain.value = 6;
       return;
     }
+    // Altered to make CCTS more effective Bas ON5HB
+    if (mode === 'FMC') {
+      bass.frequency.value = 300;
+      bass.gain.value = 2;
+      return;
+    }
+
   }, [mode]);
 
   // Debug stats
@@ -132,8 +169,6 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
   const [pwrDb, setPwrDb] = useState<number | null>(null);
   const [needsUserGesture, setNeedsUserGesture] = useState<boolean>(false);
   const [connectionNonce, setConnectionNonce] = useState(0);
-  const flacHeaderRef = useRef<Uint8Array | null>(null);
-  const flacHeaderAppliedRef = useRef<boolean>(false);
   const closeWsRef = useRef<null | (() => void)>(null);
   const messageHandlerRef = useRef<(event: MessageEvent) => void>(() => undefined);
 
@@ -148,8 +183,7 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
     lastSentMuteRef.current = null;
     lastSentSquelchRef.current = null;
     lastSentAgcRef.current = null;
-    flacHeaderRef.current = null;
-    flacHeaderAppliedRef.current = false;
+
     pcmQueueRef.current = [];
     pcmQueuedSamplesRef.current = 0;
     startedPlaybackRef.current = false;
@@ -242,16 +276,25 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
       desiredSampleRate != null ? new AudioContextCtor({ sampleRate: desiredSampleRate }) : new AudioContextCtor();
     const gain = audioCtx.createGain();
     gain.gain.value = clamp((settingsRef.current.volume / 100) * 5, 0, 8);
+
+    // CTCSS adjusted Bas ON5HB
     const ctcss = audioCtx.createBiquadFilter();
     ctcss.type = 'highpass';
-    ctcss.frequency.value = ctcssEnabledRef.current ? 300 : 10;
-    ctcss.Q.value = 0.707;
+    ctcss.frequency.value = ctcssEnabledRef.current ? 300 : 0;
+//    ctcss.Q.value = 0.707; //was 0.707
+    ctcss.gain.value = -40;
+
     const bass = audioCtx.createBiquadFilter();
     bass.type = 'lowshelf';
-    if (bassModeRef.current === 'FM' || bassModeRef.current === 'FMC') {
+    if (bassModeRef.current === 'FM') {
       bass.frequency.value = 120;
       bass.gain.value = 6;
-    } else {
+    } 
+    if (bassModeRef.current === 'FMC') {
+      bass.frequency.value = 300;
+      bass.gain.value = 2;
+    } 
+    else {
       bass.frequency.value = 140;
       bass.gain.value = 12;
     }
@@ -499,7 +542,8 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
         // Convert Hz edges to bins conservatively:
         // - low-cut uses floor so we don't accidentally shift the edge upward
         // - high-cut uses ceil so we don't accidentally shrink the requested bandwidth
-        const lowCutBins = Math.max(0, Math.floor(ssbLowCutHz / hzPerBin));
+        const lowCutBinsRaw = Math.floor(ssbLowCutHz / hzPerBin);
+        const lowCutBins = ssbLowCutHz > 0 ? Math.max(1, lowCutBinsRaw) : Math.max(0, lowCutBinsRaw);
         const highCutBins = Math.max(lowCutBins + 1, Math.ceil(ssbHighCutHz / hzPerBin));
 
         if (demod === 'USB') {
@@ -549,7 +593,7 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
           setBasicInfo(raw);
           smeterOffsetDbRef.current = typeof raw.smeter_offset === 'number' ? raw.smeter_offset : 0;
 
-          const outputSps = Math.min(raw.audio_max_sps, 48_000);
+          const outputSps = Math.max(1, Math.round(raw.audio_max_sps));
           ensureAudioGraph(outputSps);
           const ctx = audioCtxRef.current;
           if (!ctx) return;
@@ -562,8 +606,7 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
           packetsReceivedRef.current = 0;
           packetsDroppedRef.current = 0;
 
-          const compression = raw.audio_compression.toLowerCase();
-          const codec = compression.includes('opus') ? AudioCodec.Opus : AudioCodec.Flac;
+          const codec = AudioCodec.Flac;
 
           // The DSP audio stream is produced by taking an IFFT of size `audio_max_fft` from the main FFT,
           // so its *effective* sample rate is derived from the FFT parameters (not necessarily exactly the
@@ -608,21 +651,15 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
       const gain = gainRef.current;
       if (!decoder) return;
 
-      const pkt = cborDecode(new Uint8Array(event.data)) as {
-        frame_num: number;
-        l: number;
-        m: number;
-        r: number;
-        pwr: number;
-        data: Uint8Array;
-      };
+      const wire = parseAudioWireFrame(event.data);
+      if (!wire) return;
       const audioPkt: AudioPacket = {
-        frame_num: pkt.frame_num,
-        l: pkt.l,
-        m: pkt.m,
-        r: pkt.r,
-        pwr: pkt.pwr,
-        data: pkt.data,
+        frame_num: wire.frameNum,
+        l: wire.l,
+        m: wire.m,
+        r: wire.r,
+        pwr: wire.pwr,
+        data: wire.payload,
       };
 
       packetsReceivedRef.current += 1;
@@ -632,20 +669,6 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
       const normalized = avgPerBin / n;
       const smeterOffsetDb = smeterOffsetDbRef.current;
       setPwrDb(10 * Math.log10(Math.max(1e-20, normalized)) + smeterOffsetDb);
-
-      if (audioPkt.r === 0 && audioPkt.data.length > 0) {
-        flacHeaderRef.current = audioPkt.data;
-        flacHeaderAppliedRef.current = false;
-        try {
-          decoder.decode(audioPkt.data);
-          flacHeaderAppliedRef.current = true;
-        } catch {
-          // ignore; we'll retry when we get audio frames
-        }
-        setStatus('ready');
-        setError(null);
-        return;
-      }
 
       if (!ctx || !gain) return;
       if (ctx.state !== 'running') {
@@ -676,16 +699,6 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
           } catch {
             // ignore; we'll fall back to defaults if wasm rejects the call
           }
-
-          // Re-apply FLAC header if we have it so the decoder is initialized consistently.
-          if (cfg.codec === AudioCodec.Flac && flacHeaderRef.current) {
-            try {
-              decoder.decode(flacHeaderRef.current);
-              flacHeaderAppliedRef.current = true;
-            } catch {
-              flacHeaderAppliedRef.current = false;
-            }
-          }
         }
       } else {
         const desired = desiredDspRef.current;
@@ -698,18 +711,11 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
         }
       }
 
-      if (flacHeaderRef.current && !flacHeaderAppliedRef.current) {
-        try {
-          decoder.decode(flacHeaderRef.current);
-          flacHeaderAppliedRef.current = true;
-        } catch {
-          // ignore
-        }
-      }
-
       let decoded: Float32Array | null = null;
       try {
-        decoded = decoder.decode(audioPkt.data) as Float32Array;
+        if (wire.codec !== 1) return;
+        const pcm = decodeImaAdpcmMono(audioPkt.data);
+        decoded = pcm.length > 0 ? (decoder.process_pcm_f32(pcm) as Float32Array) : null;
       } catch {
         // If the decoder panics/traps, try a one-time rebuild and let the stream continue.
         decoderNeedsRebuildRef.current = true;
@@ -745,8 +751,6 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
 
     return () => {
       messageHandlerRef.current = () => undefined;
-      flacHeaderRef.current = null;
-      flacHeaderAppliedRef.current = false;
       try {
         decoderRef.current?.free();
       } catch {
