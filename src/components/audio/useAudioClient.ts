@@ -6,13 +6,18 @@ import { decodeImaAdpcmMono } from '../../lib/imaAdpcm';
 import { useReconnectingWebSocket } from '../../lib/useReconnectingWebSocket';
 import { registerAudioResumer } from './audioGate';
 import type { AudioPacket, BasicInfo } from './protocol';
-import type { AudioDebugStats, AudioUiSettings, AudioWindow } from './types';
+import type { AudioDebugStats, AudioUiSettings, AudioWindow, LatencyControl } from './types';
 import type { ReceiverMode } from '../../lib/receiverMode';
 
 function isLikelyIos(): boolean {
   const ua = navigator.userAgent || '';
   return /iPad|iPhone|iPod/i.test(ua);
 }
+
+type LatencyItem = {
+  storeStamp: number;
+  delaySeconds: number;
+};
 
 type Props = {
   receiverId: string | null;
@@ -31,11 +36,11 @@ function isBassBoostMode(mode: ReceiverMode): boolean {
 function getBufferMsForMode(mode: 'low' | 'medium' | 'high'): number {
   switch (mode) {
     case 'low':
-      return 60; // Low latency, may have dropouts on slower connections
+      return 75; // Low latency, may have dropouts on slower connections
     case 'medium':
-      return 110; // Balanced (default)
+      return 150; // Balanced (default)
     case 'high':
-      return 200; // High stability, more latency
+      return 300; // High stability, more latency
   }
 }
 
@@ -102,6 +107,9 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
   const opusDecoderWasmRef = useRef<OpusDecoder<48000> | null>(null);
   const opusDecoderNativeRef = useRef<AudioDecoder | null>(null);
   const [audioDecoderNeedsRebuild, setAudioDecoderNeedsRebuild] = useState<boolean>(false);
+  const latencyControlRef = useRef<LatencyControl>('idle');
+  const delaysRef = useRef<LatencyItem[]>([]);
+  const currentLatencyMsRef = useRef<number>(0.0);
   const wireCodecForDebugStats = useRef<number>(0);
   const gainRef = useRef<GainNode | null>(null);
   const ctcssFilterRef = useRef<BiquadFilterNode | null>(null);
@@ -118,7 +126,6 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
   const pcmQueuedSamplesRef = useRef<number>(0);
   const startedPlaybackRef = useRef<boolean>(false);
   const targetLeadSecRef = useRef<number>(getBufferMsForMode(settings.bufferMode) / 1000);
-  const stableSinceMsRef = useRef<number>(Date.now());
   const lastWindowRef = useRef<string>('');
   const lastDemodRef = useRef<string>('');
   const lastSentMuteRef = useRef<boolean | null>(null);
@@ -169,6 +176,7 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
     wireCodec: 0,
     packetsReceived: 0,
     packetsDropped: 0,
+    latencyControl: "idle",
     currentLatencyMs: 0,
     targetLatencyMs: getBufferMsForMode(settings.bufferMode),
     queuedSamples: 0,
@@ -426,16 +434,14 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
 
   const pumpAudio = useCallback(
     (ctx: AudioContext, gain: GainNode) => {
-      // Old scheduling approach, hardened:
-      // - keep a small scheduled lead time to absorb UI/main-thread stalls
-      // - schedule in small chunks to reduce latency
-      // - adapt lead time up on underrun, decay down when stable
-      const minLeadSec = 0.06;
-      const maxLeadSec = 0.28;
-      const startDelaySec = 0.03;
-      const minChunkSamples = Math.max(128, Math.round(ctx.sampleRate * 0.015)); // ~15ms
-      const maxChunkSamples = Math.max(minChunkSamples, Math.round(ctx.sampleRate * 0.03)); // ~30ms
-      const maxQueueSamples = Math.round(ctx.sampleRate * 2.0); // cap ~2s
+      // Scheduling approach:
+      // - calculate latency as difference between scheduled playback time and current time in the audio context coordinate system
+      // - try to keep this time at the desired level by adjusting playback speed using wasm based resampler
+      // - drop packets that are definitely will be played too late
+      // - restart scheduler when underrun
+      const targetSeconds = getBufferMsForMode(settingsRef.current.bufferMode) / 1000;
+      const maxDelayInSeconds = 2.0
+      const maxQueueSamples = Math.round(ctx.sampleRate * maxDelayInSeconds); // cap ~2s
 
       // Prevent unbounded growth if the UI is stalled and packets keep arriving.
       while (pcmQueuedSamplesRef.current > maxQueueSamples && pcmQueueRef.current.length > 0) {
@@ -443,62 +449,112 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
         if (!dropped) break;
         pcmQueuedSamplesRef.current -= dropped.length;
         packetsDroppedRef.current += 1;
-      }
-
-      const now = ctx.currentTime;
-      if (playTimeRef.current + 0.01 < now) {
-        if (startedPlaybackRef.current) {
-          targetLeadSecRef.current = Math.min(maxLeadSec, Math.max(minLeadSec, targetLeadSecRef.current + 0.04));
-          stableSinceMsRef.current = Date.now();
-          packetsDroppedRef.current += 1; // Count underruns as drops
-        }
-        playTimeRef.current = now + startDelaySec;
         startedPlaybackRef.current = false;
       }
 
-      const targetLeadSec = Math.max(minLeadSec, Math.min(maxLeadSec, targetLeadSecRef.current));
-
-      // Decay lead time down when stable for a while.
-      const stableMs = Date.now() - stableSinceMsRef.current;
-      if (stableMs > 5000 && targetLeadSecRef.current > minLeadSec) {
-        targetLeadSecRef.current = Math.max(minLeadSec, targetLeadSecRef.current - 0.005);
-        stableSinceMsRef.current = Date.now();
+      if (startedPlaybackRef.current && playTimeRef.current + 0.01 < ctx.currentTime) {
+        // we far ahead of play schedule - drop and resync
+        packetsDroppedRef.current += 1; // Count underruns as drops
+        startedPlaybackRef.current = false;
       }
 
-      // Ensure we have some lead scheduled. If we already have plenty, don't add more.
-      while (playTimeRef.current - now < targetLeadSec && pcmQueuedSamplesRef.current > 0) {
-        const want = Math.min(maxChunkSamples, pcmQueuedSamplesRef.current);
-        const takeSamples = want < minChunkSamples && (playTimeRef.current - now) > 0.02 ? want : Math.max(minChunkSamples, want);
-        const out = new Float32Array(Math.min(takeSamples, pcmQueuedSamplesRef.current));
+      if (!startedPlaybackRef.current) {
+        // restart scheduler  
+        playTimeRef.current = Math.ceil((ctx.currentTime + targetSeconds) * 128) / 128;
+        latencyControlRef.current = 'idle';
+        decoderRef.current?.set_relative_resample_ratio(1.0);
+        delaysRef.current = [];
+      }
 
-        let filled = 0;
-        while (filled < out.length) {
-          const head = pcmQueueRef.current[0];
-          if (!head) break;
-          const take = Math.min(head.length, out.length - filled);
-          out.set(head.subarray(0, take), filled);
-          filled += take;
-          pcmQueuedSamplesRef.current -= take;
-          if (take === head.length) {
-            pcmQueueRef.current.shift();
-          } else {
-            pcmQueueRef.current[0] = head.subarray(take);
-          }
+      // calculte number of samples rounded to chunk of 10ms
+      const quantSamples = 0.01 * ctx.sampleRate;
+      const samplesToBeProcessed = Math.floor(pcmQueuedSamplesRef.current / quantSamples) * quantSamples;
+
+      // nothing to schedule
+      if (samplesToBeProcessed < quantSamples)
+        return;
+
+      const out = new Float32Array(samplesToBeProcessed);
+      let filled = 0;
+      while (filled < out.length) {
+        const head = pcmQueueRef.current[0];
+        if (!head) break;
+        const take = Math.min(head.length, out.length - filled);
+        out.set(head.subarray(0, take), filled);
+        filled += take;
+        pcmQueuedSamplesRef.current -= take;
+        if (take === head.length) {
+          pcmQueueRef.current.shift();
+        } else {
+          pcmQueueRef.current[0] = head.subarray(take);
         }
-
-        const buffer = ctx.createBuffer(1, out.length, ctx.sampleRate);
-        buffer.copyToChannel(out, 0, 0);
-        const src = ctx.createBufferSource();
-        src.buffer = buffer;
-        const ctcss = ctcssFilterRef.current;
-        const bass = bassFilterRef.current;
-        if (ctcss && ctcssEnabledRef.current) src.connect(ctcss);
-        else if (bass && bassEnabledRef.current) src.connect(bass);
-        else src.connect(gain);
-        src.start(playTimeRef.current);
-        playTimeRef.current += buffer.duration;
-        startedPlaybackRef.current = true;
       }
+
+      // We are going to schedule audio frame which ends too late - drop it.
+      if (playTimeRef.current + samplesToBeProcessed / ctx.sampleRate > ctx.currentTime + maxDelayInSeconds) {
+        packetsDroppedRef.current += 1;
+        return;
+      }
+
+      // Calculate latency as differnce between planned time in future and current time in audio context coordinate system.
+      // And save this information in the array. This is to make latency control decision.
+      const diff = playTimeRef.current - ctx.currentTime;
+      delaysRef.current.push({ storeStamp: Date.now(), delaySeconds: diff });
+
+      // keep only last N milliseconds
+      const now = Date.now();
+      const millisecondsToKeep = 400;
+      while (delaysRef.current.length) {
+        if (delaysRef.current[0].storeStamp > now - millisecondsToKeep) {
+          break;
+        }
+        delaysRef.current.shift();
+      }
+
+      // constants for latency control algorithm
+      const highThresholdSeconds = targetSeconds * 1.4;
+      const lowThresholdSeconds = targetSeconds * 0.8;
+      const playBackShiftPart = 0.01; // %% to change playback rate on
+
+      const diffMin = delaysRef.current.reduce((res, x) => Math.min(res, x.delaySeconds), Infinity);
+
+      currentLatencyMsRef.current = diffMin * 1000;
+
+      // latency control algorithm
+      if (latencyControlRef.current == 'idle') {
+        if (diffMin > highThresholdSeconds) {
+          latencyControlRef.current = 'speed-up';
+          decoderRef.current?.set_relative_resample_ratio(1.0 - playBackShiftPart);
+        } else if (diffMin < lowThresholdSeconds) {
+          latencyControlRef.current = 'slow-down';
+          decoderRef.current?.set_relative_resample_ratio(1.0 + playBackShiftPart);
+        }
+      } else if (latencyControlRef.current == 'speed-up') {
+        if (diffMin < targetSeconds || diffMin < 0.025) {
+          latencyControlRef.current = 'idle';
+          decoderRef.current?.set_relative_resample_ratio(1.0);
+        }
+      } else if (latencyControlRef.current == 'slow-down') {
+        if (diffMin > targetSeconds) {
+          latencyControlRef.current = 'idle';
+          decoderRef.current?.set_relative_resample_ratio(1.0);
+        }
+      }
+
+      const buffer = ctx.createBuffer(1, out.length, ctx.sampleRate);
+      buffer.copyToChannel(out, 0, 0);
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+      const speedupFactor = 1.0;
+      src.playbackRate.value = speedupFactor;
+      const ctcss = ctcssFilterRef.current;
+      const bass = bassFilterRef.current;
+      if (ctcss && ctcssEnabledRef.current) src.connect(ctcss);
+      else if (bass && bassEnabledRef.current) src.connect(bass);
+      else src.connect(gain);
+      src.start(playTimeRef.current);
+      playTimeRef.current += buffer.duration / speedupFactor;
+      startedPlaybackRef.current = true;
     },
     [],
   );
@@ -727,7 +783,6 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
           playTimeRef.current = ctx.currentTime + 0.06;
           startedPlaybackRef.current = false;
           targetLeadSecRef.current = getBufferMsForMode(settingsRef.current.bufferMode) / 1000;
-          stableSinceMsRef.current = Date.now();
           packetsReceivedRef.current = 0;
           packetsDroppedRef.current = 0;
 
@@ -1012,18 +1067,15 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
       const decoderConfig = decoderConfigRef.current;
       if (!ctx) return;
 
-      const now = ctx.currentTime;
-      const currentLatencyMs = Math.max(0, (playTimeRef.current - now) * 1000);
-      const bufferHealth = Math.min(1, currentLatencyMs / (targetLeadSecRef.current * 1000));
-
       setDebugStats({
         wireCodec: wireCodecForDebugStats.current,
         packetsReceived: packetsReceivedRef.current,
         packetsDropped: packetsDroppedRef.current,
-        currentLatencyMs: Math.round(currentLatencyMs),
+        latencyControl: latencyControlRef.current,
+        currentLatencyMs: Math.round(currentLatencyMsRef.current),
         targetLatencyMs: Math.round(getBufferMsForMode(settingsRef.current.bufferMode)),
         queuedSamples: pcmQueuedSamplesRef.current,
-        bufferHealth,
+        bufferHealth: Math.min(10, currentLatencyMsRef.current / (targetLeadSecRef.current * 1000)),
         codecRate: decoderConfig?.codecRate ?? 0,
         outputRate: decoderConfig?.outputRate ?? 0,
       });

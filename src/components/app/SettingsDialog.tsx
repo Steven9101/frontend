@@ -89,9 +89,9 @@ export function SettingsDialog({
                 >
                   <span className="capitalize font-medium">{mode}</span>
                   <span className="text-xs opacity-70">
-                    {mode === 'low' && '~60ms'}
-                    {mode === 'medium' && '~110ms'}
-                    {mode === 'high' && '~200ms'}
+                    {mode === 'low' && '~75ms'}
+                    {mode === 'medium' && '~150ms'}
+                    {mode === 'high' && '~300ms'}
                   </span>
                 </Button>
               ))}
@@ -225,6 +225,7 @@ export function SettingsDialog({
                   value={debugStats.packetsDropped.toLocaleString()}
                   highlight={debugStats.packetsDropped > 0}
                 />
+                <DebugRow label="Latency Control" value={debugStats.latencyControl.replace("-", " ")} />
                 <DebugRow label="Current Latency" value={`${debugStats.currentLatencyMs}ms`} />
                 <DebugRow label="Target Latency" value={`${debugStats.targetLatencyMs}ms`} />
                 <DebugRow label="Queued Samples" value={debugStats.queuedSamples.toLocaleString()} />

@@ -1,5 +1,6 @@
 export type AgcSpeed = 'off' | 'fast' | 'medium' | 'slow' | 'custom';
 export type BufferMode = 'low' | 'medium' | 'high';
+export type LatencyControl = 'idle' | 'slow-down' | 'speed-up';
 
 export type AudioUiSettings = {
   volume: number; // 0..100
@@ -20,6 +21,7 @@ export type AudioDebugStats = {
   wireCodec: number,
   packetsReceived: number;
   packetsDropped: number;
+  latencyControl: LatencyControl;
   currentLatencyMs: number;
   targetLatencyMs: number;
   queuedSamples: number;
