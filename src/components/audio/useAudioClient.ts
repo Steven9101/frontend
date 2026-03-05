@@ -545,15 +545,13 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
       buffer.copyToChannel(out, 0, 0);
       const src = ctx.createBufferSource();
       src.buffer = buffer;
-      const speedupFactor = 1.0;
-      src.playbackRate.value = speedupFactor;
       const ctcss = ctcssFilterRef.current;
       const bass = bassFilterRef.current;
       if (ctcss && ctcssEnabledRef.current) src.connect(ctcss);
       else if (bass && bassEnabledRef.current) src.connect(bass);
       else src.connect(gain);
       src.start(playTimeRef.current);
-      playTimeRef.current += buffer.duration / speedupFactor;
+      playTimeRef.current += buffer.duration;
       startedPlaybackRef.current = true;
     },
     [],
