@@ -499,10 +499,10 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
       // Calculate latency as differnce between planned time in future and current time in audio context coordinate system.
       // And save this information in the array. This is to make latency control decision.
       const diff = playTimeRef.current - ctx.currentTime;
-      delaysRef.current.push({ storeStamp: Date.now(), delaySeconds: diff });
+      const now = performance.now();
+      delaysRef.current.push({ storeStamp: now, delaySeconds: diff });
 
       // keep only last N milliseconds
-      const now = Date.now();
       const millisecondsToKeep = 400;
       while (delaysRef.current.length) {
         if (delaysRef.current[0].storeStamp > now - millisecondsToKeep) {
