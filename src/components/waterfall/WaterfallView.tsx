@@ -1635,8 +1635,8 @@ function movePassbandToTuningCenterIdx(
   centerIdx: number,
   maxSpanIdx?: number | null,
 ): Passband {
-  void mode;
-  return movePassbandToCenterIdx(settings, prev, centerIdx, maxSpanIdx);
+  const shift = (mode === 'CW') ? (prev.r + prev.l) / 2 - prev.m : 0;
+  return movePassbandToCenterIdx(settings, prev, centerIdx - shift, maxSpanIdx);
 }
 
 function freqHzToIdx(settings: WaterfallSettings, hz: number): number {
