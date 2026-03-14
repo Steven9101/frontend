@@ -115,6 +115,8 @@ export default function App() {
       volume: 20,
       mute: false,
       squelch: false,
+      squelchAuto: true,
+      squelchLevel: -80,
       nr: false,
       nb: false,
       an: false,

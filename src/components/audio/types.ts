@@ -6,6 +6,8 @@ export type AudioUiSettings = {
   volume: number; // 0..100
   mute: boolean;
   squelch: boolean;
+  squelchAuto: boolean;     // true = auto (statistical), false = manual threshold
+  squelchLevel: number;     // manual threshold in dB (default: -80)
   nr: boolean;
   nb: boolean;
   an: boolean;

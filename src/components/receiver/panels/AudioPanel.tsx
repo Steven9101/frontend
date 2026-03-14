@@ -90,6 +90,33 @@ export function AudioPanel({
           />
         </div>
 
+        {settings.squelch && (
+          <div className="ml-2 space-y-2 border-l-2 border-primary/20 pl-3">
+            <ToggleSmall
+              label="Auto"
+              help="Uses automatic noise detection algorithm to open/close squelch."
+              checked={settings.squelchAuto}
+              onCheckedChange={(checked) =>
+                onChange((prev) => ({ ...prev, squelchAuto: checked }))
+              }
+            />
+            {!settings.squelchAuto && (
+              <div className="space-y-1">
+                <Label className="text-xs">Level ({settings.squelchLevel} dB)</Label>
+                <Slider
+                  value={[settings.squelchLevel]}
+                  min={-140}
+                  max={0}
+                  step={1}
+                  onValueChange={([v]) =>
+                    onChange((prev) => ({ ...prev, squelchLevel: v }))
+                  }
+                />
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="grid grid-cols-3 gap-3">
           <ToggleSmall
             label="NR"

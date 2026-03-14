@@ -129,7 +129,7 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
   const lastWindowRef = useRef<string>('');
   const lastDemodRef = useRef<string>('');
   const lastSentMuteRef = useRef<boolean | null>(null);
-  const lastSentSquelchRef = useRef<boolean | null>(null);
+  const lastSentSquelchRef = useRef<string | null>(null);
   const lastSentAgcRef = useRef<string | null>(null);
   const receiverIdRef = useRef<string | null>(receiverId);
   const smeterOffsetDbRef = useRef<number>(0);
@@ -1003,10 +1003,14 @@ export function useAudioClient({ receiverId, receiverSessionNonce, mode, centerH
   useEffect(() => {
     if (!basicInfo) return;
     const enabled = settings.squelch;
-    if (lastSentSquelchRef.current === enabled) return;
-    if (!send({ cmd: 'squelch', enabled })) return;
-    lastSentSquelchRef.current = enabled;
-  }, [basicInfo, connectionNonce, send, settings.squelch]);
+    const level = (enabled && !settings.squelchAuto)
+      ? settings.squelchLevel - smeterOffsetDbRef.current
+      : null;
+    const key = `${enabled}:${settings.squelchAuto}:${settings.squelchLevel}`;
+    if (lastSentSquelchRef.current === key) return;
+    if (!send({ cmd: 'squelch', enabled, level })) return;
+    lastSentSquelchRef.current = key;
+  }, [basicInfo, connectionNonce, send, settings.squelch, settings.squelchAuto, settings.squelchLevel]);
 
   useEffect(() => {
     if (!basicInfo) return;
