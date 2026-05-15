@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { readTimeOffsetMs } from './timeSync';
 
-export type DecoderId = 'ft8';
+export type DecoderId = 'ft8' | 'msk144';
 
 export type DecodeLine = {
   id: string;
@@ -29,28 +29,31 @@ function makeId(): string {
 const GRID_RE = /[A-R]{2}[0-9]{2}([A-X]{2})?/i;
 
 export function useDecoders() {
-  const [enabled, setEnabled] = useState<Record<DecoderId, boolean>>({ ft8: false });
+  const [enabled, setEnabled] = useState<Record<DecoderId, boolean>>({ ft8: false, msk144: false });
   const [lines, setLines] = useState<DecodeLine[]>([]);
-  const [unread, setUnread] = useState<Record<DecoderId, number>>({ ft8: 0 });
-  const [errors, setErrors] = useState<Record<DecoderId, string | null>>({ ft8: null });
+  const [unread, setUnread] = useState<Record<DecoderId, number>>({ ft8: 0, msk144: 0 });
+  const [errors, setErrors] = useState<Record<DecoderId, string | null>>({ ft8: null, msk144: null });
 
-  const workerRef = useRef<Worker | null>(null);
-  const readyRef = useRef<boolean>(false);
-  const inputRateRef = useRef<number | null>(null);
+  const workerFt8Ref = useRef<Worker | null>(null);
+  const readyFt8Ref = useRef<boolean>(false);
+  const inputRateFt8Ref = useRef<number | null>(null);
   const timeOffsetRef = useRef<number>(0);
 
-  const pcmAccRef = useRef<Float32Array>(new Float32Array(0));
-  const pcmAccLenRef = useRef<number>(0);
-  const pcmFlushTimerRef = useRef<number | null>(null);
+  const pcmFt8AccRef = useRef<Float32Array>(new Float32Array(0));
+  const pcmFt8AccLenRef = useRef<number>(0);
+  const pcmFt8FlushTimerRef = useRef<number | null>(null);
 
-  const stopWorker = useCallback(() => {
-    const w = workerRef.current;
-    workerRef.current = null;
-    readyRef.current = false;
-    inputRateRef.current = null;
-    if (pcmFlushTimerRef.current != null) {
-      window.clearInterval(pcmFlushTimerRef.current);
-      pcmFlushTimerRef.current = null;
+  const workerMsk144Ref = useRef<Worker | null>(null);
+  const inputRateMsk144Ref = useRef<number | null>(null);
+
+  const stopFT8Worker = useCallback(() => {
+    const w = workerFt8Ref.current;
+    workerFt8Ref.current = null;
+    readyFt8Ref.current = false;
+    inputRateFt8Ref.current = null;
+    if (pcmFt8FlushTimerRef.current != null) {
+      window.clearInterval(pcmFt8FlushTimerRef.current);
+      pcmFt8FlushTimerRef.current = null;
     }
     try {
       w?.postMessage({ type: 'stop' } satisfies WorkerIn);
@@ -64,20 +67,35 @@ export function useDecoders() {
     }
   }, []);
 
-  const ensureWorker = useCallback((inputSampleRate: number) => {
-    if (workerRef.current && inputRateRef.current === inputSampleRate) return;
+  const stopMsk144Worker = useCallback(() => {
+    const w = workerMsk144Ref.current;
+    workerMsk144Ref.current = null;
+    try {
+      w?.postMessage({ type: 'stop' } satisfies WorkerIn);
+    } catch {
+      // ignore
+    }
+    try {
+      w?.terminate();
+    } catch {
+      // ignore
+    }
+  }, []);
 
-    stopWorker();
+  const ensureFt8Worker = useCallback((inputSampleRate: number) => {
+    if (workerFt8Ref.current && inputRateFt8Ref.current === inputSampleRate) return;
 
-    inputRateRef.current = inputSampleRate;
+    stopFT8Worker();
+
+    inputRateFt8Ref.current = inputSampleRate;
     timeOffsetRef.current = readTimeOffsetMs();
     const w = new Worker(new URL('../decoders/ft8/ft8Worker.ts', import.meta.url), { type: 'module' });
-    workerRef.current = w;
+    workerFt8Ref.current = w;
 
     w.onmessage = (ev: MessageEvent<WorkerOut>) => {
       const msg = ev.data;
       if (msg.type === 'ready') {
-        readyRef.current = true;
+        readyFt8Ref.current = true;
         return;
       }
       if (msg.type === 'error') {
@@ -99,11 +117,11 @@ export function useDecoders() {
     w.postMessage({ type: 'init', inputSampleRate, timeOffsetMs: timeOffsetRef.current } satisfies WorkerIn);
 
     // Flush PCM to the worker in batches (keeps the UI thread light).
-    pcmAccRef.current = new Float32Array(48_000); // ~1s at 48kHz (will grow if needed)
-    pcmAccLenRef.current = 0;
-    pcmFlushTimerRef.current = window.setInterval(() => {
-      const ww = workerRef.current;
-      if (!ww || !readyRef.current) return;
+    pcmFt8AccRef.current = new Float32Array(48_000); // ~1s at 48kHz (will grow if needed)
+    pcmFt8AccLenRef.current = 0;
+    pcmFt8FlushTimerRef.current = window.setInterval(() => {
+      const ww = workerFt8Ref.current;
+      if (!ww || !readyFt8Ref.current) return;
 
       const nextOffset = readTimeOffsetMs();
       if (nextOffset !== timeOffsetRef.current) {
@@ -115,32 +133,85 @@ export function useDecoders() {
         }
       }
 
-      const n = pcmAccLenRef.current;
+      const n = pcmFt8AccLenRef.current;
       if (n <= 0) return;
-      const chunk = pcmAccRef.current.subarray(0, n);
+      const chunk = pcmFt8AccRef.current.subarray(0, n);
       const copy = new Float32Array(chunk); // transferable copy
-      pcmAccLenRef.current = 0;
+      pcmFt8AccLenRef.current = 0;
       ww.postMessage({ type: 'pcm', pcm: copy } satisfies WorkerIn, [copy.buffer]);
     }, 250);
-  }, [stopWorker]);
+  }, [stopFT8Worker]);
+
+  const ensureMsk144Worker = useCallback((inputSampleRate: number) => {
+    if (workerMsk144Ref.current && inputRateMsk144Ref.current === inputSampleRate) return;
+
+    stopMsk144Worker();
+
+    inputRateMsk144Ref.current = inputSampleRate;
+    const w = new Worker(new URL('../decoders/msk144/msk144Worker.ts', import.meta.url), { type: 'module' });
+    workerMsk144Ref.current = w;
+
+    w.onmessage = (ev: MessageEvent<WorkerOut>) => {
+      const msg = ev.data;
+      if (msg.type === 'ready') {
+        return;
+      }
+      if (msg.type === 'error') {
+        setErrors((prev) => ({ ...prev, msk144: String(msg.message ?? 'MSK144 worker error') }));
+        return;
+      }
+      if (msg.type === 'log') {
+        const raw_text = String(msg.text ?? '').trim();
+        if (!raw_text) return;
+        const d = new Date();
+        const tc = d.toISOString().split('T')[1].split(/[:\.]/);
+        // prepend by UTC time as hhmmss
+        const text = `${tc[0]}${tc[1]}${tc[2]} ${raw_text}`;
+        setLines((prev) => [{ id: makeId(), ts: Date.now() , decoder: 'msk144' as const, text }, ...prev].slice(0, 500));
+        setUnread((prev) => ({ ...prev, msk144: prev.msk144 + 1 }));
+      }
+    };
+    w.postMessage({ type: 'init', inputSampleRate, timeOffsetMs: 0 } satisfies WorkerIn);
+  }, [stopMsk144Worker]);
+
+  const feedFt8Audio = useCallback(
+    (pcm: Float32Array, inputSampleRate: number) => {
+      if (!enabled.ft8) return;
+      ensureFt8Worker(inputSampleRate);
+
+      // Accumulate PCM into a staging buffer.
+      const needed = pcmFt8AccLenRef.current + pcm.length;
+      if (pcmFt8AccRef.current.length < needed) {
+        const next = new Float32Array(Math.max(needed, pcmFt8AccRef.current.length * 2, 48_000));
+        next.set(pcmFt8AccRef.current.subarray(0, pcmFt8AccLenRef.current), 0);
+        pcmFt8AccRef.current = next;
+      }
+      pcmFt8AccRef.current.set(pcm, pcmFt8AccLenRef.current);
+      pcmFt8AccLenRef.current += pcm.length;
+    },
+    [enabled.ft8, ensureFt8Worker],
+  );
+
+  const feedMsk144Audio = useCallback(
+    (pcm: Float32Array, inputSampleRate: number) => {
+      if (!enabled.msk144) return;
+      ensureMsk144Worker(inputSampleRate);
+
+      const ww = workerMsk144Ref.current!;
+
+      const copy = new Float32Array(pcm); // transferable copy
+      ww.postMessage({ type: 'pcm', pcm: copy } satisfies WorkerIn, [copy.buffer]);
+    },
+    [enabled.msk144, ensureMsk144Worker],
+  );
 
   const feedAudio = useCallback(
     (pcm: Float32Array, inputSampleRate: number) => {
-      if (!enabled.ft8) return;
       if (!Number.isFinite(inputSampleRate) || inputSampleRate <= 0) return;
-      ensureWorker(inputSampleRate);
-
-      // Accumulate PCM into a staging buffer.
-      const needed = pcmAccLenRef.current + pcm.length;
-      if (pcmAccRef.current.length < needed) {
-        const next = new Float32Array(Math.max(needed, pcmAccRef.current.length * 2, 48_000));
-        next.set(pcmAccRef.current.subarray(0, pcmAccLenRef.current), 0);
-        pcmAccRef.current = next;
-      }
-      pcmAccRef.current.set(pcm, pcmAccLenRef.current);
-      pcmAccLenRef.current += pcm.length;
+      feedFt8Audio(pcm, inputSampleRate);
+      feedMsk144Audio(pcm, inputSampleRate);
     },
-    [enabled.ft8, ensureWorker],
+    [feedFt8Audio, feedMsk144Audio]
   );
 
   const toggle = useCallback(
@@ -151,16 +222,20 @@ export function useDecoders() {
       });
       if (id === 'ft8') {
         setErrors((prev) => ({ ...prev, ft8: null }));
-        if (next === false) stopWorker();
+        if (next === false) stopFT8Worker();
+      }
+      if (id === 'msk144') {
+        setErrors((prev) => ({ ...prev, msk144: null }));
+        if (next === false) stopMsk144Worker();
       }
     },
-    [stopWorker],
+    [stopFT8Worker, stopMsk144Worker],
   );
 
   const clear = useCallback((id?: DecoderId) => {
     if (!id) {
       setLines([]);
-      setUnread({ ft8: 0 });
+      setUnread({ ft8: 0, msk144: 0 });
       return;
     }
     setLines((prev) => prev.filter((l) => l.decoder !== id));
@@ -173,8 +248,11 @@ export function useDecoders() {
 
   useEffect(() => {
     // cleanup on unmount
-    return () => stopWorker();
-  }, [stopWorker]);
+    return () => { 
+      stopFT8Worker();
+      stopMsk144Worker(); 
+    }
+  }, [stopFT8Worker, stopMsk144Worker]);
 
   const stats = useMemo(() => {
     return {

@@ -461,9 +461,50 @@ export function WaterfallCard({
   );
 
   const ft8Unread = decoders.unread.ft8 ?? 0;
+  const msk144Unread = decoders.unread.msk144 ?? 0;
+  const wsjtUnread = useMemo(() => ft8Unread + msk144Unread, [ft8Unread, msk144Unread]);
+
   const ft8Enabled = !!decoders.enabled.ft8;
+  const msk144Enabled = !!decoders.enabled.msk144;
+  const wsjtEnabled = useMemo(() => ft8Enabled || msk144Enabled, [ft8Enabled, msk144Enabled]);
+
   const ft8Error = decoders.errors?.ft8 ?? null;
-  const ft8Lines = useMemo(() => decoders.lines.filter((l) => l.decoder === 'ft8'), [decoders.lines]);
+  const msk144Error = decoders.errors?.msk144 ?? null;
+
+  const wsjtLines = useMemo(() => decoders.lines.filter((l) => l.decoder === 'ft8' || l.decoder === 'msk144'), [decoders.lines]);
+
+  const wsjtClear = () => {
+    decoders.clear('ft8');
+    decoders.clear('msk144');
+  }
+
+  const wsjtMarkRead = () => {
+    decoders.markRead('ft8');
+    decoders.markRead('msk144');
+  }
+
+  const fmtTitle = useMemo(() => { 
+    let arr = [];
+    if (ft8Enabled) {
+      arr.push("FT8")
+    }
+    if (msk144Enabled) {
+      arr.push("MSK144")
+    }
+    return arr.join("+");
+  }, [ft8Enabled, msk144Enabled]);
+
+  const fmtError = useMemo(() => {
+    let arr = [];
+    if (ft8Error) {
+      arr.push(`FT8 decoder error: ${ft8Error}`);
+    }
+    if (msk144Error) {
+      arr.push(`MSK144 decoder error: ${msk144Error}`);
+    }
+    return arr.join("; ");
+  }, [ft8Error, msk144Error]);
+
   const serverGrid = (gridLocator ?? '').trim().toUpperCase();
   const hasValidServerGrid = isValidGrid(serverGrid);
   const ft8BaseLatLon = useMemo(() => {
@@ -474,7 +515,7 @@ export function WaterfallCard({
   const farthestKm = useMemo(() => {
     if (!ft8BaseLatLon) return null;
     let max = 0;
-    for (const l of ft8Lines) {
+    for (const l of wsjtLines) {
       const locs = extractGridLocators(l.text);
       if (locs.length === 0) continue;
       const target = gridSquareToLatLong(locs[0]);
@@ -482,7 +523,7 @@ export function WaterfallCard({
       if (Number.isFinite(km) && km > max) max = km;
     }
     return max > 0 ? max : 0;
-  }, [ft8BaseLatLon, ft8Lines]);
+  }, [ft8BaseLatLon, wsjtLines]);
 
   return (
     <Card className="shadow-none">
@@ -586,9 +627,9 @@ export function WaterfallCard({
                 <Button type="button" variant="secondary" className="gap-2">
                   <Cpu className="h-4 w-4" />
                   Decoders
-                  {ft8Unread > 0 ? (
+                  {wsjtUnread > 0 ? (
                     <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold leading-none text-primary-foreground">
-                      {ft8Unread > 99 ? '99+' : ft8Unread}
+                      {wsjtUnread > 99 ? '99+' : wsjtUnread}
                     </span>
                   ) : null}
                 </Button>
@@ -619,9 +660,18 @@ export function WaterfallCard({
                           FT8
                         </DropdownMenuCheckboxItem>
 
+                        <DropdownMenuCheckboxItem
+                          checked={msk144Enabled}
+                          onCheckedChange={(checked) => {
+                            decoders.toggle('msk144', !!checked);
+                          }}
+                        >
+                          MSK144
+                        </DropdownMenuCheckboxItem>
+
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          disabled={!ft8Enabled}
+                          disabled={!wsjtEnabled && wsjtLines.length === 0}
                           onSelect={(e) => {
                             // Avoid the same click that closes the dropdown also immediately closing the dialog.
                             e.preventDefault();
@@ -632,12 +682,12 @@ export function WaterfallCard({
                           Show decodes
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          disabled={ft8Lines.length === 0}
+                          disabled={wsjtLines.length === 0}
                           onSelect={() => {
-                            decoders.clear('ft8');
+                            wsjtClear();
                           }}
                         >
-                          Clear FT8
+                          Clear Decodes
                         </DropdownMenuItem>
                       </motion.div>
                     </DropdownMenuPrimitive.Content>
@@ -650,9 +700,9 @@ export function WaterfallCard({
               open={decodesOpen}
               onOpenChange={(open) => {
                 setDecodesOpen(open);
-                if (open) decoders.markRead('ft8');
+                if (open) wsjtMarkRead();
               }}
-              title="FT8 Decodes"
+              title={`${fmtTitle} Decodes`}
               description="Decoding runs in the background; this list updates automatically."
               contentClassName="max-w-xl"
               footer={
@@ -664,9 +714,9 @@ export function WaterfallCard({
                     type="button"
                     variant="secondary"
                     onClick={() => {
-                      decoders.clear('ft8');
+                      wsjtClear();
                     }}
-                    disabled={ft8Lines.length === 0}
+                    disabled={wsjtLines.length === 0}
                   >
                     Clear
                   </Button>
@@ -693,16 +743,16 @@ export function WaterfallCard({
                 <div className="rounded-md border bg-muted/10">
                   <ScrollArea className="h-[260px]">
                     <div className="space-y-2 p-3">
-                      {ft8Lines.length === 0 ? (
+                      {wsjtLines.length === 0 ? (
                         <div className="text-sm text-muted-foreground">
-                          {ft8Error
-                            ? `FT8 decoder error: ${ft8Error}`
-                            : ft8Enabled
+                          {(ft8Error || msk144Error)
+                            ? fmtError
+                            : (wsjtEnabled)
                               ? 'Waiting for decodes…'
-                              : 'Enable FT8 in the Decoders menu to start.'}
+                              : 'Enable FT8 or MSK144 in the Decoders menu to start.'}
                         </div>
                       ) : (
-                        ft8Lines.map((l) => {
+                        wsjtLines.map((l) => {
                           const locs = extractGridLocators(l.text);
                           const first = locs[0];
                           const km =
@@ -1067,12 +1117,25 @@ export function WaterfallCard({
               </Button>
             </div>
 
+            <div className="flex items-center justify-between rounded-md border bg-muted/10 px-3 py-2">
+              <div className="text-sm font-medium">MSK144</div>
+              <Button
+                type="button"
+                variant={msk144Enabled ? 'default' : 'secondary'}
+                size="sm"
+                className="h-8"
+                onClick={() => decoders.toggle('msk144', !msk144Enabled)}
+              >
+                {msk144Enabled ? 'On' : 'Off'}
+              </Button>
+            </div>
+
             <div className="grid grid-cols-2 gap-2">
               <Button
                 type="button"
                 variant="secondary"
                 className="h-10"
-                disabled={!ft8Enabled}
+                disabled={!wsjtEnabled && wsjtLines.length === 0}
                 onClick={() => {
                   setMobileDecodersOpen(false);
                   window.setTimeout(() => setDecodesOpen(true), 0);
@@ -1084,8 +1147,8 @@ export function WaterfallCard({
                 type="button"
                 variant="secondary"
                 className="h-10"
-                disabled={ft8Lines.length === 0}
-                onClick={() => decoders.clear('ft8')}
+                disabled={wsjtLines.length === 0}
+                onClick={() => wsjtClear()}
               >
                 Clear
               </Button>

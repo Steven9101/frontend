@@ -1,0 +1,24 @@
+{
+  "name": "msk144-decoder",
+  "type": "module",
+  "collaborators": [
+    "Alexander Sholokhov <ra9yer@yahoo.com>"
+  ],
+  "description": "MSK144 WASM Decoder",
+  "version": "0.1.0",
+  "license": "GPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexander-sholohov/msk144rs.git"
+  },
+  "files": [
+    "msk144_decoder_bg.wasm",
+    "msk144_decoder.js",
+    "msk144_decoder.d.ts"
+  ],
+  "main": "msk144_decoder.js",
+  "types": "msk144_decoder.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
